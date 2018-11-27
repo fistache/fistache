@@ -1,0 +1,8 @@
+.idea/
+
+*.console
+yarn-debug.console*
+yarn-error.console*
+
+node_modules/
+yarn-error.log
