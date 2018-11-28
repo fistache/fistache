@@ -323,7 +323,7 @@ async@^1.5.0, async@^1.5.2:
   version "1.5.2"
   resolved "http://registry.npmjs.org/async/-/async-1.5.2.tgz#ec6a61ae56480c0c3cb241c95618e20892f9672a"
 
-async@^2.0.1:
+async@^2.0.1, async@^2.6.0:
   version "2.6.1"
   resolved "https://registry.yarnpkg.com/async/-/async-2.6.1.tgz#b245a23ca71930044ec53fa46aa00a3e87c6a610"
   dependencies:
@@ -1350,6 +1350,17 @@ expand-brackets@^2.1.4:
     snapdragon "^0.8.1"
     to-regex "^3.0.1"
 
+express-https-provider@^1.0.11:
+  version "1.0.11"
+  resolved "https://registry.yarnpkg.com/express-https-provider/-/express-https-provider-1.0.11.tgz#b51be5c7fa72a55de89cc445764d0c8002464742"
+  dependencies:
+    express "^4.16.4"
+    hostile "^1.3.2"
+    path "^0.12.7"
+    portscanner "^2.2.0"
+    request "^2.88.0"
+    vhost "^3.0.2"
+
 express@^4.16.4:
   version "4.16.4"
   resolved "https://registry.yarnpkg.com/express/-/express-4.16.4.tgz#fddef61926109e24c515ea97fd2f1bdbf62df12e"
@@ -2191,6 +2202,12 @@ is-my-json-valid@^2.12.0:
     jsonpointer "^4.0.0"
     xtend "^4.0.0"
 
+is-number-like@^1.0.3:
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/is-number-like/-/is-number-like-1.0.8.tgz#2e129620b50891042e44e9bbbb30593e75cfbbe3"
+  dependencies:
+    lodash.isfinite "^3.3.2"
+
 is-number@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/is-number/-/is-number-3.0.0.tgz#24fd6201a4782cf50561c810276afc7d12d71195"
@@ -2491,6 +2508,10 @@ locate-path@^2.0.0:
 lodash.debounce@^4.0.8:
   version "4.0.8"
   resolved "https://registry.yarnpkg.com/lodash.debounce/-/lodash.debounce-4.0.8.tgz#82d79bff30a67c4005ffd5e2515300ad9ca4d7af"
+
+lodash.isfinite@^3.3.2:
+  version "3.3.2"
+  resolved "https://registry.yarnpkg.com/lodash.isfinite/-/lodash.isfinite-3.3.2.tgz#fb89b65a9a80281833f0b7478b3a5104f898ebb3"
 
 lodash@^3.2.0:
   version "3.10.1"
@@ -3201,6 +3222,13 @@ portfinder@^1.0.19:
     debug "^2.2.0"
     mkdirp "0.5.x"
 
+portscanner@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/portscanner/-/portscanner-2.2.0.tgz#6059189b3efa0965c9d96a56b958eb9508411cf1"
+  dependencies:
+    async "^2.6.0"
+    is-number-like "^1.0.3"
+
 posix-character-classes@^0.1.0:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/posix-character-classes/-/posix-character-classes-0.1.1.tgz#01eac0fe3b5af71a2a6c02feabb8c1fef7e00eab"
@@ -3484,7 +3512,7 @@ request-progress@^2.0.1:
   dependencies:
     throttleit "^1.0.0"
 
-request@^2.65.0, request@^2.74.0, request@^2.81.0:
+request@^2.65.0, request@^2.74.0, request@^2.81.0, request@^2.88.0:
   version "2.88.0"
   resolved "https://registry.yarnpkg.com/request/-/request-2.88.0.tgz#9c2fca4f7d35b592efe57c7f0a55e81052124fef"
   dependencies:

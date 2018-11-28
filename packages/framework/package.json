@@ -1,7 +1,7 @@
 {
-  "name": "@seafood/typescript-config-recommended",
+  "name": "@seafood/framework",
   "version": "1.0.0",
-  "main": "index.js",
+  "types": "index.d.ts",
   "author": "Aliaksandr Parfiankou <aliaksandr.parfiankou@gmail.com>",
   "license": "MIT",
   "dependencies": {

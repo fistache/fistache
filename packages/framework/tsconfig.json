@@ -1,0 +1,17 @@
+{
+  // "extends": "@seafood/typescript-config-recommended",
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "outDir": "./dist",
+    "strict": true
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

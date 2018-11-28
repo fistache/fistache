@@ -4,7 +4,8 @@ module.exports = config => {
   config
     .cache(true)
     .entry('app')
-      .add(path.resolve(__dirname, '../bootstrap/app.ts'))
+      .add(path.resolve(__dirname, '../bootstrap/app.js'))
+      .add(path.resolve('bootstrap/app.ts'))
       .end()
     .output
       .path(path.resolve('dist'))
@@ -35,31 +36,46 @@ module.exports = config => {
       .use('html-loader')
         .loader('html-loader')
 
-  config.module
-    .rule('typescript')
-      .test(/\.ts$/)
-      .include
-        .add(path.resolve('app'))
-        .add(path.resolve('src'))
-        .add(path.resolve('test'))
-        .end()
+  const appendTypeScriptLoaders = on => {
+    on
       .use('cache-loader')
-        .loader('cache-loader')
-        .end()
+      .loader('cache-loader')
+      .end()
       .use('babel-loader')
-        .loader('babel-loader')
-        .options({
-          presets: [
-            ['@babel/preset-env', { useBuiltIns: 'entry' }],
-            '@babel/runtime'
-          ]
-        })
-        .end()
+      .loader('babel-loader')
+      .options({
+        presets: [
+          ['@babel/preset-env', { useBuiltIns: 'entry' }],
+          '@babel/runtime'
+        ]
+      })
+      .end()
       .use('ts-loader')
-        .loader('ts-loader')
-        .options({
-          // transpileOnly: true
-        })
+      .loader('ts-loader')
+      .options({
+        // transpileOnly: true
+      })
+  }
+
+  appendTypeScriptLoaders(
+    config.module
+      .rule('typescript')
+        .test(/\.ts$/)
+        .include
+          .add(path.resolve('app'))
+          .add(path.resolve('src'))
+          .add(path.resolve('test'))
+          .end()
+  )
+
+  appendTypeScriptLoaders(
+    config.module
+      .rule('seafood')
+        .test(/\.seafood$/)
+          .use('seafood-loader')
+          .loader('seafood-loader')
+          .end()
+  )
 
   config
     .plugin('html')

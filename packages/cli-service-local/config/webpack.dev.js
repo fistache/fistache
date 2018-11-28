@@ -9,24 +9,6 @@ module.exports = config => {
         .end()
       .devtool('cheap-module-eval-source-map')
 
-    config
-      .devServer
-        .compress(false)
-        .contentBase('public')
-        .hot(true)
-        // .https(true)
-        .open(true) // todo: add to .env file
-        .overlay({
-          warnings: true,
-          errors: true
-        })
-        .port(8080) // todo: add to .env file
-        // .proxy for API ???
-        // .public for proxy. read webpack docs for more info
-        // .progress(true)
-        .quiet(true)
-        .stats('none')
-
     // https://github.com/webpack/webpack/issues/6642
     config
       .output

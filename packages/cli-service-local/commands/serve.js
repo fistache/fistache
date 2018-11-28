@@ -5,17 +5,18 @@ module.exports = program => {
   program
     .command('serve')
     .description('run development server')
+    .allowUnknownOption()
     .action(async () => {
       const webpack = require('webpack')
       const {getChainableWebpackConfig} = require('../util/config')
 
-      const server = require('express-trusted-ssl')()
+      const provider = require('express-https-provider')()
       const history = require('connect-history-api-fallback')
 
       const chalk = require('chalk')
       const {error, log} = require('../util/console')
 
-      server
+      provider
         .modifyApp((app, state) => {
           // Start webpack compiler.
           const config = getChainableWebpackConfig().toConfig()
@@ -38,7 +39,6 @@ module.exports = program => {
           }))
 
           // Todo: Implement SSR rendering.
-          // Routes must be after history and etc...
           app.get('/', (request, response) => {
             response.end('test string')
           })

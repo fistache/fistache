@@ -2,6 +2,7 @@ module.exports = {
   "compilerOptions": {
     "target": "es2015",
     "module": "commonjs",
+    "types": ["node"],
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
