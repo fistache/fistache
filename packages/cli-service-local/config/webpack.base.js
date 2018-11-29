@@ -36,46 +36,40 @@ module.exports = config => {
       .use('html-loader')
         .loader('html-loader')
 
-  const appendTypeScriptLoaders = on => {
-    on
-      .use('cache-loader')
-      .loader('cache-loader')
-      .end()
-      .use('babel-loader')
-      .loader('babel-loader')
-      .options({
-        presets: [
-          ['@babel/preset-env', { useBuiltIns: 'entry' }],
-          '@babel/runtime'
-        ]
-      })
-      .end()
-      .use('ts-loader')
-      .loader('ts-loader')
-      .options({
-        // transpileOnly: true
-      })
+  const babelOptions = {
+    presets: [
+      ['@babel/preset-env', { useBuiltIns: 'entry' }],
+      '@babel/runtime'
+    ]
   }
 
-  appendTypeScriptLoaders(
-    config.module
-      .rule('typescript')
-        .test(/\.ts$/)
-        .include
-          .add(path.resolve('app'))
-          .add(path.resolve('src'))
-          .add(path.resolve('test'))
+  config.module
+    .rule('typescript')
+      .test(/\.ts$/)
+      .include
+        .add(path.resolve('app'))
+        .add(path.resolve('src'))
+        .add(path.resolve('test'))
+        .end()
+      // .use('cache-loader')
+      //   .loader('cache-loader')
+      //   .end()
+      .use('babel-loader')
+        .loader('babel-loader')
+          .options(babelOptions)
           .end()
-  )
+        .use('ts-loader')
+          .loader('ts-loader')
+          .options({
+            // transpileOnly: true
+          })
 
-  appendTypeScriptLoaders(
-    config.module
-      .rule('seafood')
-        .test(/\.seafood$/)
-          .use('seafood-loader')
-          .loader('seafood-loader')
-          .end()
-  )
+  config.module
+    .rule('seafood')
+      .test(/\.seafood$/)
+      .use('seafood-loader')
+        .loader('seafood-loader')
+        .end()
 
   config
     .plugin('html')

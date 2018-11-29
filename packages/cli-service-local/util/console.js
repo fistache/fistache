@@ -1,5 +1,4 @@
 const chalk = require('chalk')
-const ora = require('ora')
 
 const print = (message, callback) => {
   callback && callback(message || '')
@@ -29,27 +28,9 @@ const success = message => {
   })
 }
 
-const spinner = text => {
-  const spinner = ora({
-    text,
-    spinner: {
-      interval: 80,
-      frames: [
-        "-",
-        "\\",
-        "|",
-        "/"
-      ]
-    },
-    color: 'black'
-  })
-  return spinner.start()
-}
-
 module.exports = {
   log,
   error,
   warn,
-  success,
-  spinner
+  success
 }

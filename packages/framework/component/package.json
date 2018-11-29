@@ -1,5 +1,5 @@
 {
-  "name": "@seafood/framework",
+  "name": "@seafood/component",
   "version": "1.0.0",
   "types": "index.d.ts",
   "author": "Aliaksandr Parfiankou <aliaksandr.parfiankou@gmail.com>",

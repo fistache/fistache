@@ -23,9 +23,7 @@ module.exports = class Compiler {
   finishParsing(domTree) {
     try {
       const structure = new ComponentStructure(domTree)
-      const compiled = `${structure.getScriptContent()} \nexport const render = ${structure.getRenderFunctionAsString()}`
-
-      this.callback(null, compiled)
+      this.callback(null, structure)
     } catch (exception) {
       this.callback(exception.message)
     }

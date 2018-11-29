@@ -7,7 +7,8 @@ module.exports = {
     "no-console": false,
     "max-line-length": {
       "options": [120]
-    }
+    },
+    "no-namespace": false
   },
   "jsRules": {
     "max-line-length": {

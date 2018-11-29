@@ -1,5 +1,4 @@
 const semver = require('semver')
-const portfinder = require('portfinder')
 const packageJson = require('../package.json')
 const {error, warn} = require('./console')
 
