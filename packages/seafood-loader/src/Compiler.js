@@ -1,10 +1,12 @@
 const {Parser, DomHandler} = require('htmlparser2')
 const ComponentStructure = require('./ComponentStructure')
+const {makeExportString} = require('../lib/export')
 
-module.exports = class Compiler {
+class Compiler {
   constructor () {
     this.callback = null
     this.parser = new Parser(this.getParserHandler(), this.getParserOptions())
+    this.loaderContext = null
   }
 
   setCallback (callback) {
@@ -20,12 +22,28 @@ module.exports = class Compiler {
     }
   }
 
+  setLoaderContext (context) {
+    this.loaderContext = context
+    return this
+  }
+
   finishParsing(domTree) {
     try {
-      const structure = new ComponentStructure(domTree)
-      this.callback(null, structure)
+      const structure = new ComponentStructure(this.loaderContext, domTree)
+
+      const script = makeExportString([
+        structure.getScriptContent(),
+        ``,
+        `export const __$render__ = ${(() => {
+        }).toString()}`,
+        ``
+      ])
+
+      this.callback(null, {
+        script
+      })
     } catch (exception) {
-      this.callback(exception.message)
+      this.callback(exception)
     }
   }
 
@@ -50,3 +68,5 @@ module.exports = class Compiler {
     }
   }
 }
+
+module.exports = () => new Compiler()

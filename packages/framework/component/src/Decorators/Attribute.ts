@@ -1,9 +1,9 @@
 interface IAttributeProperties {
-    required: boolean;
+    required?: boolean;
 }
 
-export function attribute(properties: IAttributeProperties) {
-    return () => {
+export function attribute(properties?: IAttributeProperties) {
+    return (target: any, title: string, descriptor: PropertyDescriptor) => {
         //
     };
 }

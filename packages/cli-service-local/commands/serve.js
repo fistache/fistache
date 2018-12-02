@@ -6,7 +6,7 @@ module.exports = program => {
     .command('serve')
     .description('run development server')
     .allowUnknownOption()
-    .action(async () => {
+    .action( () => {
       const webpack = require('webpack')
       const {getChainableWebpackConfig} = require('../util/config')
 

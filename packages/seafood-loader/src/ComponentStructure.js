@@ -1,7 +1,9 @@
 const DataProcessor = require('./DataProcessor')
+const loaderUtils = require('loader-utils')
+const path = require('path')
 
 module.exports = class ComponentStructure {
-  constructor (domTree) {
+  constructor (context, domTree) {
     this.domTree = domTree
 
     this.renderFunction = null
@@ -10,6 +12,8 @@ module.exports = class ComponentStructure {
     this.template = null
     this.style = null
 
+    this.loaderContext = context
+
     this.processDomTree()
   }
 
@@ -17,6 +21,7 @@ module.exports = class ComponentStructure {
     const scriptTag = this.findRootTag('script')
     if (scriptTag) {
       this.script = this.getTagData(scriptTag).trim()
+      this.fixScriptImports()
     }
 
     const styleTag = this.findRootTag('style')
@@ -53,7 +58,23 @@ module.exports = class ComponentStructure {
   }
 
   getScriptContent () {
-    // todo: rewrite import with stringifyRequest !!!
     return this.script
+  }
+
+  fixScriptImports () {
+    const regex = /import(?:["'\s]*([\w*{}\n\r\t, ]+)from\s*)["'\s].*([@\w/_-]+)["'\s].*;?$/gm
+    this.script = this.script.replace(regex, match => {
+      return match.replace(/"([^"]+)"/s, submatch => {
+        if (!this.loaderContext) {
+          throw new Error('Loader context must be specified!')
+        }
+        let result = submatch.replace(/"/gi, '')
+        if (!result.includes('.')) {
+          return submatch // not result! do not change
+        }
+
+        return loaderUtils.stringifyRequest(this.loaderContext, result)
+      })
+    })
   }
 }
