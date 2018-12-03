@@ -3,6 +3,7 @@ const qs = require('querystring')
 const parse = require('./lib/parse')
 const {makeExportString} = require('./lib/export')
 const path = require('path')
+const fs = require('fs')
 
 module.exports = async function(source, sourceMap) {
   const context = this
@@ -20,11 +21,7 @@ module.exports = async function(source, sourceMap) {
           return
         }
 
-        // this.options.context = path.resolve('node_modules')
-        // this.rootContext = path.resolve('node_modules')
-        // this.context = path.resolve()
         // context.resourcePath += '.ts'
-        // как указать контекст?
         finish(null, component.script)
       })
     }
@@ -40,7 +37,16 @@ module.exports = async function(source, sourceMap) {
     // if (component.script) {
       const src = resourcePath
       const query = `?seafood&type=script`
-      const request = genLoaders(['babel-loader', 'ts-loader?{compilerOptions:{"moduleResolution": "node"},transpileOnly: true, allowTsInNodeModules: true, appendTsSuffixTo: [\'\\\\.seafood$\']}', 'seafood-loader'], src, query)
+      const request = genLoaders([
+        'babel-loader',
+        `ts-loader?${JSON.stringify({
+          transpileOnly: true,
+          // allowTsInNodeModules: true,
+          appendTsSuffixTo: ['\\.seafood$'],
+        })}`,
+        'seafood-loader'],
+        src,
+        query)
       importScript = makeExportString([
         `import script from ${request}`,
         `export default script`,

@@ -1,0 +1,26 @@
+{
+  "name": "@seafood/framework",
+  "version": "1.0.0",
+  "author": "Aliaksandr Parfiankou <aliaksandr.parfiankou@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "serve": "node index.js",
+    "build": "node index.js"
+  },
+  "engines": {
+    "node": ">= 8.0.0"
+  },
+  "dependencies": {
+    "@babel/core": "^7.2.0",
+    "babel-loader": "^8.0.4",
+    "fork-ts-checker-webpack-plugin": "^0.5.0",
+    "friendly-errors-webpack-plugin": "^1.7.0",
+    "merge": "^1.2.1",
+    "simple-progress-webpack-plugin": "^1.1.2",
+    "ts-loader": "^5.3.1",
+    "tslint": "^5.11.0",
+    "tslint-loader": "^3.5.4",
+    "typescript": "^3.2.1",
+    "webpack": "^4.26.1"
+  }
+}

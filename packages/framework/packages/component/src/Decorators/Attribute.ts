@@ -3,7 +3,10 @@ interface IAttributeProperties {
 }
 
 export function attribute(properties?: IAttributeProperties) {
-    return (target: any, title: string, descriptor: PropertyDescriptor) => {
+    if (properties) {
+        //
+    }
+    return (/*target: any, title: string, descriptor: PropertyDescriptor*/) => {
         //
     };
 }

@@ -1,25 +1,25 @@
 /**
  * The command to run development server.
  */
-module.exports = program => {
+module.exports = (program, projectManager) => {
   program
     .command('serve')
     .description('run development server')
     .allowUnknownOption()
-    .action( () => {
+    .action(() => {
       const webpack = require('webpack')
-      const {getChainableWebpackConfig} = require('../util/config')
 
       const provider = require('express-https-provider')()
       const history = require('connect-history-api-fallback')
 
       const chalk = require('chalk')
-      const {error, log} = require('../util/console')
+      const {console} = require('@seafood/project-manager')
+      const {error, log} = console
 
       provider
         .modifyApp((app, state) => {
           // Start webpack compiler.
-          const config = getChainableWebpackConfig().toConfig()
+          const config = projectManager.webpackConfigManager.getConfig()
           const compiler = webpack(config)
 
           compiler.hooks.done.tap('seafood serve', stats => {

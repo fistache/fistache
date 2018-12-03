@@ -9,7 +9,7 @@ module.exports = config => {
     .output
       .path(path.resolve('dist'))
       .filename('[name].js')
-      // .publicPath('/')
+      .publicPath('/')
 
   config.node
     .merge({
@@ -29,16 +29,14 @@ module.exports = config => {
     .modules
       .add('node_modules')
       .add(path.resolve('node_modules'))
-      .add(path.resolve(__dirname, '../node_modules'))
+      .add(path.resolve(__dirname, '../../node_modules'))
       .end()
-    .alias
-      .set('@', path.resolve('src'))
 
   config.resolveLoader
     .modules
       .add('node_modules')
       .add(path.resolve('node_modules'))
-      .add(path.resolve(__dirname, '../node_modules'))
+      .add(path.resolve(__dirname, '../../node_modules'))
 
   config.module
     .rule('html')
@@ -56,16 +54,16 @@ module.exports = config => {
   config.module
     .rule('typescript')
       .test(/\.ts$/)
-      .exclude
-        .add(path.resolve('node_modules'))
-        .end()
+      // .exclude
+      //   .add(path.resolve('node_modules'))
+      //   .end()
       // .use('cache-loader')
       //   .loader('cache-loader')
       //   .end()
       .use('ts-loader')
         .loader('ts-loader')
         .options({
-          allowTsInNodeModules: true, // ??
+          // allowTsInNodeModules: true, // ??
           transpileOnly: true
         })
         .end()
@@ -76,7 +74,7 @@ module.exports = config => {
   config
     .plugin('html')
     .use(require('html-webpack-plugin'), [{
-      template: path.resolve(__dirname, '../index.html')
+      template: path.resolve(__dirname, '../../index.html')
     }])
 
   config

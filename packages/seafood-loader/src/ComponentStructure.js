@@ -1,6 +1,7 @@
 const DataProcessor = require('./DataProcessor')
 const loaderUtils = require('loader-utils')
 const path = require('path')
+const fs = require('fs')
 
 module.exports = class ComponentStructure {
   constructor (context, domTree) {
@@ -70,7 +71,21 @@ module.exports = class ComponentStructure {
         }
         let result = submatch.replace(/"/gi, '')
         if (!result.includes('.')) {
-          return submatch // not result! do not change
+          // return submatch // not result! do not change
+          try { require.resolve(result) }
+          catch (e) {
+            return submatch
+            // const contextPath = process.cwd()
+            // const localPackagePath = `${contextPath}/node_modules/${result}`
+            // const realPackagePath = fs.realpathSync(path.normalize(localPackagePath))
+            //
+            // let packageIndexFilePath = require(path.join(realPackagePath, 'package.json')).types
+            // if (!packageIndexFilePath.includes('.d.ts') && !packageIndexFilePath.includes('.ts')) {
+            //   packageIndexFilePath += '.d.ts'
+            // }
+            //
+            // result = path.join(localPackagePath, packageIndexFilePath)
+          }
         }
 
         return loaderUtils.stringifyRequest(this.loaderContext, result)

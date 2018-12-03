@@ -1,14 +1,13 @@
-module.exports = {
+{
   "defaultSeverity": "warning",
   "extends": [
     "tslint:recommended"
   ],
   "rules": {
-    "no-console": false,
     "max-line-length": {
       "options": [120]
     },
-    "no-namespace": false
+    "no-console": false
   },
   "jsRules": {
     "max-line-length": {
