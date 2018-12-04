@@ -1,4 +1,4 @@
-// const HashedModuleIdsPlugin = require('webpack/lib/HashedModuleIdsPlugin');
+const HashedModuleIdsPlugin = require('webpack/lib/HashedModuleIdsPlugin');
 // const TerserPlugin = require('terser-webpack-plugin')
 
 module.exports = config => {

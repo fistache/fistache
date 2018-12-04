@@ -34,9 +34,8 @@ class Compiler {
       const script = makeExportString([
         structure.getScriptContent(),
         ``,
-        `export const __$render__ = ${(() => {
-        }).toString()}`,
-        ``
+        // `export const __$render__ = ${(() => {}).toString()}`,
+        // ``
       ])
 
       this.callback(null, {

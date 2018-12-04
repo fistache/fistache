@@ -4,15 +4,15 @@
   "author": "Aliaksandr Parfiankou <aliaksandr.parfiankou@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "serve": "node index.js",
-    "build": "node index.js"
+    "serve": "cross-env NODE_ENV=development node index.js serve",
+    "build": "cross-env NODE_ENV=production node index.js build"
   },
   "engines": {
     "node": ">= 8.0.0"
   },
   "dependencies": {
-    "@babel/core": "^7.2.0",
     "babel-loader": "^8.0.4",
+    "cross-env": "^5.2.0",
     "fork-ts-checker-webpack-plugin": "^0.5.0",
     "friendly-errors-webpack-plugin": "^1.7.0",
     "merge": "^1.2.1",

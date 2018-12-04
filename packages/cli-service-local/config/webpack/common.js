@@ -2,8 +2,9 @@ const path = require('path');
 
 module.exports = config => {
   config
-    // .cache(true)
+    .cache(true)
     .entry('app')
+      .add(path.resolve(__dirname,  '../../index.js'))
       .add(path.resolve('bootstrap/app.ts'))
       .end()
     .output
@@ -23,6 +24,7 @@ module.exports = config => {
     })
 
   config.resolve
+    .symlinks(true)
     .extensions
       .merge(['.ts', '.seafood', '.js', '.json'])
       .end()
@@ -47,29 +49,60 @@ module.exports = config => {
   config.module
     .rule('seafood')
       .test(/\.seafood$/)
+      .use('babel-loader')
+        .loader('babel-loader')
+        .options({
+          babelrc: true
+        })
+        .end()
+      .use('ts-loader')
+        .loader('ts-loader')
+        .options({
+          transpileOnly: true,
+          appendTsSuffixTo: ['\\.seafood$']
+        })
+        .end()
       .use('seafood-loader')
         .loader('seafood-loader')
         .end()
 
   config.module
     .rule('typescript')
-      .test(/\.ts$/)
-      // .exclude
-      //   .add(path.resolve('node_modules'))
-      //   .end()
-      // .use('cache-loader')
-      //   .loader('cache-loader')
-      //   .end()
-      .use('ts-loader')
-        .loader('ts-loader')
-        .options({
-          // allowTsInNodeModules: true, // ??
-          transpileOnly: true
-        })
-        .end()
-      .use('babel-loader')
-        .loader('babel-loader')
-        .end()
+    .test(/\.ts$/)
+    // .exclude
+    //   .add(path.resolve('node_modules'))
+    //   .add(path.resolve(__dirname, '../../node_modules'))
+    //   .end()
+    // .use('cache-loader')
+    //   .loader('cache-loader')
+    //   .end()
+    .use('babel-loader')
+      .loader('babel-loader')
+      .options({
+        babelrc: true
+      })
+      .end()
+    .use('ts-loader')
+      .loader('ts-loader')
+      .options({
+        transpileOnly: true
+      })
+      .end()
+
+
+  config.module
+    .rule('javascript')
+    .test(/\.js$/)
+    // .exclude
+    //   .add(path.resolve('node_modules'))
+    //   .add(path.resolve(__dirname, '../../node_modules'))
+    //   .end()
+    .use('babel-loader')
+      .loader('babel-loader')
+      .options({
+        babelrc: true
+      })
+      .end()
 
   config
     .plugin('html')

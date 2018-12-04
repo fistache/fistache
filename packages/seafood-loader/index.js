@@ -1,15 +1,10 @@
-const utils = require('loader-utils')
 const qs = require('querystring')
 const parse = require('./lib/parse')
-const {makeExportString} = require('./lib/export')
-const path = require('path')
-const fs = require('fs')
 
-module.exports = async function(source, sourceMap) {
+module.exports = async function(source) {
   const context = this
   const finish = this.async()
   const {resourcePath, resourceQuery} = context
-  const query = utils.getOptions(context) || {}
   const rawQuery = resourceQuery.slice(1)
   const incomingQuery = qs.parse(rawQuery)
 
@@ -21,44 +16,20 @@ module.exports = async function(source, sourceMap) {
           return
         }
 
-        // context.resourcePath += '.ts'
-        finish(null, component.script)
+        context.resourcePath += '.ts'
+        finish(null, JSON.stringify(component.script))
       })
     }
   } else {
-    const genLoaders = (loaders, src, query) => {
-      return utils.stringifyRequest(this, '!!' + [
-        ...loaders,
-        src + query
-      ].join('!'))
-    }
+    const src = resourcePath
+    const query = `?seafood&type=script`
 
-    let importScript = null
-    // if (component.script) {
-      const src = resourcePath
-      const query = `?seafood&type=script`
-      const request = genLoaders([
-        'babel-loader',
-        `ts-loader?${JSON.stringify({
-          transpileOnly: true,
-          // allowTsInNodeModules: true,
-          appendTsSuffixTo: ['\\.seafood$'],
-        })}`,
-        'seafood-loader'],
-        src,
-        query)
-      importScript = makeExportString([
-        `import script from ${request}`,
-        `export default script`,
-        `export * from ${request}`
-      ])
-    // }
+    this.loadModule('!!seafood-loader!' + src + query, (error, source, sourceMap) => {
+      if (error) {
+        finish(error)
+      }
 
-    let code = makeExportString([
-      importScript,
-      ``
-    ])
-
-    finish(null, code)
+      finish(error, JSON.parse(source))
+    })
   }
 }

@@ -43,13 +43,13 @@ module.exports = config => {
       .plugin('friendly-errors')
         .use(require('friendly-errors-webpack-plugin'))
 
-    config.module
-      .rule('typescript')
-        .use('babel-loader')
-          .tap(options => merge(options, {
-            cacheDirectory: true,
-            cacheCompression: false
-          }))
+    // config.module
+    //   .rule('typescript')
+    //     .use('babel-loader')
+    //       .tap(options => merge(options, {
+    //         cacheDirectory: true,
+    //         cacheCompression: false
+    //       }))
 
     config
       .plugin('fork-ts-checker')

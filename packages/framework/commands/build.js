@@ -14,14 +14,13 @@ module.exports = (program, projectManager) => {
 
       webpack(Object.assign(config, {
         mode: 'development',
-      })).run({
-        // watch options
-      }, (err, stats) => {
+      })).run((err, stats) => {
         if (err || stats.hasErrors()) {
           console.log(err || stats.toString({
             chunks: false,
             colors: true
           }))
+          return
         }
       })
     });
