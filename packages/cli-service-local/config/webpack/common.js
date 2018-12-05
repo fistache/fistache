@@ -113,7 +113,7 @@ module.exports = config => {
   config
     .plugin('favicon')
     .use(require('favicons-webpack-plugin'), [{
-      logo: path.resolve('src/resources/logo.svg'),
+      logo: path.resolve('resources/images/logo.svg'),
       background: false,
       icons: {
         android: true,

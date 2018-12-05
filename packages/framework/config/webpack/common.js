@@ -4,16 +4,10 @@ module.exports = config => {
   config
     .cache(true)
     .target('node')
-    .entry('index')
-      // don't forget to add resolve paths
-      .add(path.resolve(__dirname, '../../packages/component/index.ts'))
-      .end()
     .output
       .libraryTarget('commonjs2')
-      .path(path.resolve(__dirname, '../../packages/component/dist'))
       .filename('[name].js')
       .end()
-      // .publicPath('/')
     .node
       .set('__dirname', false)
       .set('__filename', false)
@@ -25,14 +19,12 @@ module.exports = config => {
       .end()
     .modules
       .add('node_modules')
-      .add(path.resolve(__dirname, '../../packages/component/node_modules'))
       .add(path.resolve(__dirname, '../../node_modules'))
       .end()
 
   config.resolveLoader
     .modules
       .add('node_modules')
-      .add(path.resolve(__dirname, '../../packages/component/node_modules'))
       .add(path.resolve(__dirname, '../../node_modules'))
 
   config.module

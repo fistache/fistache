@@ -12,8 +12,10 @@ module.exports = (program, projectManager) => {
 
       const {console} = require('@seafood/project-manager')
 
-      webpack(Object.assign(config, {
-        mode: 'development',
+      webpack(config.map(config => {
+        return Object.assign(config, {
+          mode: 'development',
+        })
       })).watch({
         // watch options
       }, (err, stats) => {

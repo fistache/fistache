@@ -7,7 +7,16 @@ module.exports = class WebpackConfigManager {
   constructor(projectManager) {
     this.projectManager = projectManager
     this.branches = {}
+    this.packages = []
     this.order = []
+  }
+
+  storePackages (packages) {
+    if (!Array.isArray(packages)) {
+      throw new Error('A parameter "packages" must be an array of function.')
+    }
+
+    this.packages = packages
   }
 
   storeFolder (folderPath, order) {
@@ -66,21 +75,34 @@ module.exports = class WebpackConfigManager {
   }
 
   getChain () {
-    let config = new WebpackChainConfig
-    this.order.forEach(branchName => {
-      this.executeBranch(branchName, config)
+    let configs = []
+
+    this.packages.forEach(chainBuilder => {
+      let config = new WebpackChainConfig
+      this.order.forEach(branchName => {
+        this.executeBranch(branchName, config)
+      })
+
+      for (const name in this.branches) {
+        if (!this.order.includes(name)) {
+          this.executeBranch(name, config)
+        }
+      }
+
+      if (typeof chainBuilder !== 'function') {
+        throw new Error('A parameter "pack" must be a function.')
+      }
+
+      chainBuilder(config)
+      configs.push(config)
     })
 
-    for (const name in this.branches) {
-      if (!this.order.includes(name)) {
-        this.executeBranch(name, config)
-      }
-    }
-
-    return config
+    return configs
   }
 
   getConfig () {
-    return this.getChain().toConfig()
+    return this.getChain().map(config => {
+      return config.toConfig()
+    })
   }
 }

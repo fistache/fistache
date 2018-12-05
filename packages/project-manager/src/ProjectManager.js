@@ -1,6 +1,7 @@
 const WebpackConfigManager = require('./WebpackConfigManager')
 const CommandManager = require('./CommandManager')
 
+const fs = require('fs')
 const path = require('path')
 const semver = require('semver')
 
@@ -53,9 +54,18 @@ module.exports = class ProjectManager {
     return this
   }
 
-  defineConfig (folderPath) {
+  defineConfig (folderPath, packagesPath) {
     if (!folderPath) {
       folderPath = this.generatePath('config/webpack')
+    }
+
+    if (!packagesPath) {
+      packagesPath = this.generatePath('config/webpack.packages.js')
+    }
+
+    if (fs.existsSync(packagesPath)) {
+      const packages = require(packagesPath)
+      this.webpackConfigManager.storePackages(packages)
     }
 
     this.webpackConfigManager.storeFolder(folderPath)
