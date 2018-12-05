@@ -3,7 +3,7 @@ const path = require('path')
 const createPackageChainableConfig = packageName => {
   return config => {
     config
-      .entry(packageName)
+      .entry('index')
         .add(path.resolve(__dirname, `../packages/${packageName}/index.ts`))
         .end()
       .output

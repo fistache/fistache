@@ -75,6 +75,10 @@ module.exports = class WebpackConfigManager {
   }
 
   getChain () {
+    if (!this.packages.length) {
+      this.packages = [chain => chain]
+    }
+
     let configs = []
 
     this.packages.forEach(chainBuilder => {

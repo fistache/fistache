@@ -4,6 +4,7 @@
     "lib": ["es5", "es6", "dom"],
     "module": "commonjs",
     "strict": true,
+    "allowJs": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
@@ -19,9 +20,7 @@
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "sourceMap": true,
-    "preserveSymlinks": true,
-    "declaration": true
+    "sourceMap": true
   },
   "exclude": [
     "node_modules",

@@ -17,7 +17,8 @@ module.exports = (program, projectManager) => {
           mode: 'development',
         })
       })).watch({
-        // watch options
+        hot: false,
+        inline: false,
       }, (err, stats) => {
         if (err || stats.hasErrors()) {
           console.log(err || stats.toString({
