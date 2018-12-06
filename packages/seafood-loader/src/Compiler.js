@@ -1,6 +1,7 @@
 const {Parser, DomHandler} = require('htmlparser2')
 const ComponentStructure = require('./ComponentStructure')
 const {makeExportString} = require('../lib/export')
+const path = require('path')
 
 class Compiler {
   constructor () {
@@ -31,16 +32,18 @@ class Compiler {
     try {
       const structure = new ComponentStructure(this.loaderContext, domTree)
 
-      const script = makeExportString([
+      // !!!
+      const request = path.resolve(__dirname, 'TemplateRenderer/TemplateRenderer.js')
+
+      const result = makeExportString([
         structure.getScriptContent(),
         ``,
-        // `export const __$render__ = ${(() => {}).toString()}`,
-        // ``
+        `export const $renderContent = ${structure.getRenderContentAsString()}`,
+        `export const $render = ${structure.getRenderFunctionAsString()}`,
+        ``
       ])
 
-      this.callback(null, {
-        script
-      })
+      this.callback(null, result)
     } catch (exception) {
       this.callback(exception)
     }

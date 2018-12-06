@@ -1,13 +1,8 @@
-const DataProcessor = require('./DataProcessor')
-const loaderUtils = require('loader-utils')
-const path = require('path')
-const fs = require('fs')
+const TemplateRenderer = require('./TemplateRenderer/TemplateRenderer')
 
 module.exports = class ComponentStructure {
   constructor (context, domTree) {
     this.domTree = domTree
-
-    this.renderFunction = null
 
     this.script = null
     this.template = null
@@ -16,6 +11,8 @@ module.exports = class ComponentStructure {
     this.loaderContext = context
 
     this.processDomTree()
+
+    this.templateRenderer = new TemplateRenderer(this.template)
   }
 
   processDomTree () {
@@ -50,12 +47,12 @@ module.exports = class ComponentStructure {
     return data
   }
 
-  getRenderFunction () {
-    return this.renderFunction
+  getRenderFunctionAsString () {
+    return this.templateRenderer.render.toString()
   }
 
-  getRenderFunctionAsString () {
-    return DataProcessor.stringify(this.getRenderFunction())
+  getRenderContentAsString () {
+    return JSON.stringify(this.templateRenderer.content)
   }
 
   getScriptContent () {
@@ -63,33 +60,18 @@ module.exports = class ComponentStructure {
   }
 
   fixScriptImports () {
-    const regex = /import(?:["'\s]*([\w*{}\n\r\t, ]+)from\s*)["'\s].*([@\w/_-]+)["'\s].*;?$/gm
-    this.script = this.script.replace(regex, match => {
-      return match.replace(/"([^"]+)"/s, submatch => {
-        if (!this.loaderContext) {
-          throw new Error('Loader context must be specified!')
-        }
-        let result = submatch.replace(/"/gi, '')
-        if (!result.includes('.')) {
-          // return submatch // not result! do not change
-          try { require.resolve(result) }
-          catch (e) {
-            return submatch
-            // const contextPath = process.cwd()
-            // const localPackagePath = `${contextPath}/node_modules/${result}`
-            // const realPackagePath = fs.realpathSync(path.normalize(localPackagePath))
-            //
-            // let packageIndexFilePath = require(path.join(realPackagePath, 'package.json')).types
-            // if (!packageIndexFilePath.includes('.d.ts') && !packageIndexFilePath.includes('.ts')) {
-            //   packageIndexFilePath += '.d.ts'
-            // }
-            //
-            // result = path.join(localPackagePath, packageIndexFilePath)
-          }
-        }
-
-        return loaderUtils.stringifyRequest(this.loaderContext, result)
-      })
-    })
+    // const regex = /import(?:["'\s]*([\w*{}\n\r\t, ]+)from\s*)["'\s].*([@\w/_-]+)["'\s].*;?$/gm
+    // this.script = this.script.replace(regex, match => {
+    //   return match.replace(/"([^"]+)"/s, submatch => {
+    //     if (!this.loaderContext) {
+    //       throw new Error('Loader context must be specified!')
+    //     }
+    //     let result = submatch.replace(/"/gi, '')
+    //     if (!result.includes('.')) {
+    //         return submatch
+    //     }
+    //     return loaderUtils.stringifyRequest(this.loaderContext, result)
+    //   })
+    // })
   }
 }
