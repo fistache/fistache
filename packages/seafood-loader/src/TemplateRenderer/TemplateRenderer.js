@@ -1,40 +1,45 @@
-const TextTemplateNode = require('./Types/TextTemplateNode')
-const TemplateNode = require('./TemplateNode')
+const TextNode = require('./Nodes/TextNode')
+const ComponentNode = require('./Nodes/ComponentNode')
 
 module.exports = class TemplateRenderer {
-  constructor(template) {
-    this.content = this.generateContent(template)
+  constructor() {
+    this.context = null
+    this.content = []
   }
 
-  generateContent(template) {
-    let content = []
+  setContext(context) {
+    this.context = context
+    return this
+  }
 
-    for (const element of template) {
+  setContent(content) {
+    this.content = content
+    return this
+  }
+
+  generateNodesToRender(contextNode, content) {
+    for (const element of content) {
       let node = null
 
       switch (element.type) {
         case ('text'):
-          node = new TextTemplateNode(element.data)
+          node = new TextNode(element.data)
+          break;
+        case ('tag'):
+          // check tag name
+          // if unknow -> generateNodesToRender()
           break;
       }
 
       if (node) {
-        content.push(node)
+        contextNode.attach(node)
       }
     }
-
-    return content
   }
 
-  get render() {
-    return (context, content) => {
-      for(const node of content) {
-        if (node instanceof TemplateNode) {
-          node.render(context)
-        } else if (Array.isArray(node)) {
-          // todo: implement
-        }
-      }
-    }
+  render() {
+    let node = new ComponentNode(this.context)
+    this.generateNodesToRender(node, this.content)
+    node.render()
   }
 }

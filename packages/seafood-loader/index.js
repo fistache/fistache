@@ -1,39 +1,109 @@
 const qs = require('querystring')
 const loaderUtils = require('loader-utils')
+const path = require('path')
+const hash = require('hash-sum')
 const parse = require('./lib/parse')
 
 module.exports = async function(source) {
-  const context = this
+  const loaderContext = this
   const finish = this.async()
-  const {resourcePath, resourceQuery} = context
+  const {rootContext, resourcePath, resourceQuery} = loaderContext
   const rawQuery = resourceQuery.slice(1)
   const incomingQuery = qs.parse(rawQuery)
 
   if (incomingQuery.compile) {
-    parse(context, source.toString('utf8'), (error, component) => {
+    parse(loaderContext, source.toString('utf8'), (error, component) => {
       if (error) {
         finish(error)
         return
       }
 
-      context.resourcePath += '.ts'
+      loaderContext.resourcePath += '.ts'
       finish(null, component)
     })
   } else {
     const query = `?seafood&compile=true`
     const loaders = this.loaders.slice()
-    const request = loaderUtils.stringifyRequest(context, generateLoaders(loaders,resourcePath + query))
+
+    const componentRequest = loaderUtils.stringifyRequest(loaderContext, generateLoaders(loaders,resourcePath + query))
+    const hmrRequest = loaderUtils.stringifyRequest(loaderContext, path.join(__dirname, 'hmr.js'))
+
+    const context = rootContext || process.cwd()
+    const rawFilePath = path
+      .relative(context, resourcePath)
+      .replace(/^(\.\.[\/\\])+/, '')
+    const filePath = rawFilePath.replace(/\\/g, '/') + resourceQuery
+    const id = hash(filePath/* + '\n' + source*/)
 
     finish(null,
-      `import {default as BaseComponent, $renderContent, $render} from ${request}
+      ` import {default as BaseComponent, TemplateRenderer, content} from ${componentRequest}
+        import hmr from ${hmrRequest}
+        
+        class CompiledComponent extends BaseComponent {
+          public parentNode = null;
       
-      class CompiledComponent extends BaseComponent {
-        public $render(context) {
-          $render(context, $renderContent)
+          public hmrOptions: object = {};
+          public uncompiledTemplate = [];
+      
+          private renderer = null;
+      
+          public initHmrOptions() {
+              this.hmrOptions = {
+                  events: {},
+              };
+          }
+      
+          public setContent(content: any) {
+              this.uncompiledTemplate = content;
+          }
+      
+          public setRenderer(renderer: any) {
+              this.renderer = renderer;
+          }
+      
+          public render(parentNode: any) {
+              if (parentNode) {
+                  this.parentNode = parentNode;
+              } else {
+                  parentNode = this.parentNode;
+              }
+      
+              if (!parentNode) {
+                  console.warn("Parent node for this component is not specified, cancelling rendering...");
+                  return;
+              }
+      
+              // @ts-ignore
+              this.renderer
+                  .setContext(parentNode)
+                  .setContent(this.uncompiledTemplate)
+                  .render();
+          }
         }
-      }
-      
-      export default new CompiledComponent`
+        
+        const component = new CompiledComponent()
+        component.initHmrOptions()
+        component.setContent(content)
+        component.setRenderer(new TemplateRenderer())
+        
+        if (module.hot) {
+          module.hot.accept()  
+          if (!module.hot.data) {
+            hmr.register('${id}', component.hmrOptions)
+          } else {
+            hmr.reload('${id}', {
+              content
+            })
+          }
+        
+          module.hot.accept(${componentRequest}, () => {
+            hmr.rerender('${id}', {
+              content
+            })
+          })
+        }
+        
+        export default component`
     )
   }
 }

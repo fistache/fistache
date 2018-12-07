@@ -1,18 +1,15 @@
-const TemplateRenderer = require('./TemplateRenderer/TemplateRenderer')
-
 module.exports = class ComponentStructure {
   constructor (context, domTree) {
     this.domTree = domTree
 
     this.script = null
+    this.renderContent = null
     this.template = null
     this.style = null
 
     this.loaderContext = context
 
     this.processDomTree()
-
-    this.templateRenderer = new TemplateRenderer(this.template)
   }
 
   processDomTree () {
@@ -30,7 +27,25 @@ module.exports = class ComponentStructure {
     const templateTag = this.findRootTag('template')
     if (templateTag) {
       this.template = templateTag.children
+      this.renderContent = this.generateContent(this.template)
     }
+  }
+
+  generateContent (domTree) {
+    let content = []
+
+    for (const elementIndex in domTree) {
+      const element = domTree[elementIndex]
+      content.push({
+        type: element.type,
+        name: element.name,
+        attribs: element.attribs,
+        data: element.data,
+        children: this.generateContent(element.children),
+      })
+    }
+
+    return content
   }
 
   findRootTag (name) {
@@ -47,12 +62,8 @@ module.exports = class ComponentStructure {
     return data
   }
 
-  getRenderFunctionAsString () {
-    return this.templateRenderer.render.toString()
-  }
-
   getRenderContentAsString () {
-    return JSON.stringify(this.templateRenderer.content)
+    return JSON.stringify(this.renderContent)
   }
 
   getScriptContent () {
