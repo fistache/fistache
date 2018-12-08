@@ -4,15 +4,16 @@ let hmrData = Object.create(null)
 
 const nofityIfRerenderCrashed = (rerender) => {
   return (id, options) => {
-    try {
+    // todo: remove comments
+    // try {
       rerender(id, options)
-    } catch (exception) {
-      console.error(exception.message)
-      console.error(exception.stackTrace)
-      console.warn(
-        'Something went wrong during hot-reload. Full reload required.'
-      )
-    }
+    // } catch (exception) {
+    //   console.error(exception.message)
+    //   console.error(exception.stackTrace)
+    //   console.warn(
+    //     'Something went wrong during hot-reload. Full reload required.'
+    //   )
+    // }
   }
 }
 

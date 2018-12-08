@@ -5,10 +5,29 @@ module.exports = class TextNode extends Node {
     super()
 
     this.text = text
+    this.htmlNode = null
   }
 
   render(context) {
+    if (!context && this.htmlNode) {
+      this.htmlNode.innerHTML = ''
+    }
+
+    if (context) {
+      this.htmlNode = context
+    }
+
     const textNode = document.createTextNode(this.text)
-    context.appendChild(textNode)
+    this.htmlNode.appendChild(textNode)
+  }
+
+  equals (node) {
+    return !(
+      this.text !== node.text
+    );
+  }
+
+  clone (node) {
+    this.text = node.text
   }
 }

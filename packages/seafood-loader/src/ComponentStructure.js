@@ -36,13 +36,35 @@ module.exports = class ComponentStructure {
 
     for (const elementIndex in domTree) {
       const element = domTree[elementIndex]
-      content.push({
+      const parsed = {
         type: element.type,
-        name: element.name,
-        attribs: element.attribs,
-        data: element.data,
-        children: this.generateContent(element.children),
-      })
+      }
+
+      if (element.name) {
+        parsed.name = element.name
+      }
+
+      if (element.attribs) {
+        parsed.attribs = element.attribs
+      }
+
+
+
+      if (element.data) {
+        parsed.data = element.data
+      }
+
+
+
+      if (element.children) {
+        if (element.children.length) {
+          parsed.children = this.generateContent(element.children)
+        } else {
+          parsed.children = []
+        }
+      }
+
+      content.push(parsed)
     }
 
     return content

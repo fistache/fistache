@@ -12,8 +12,17 @@ module.exports = class ComponentNode extends Node {
   }
 
   render() {
+    this.context.innerHTML = ''
     for(const node of this.nodes) {
       node.render(this.context)
     }
+  }
+
+  equals (node) {
+    return JSON.stringify(this.nodes) === JSON.stringify(node.nodes)
+  }
+
+  clone (node) {
+    this.nodes = node.nodes
   }
 }
