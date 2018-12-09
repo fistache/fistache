@@ -64,16 +64,28 @@ module.exports = class TemplateRenderer {
     }
   }
 
-  areChildNodeEquals(prevNode, currentNode) {
-    const prev = this.prepareChildNodesToCompare(prevNode)
-    const current = this.prepareChildNodesToCompare(currentNode)
+  areAllChildNodeEquals(prevNode, currentNode) {
+    const prev = this.prepareAllChildNodesToCompare(prevNode)
+    const current = this.prepareAllChildNodesToCompare(currentNode)
 
-    const jsonPrev = JSON.stringify(prev)
-    const jsonCurrent = JSON.stringify(current)
     return JSON.stringify(prev) === JSON.stringify(current)
   }
 
-  prepareChildNodesToCompare(node, nested) {
+  isTypeOfChildNodesEquals(prevNode, currentNode) {
+    if (prevNode.nodes.length !== currentNode.nodes.length) {
+      return false
+    }
+
+    for (let i = 0; i < prevNode.nodes.length; i++) {
+      if (typeof prevNode.nodes[i] !== typeof currentNode.nodes[i]) {
+        return false
+      }
+    }
+
+    return true
+  }
+
+  prepareAllChildNodesToCompare(node, nested) {
     let processedNode = {
       nodes: []
     }
@@ -87,7 +99,7 @@ module.exports = class TemplateRenderer {
 
     if (node.nodes) {
       node.nodes.forEach(childNode => {
-        processedNode.nodes.push(this.prepareChildNodesToCompare(childNode, true))
+        processedNode.nodes.push(this.prepareAllChildNodesToCompare(childNode, true))
       })
     }
 
@@ -111,14 +123,14 @@ module.exports = class TemplateRenderer {
       if (!prevNode.equals(currentNode)) {
         if (typeof prevNode === typeof currentNode &&
           prevNode.nodes && currentNode.nodes &&
-          (!(prevNode instanceof TagNode) && prevNode.nodes.length === currentNode.nodes.length ||
-          (!this.areChildNodeEquals(prevNode, currentNode) && prevNode instanceof TagNode))
+          (!(prevNode instanceof TagNode) && this.isTypeOfChildNodesEquals(prevNode, currentNode) ||
+          (!this.areAllChildNodeEquals(prevNode, currentNode) && prevNode instanceof TagNode))
         ) {
           this.rerenderUpdatedChunk(prevNode.nodes, currentNode.nodes)
         } else {
           prevNode.clone(currentNode)
 
-          if (prevNode instanceof TagNode && this.areChildNodeEquals(prevNode, currentNode)) {
+          if (prevNode instanceof TagNode && this.areAllChildNodeEquals(prevNode, currentNode)) {
             prevNode.renderAttributes()
           } else {
             prevNode.render()
