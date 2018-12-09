@@ -1,5 +1,5 @@
 {
-  "name": "@seafood/cli-service-local",
+  "name": "@seafood-app/cli-local",
   "version": "1.0.0",
   "main": "index.js",
   "author": "Aliaksandr Parfiankou <aliaksandr.parfiankou@gmail.com>",
