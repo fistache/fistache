@@ -13,8 +13,7 @@ module.exports = (program, projectManager) => {
       const history = require('connect-history-api-fallback')
 
       const chalk = require('chalk')
-      const {console} = require('@seafood/project-manager')
-      const {error, log} = console
+      const {console} = require('@seafood-app/webpack-kit')
 
       provider
         .modifyApp((app, state) => {
@@ -24,7 +23,7 @@ module.exports = (program, projectManager) => {
 
           compiler.hooks.done.tap('seafood serve', stats => {
             if (!stats.hasErrors()) {
-              log(`App serving at: ${chalk.blue.bold(state.getServingLink())}`)
+              console.log(`App serving at: ${chalk.blue.bold(state.getServingLink())}`)
             }
           })
 
@@ -44,6 +43,6 @@ module.exports = (program, projectManager) => {
           })
         })
         .run()
-        .catch(err => error(err))
+        .catch(err => console.error(err))
     });
 }

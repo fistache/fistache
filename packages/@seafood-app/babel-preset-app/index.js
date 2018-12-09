@@ -1,11 +1,8 @@
-module.exports = () => {
-  return {
-    presets: [
-      [
-        '@babel/preset-env', {
-          useBuiltIns: 'entry'
-        }
-      ],
-    ]
-  }
-}
+module.exports = () => ({
+  presets: [
+    [require("@babel/preset-env"), {useBuiltIns: 'entry'}],
+  ],
+  plugins: [
+    //
+  ],
+});

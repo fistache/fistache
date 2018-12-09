@@ -1,11 +1,11 @@
 {
-  "name": "@seafood/project-manager",
+  "name": "@seafood-app/webpack-kit",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
   "author": "Aliaksandr Parfiankou <aliaksandr.parfiankou@gmail.com>",
   "dependencies": {
-    "@babel/preset-env": "^7.2.0",
+    "chalk": "^2.4.1",
     "commander": "^2.19.0",
     "glob": "^7.1.3",
     "path": "^0.12.7",

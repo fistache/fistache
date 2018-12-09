@@ -74,6 +74,18 @@ module.exports = class WebpackConfigManager {
     }
   }
 
+  addDefaultConfigProperties (config) {
+    config.resolve
+      .modules
+        .add(path.resolve(__dirname, '../node_modules'))
+        .end()
+
+    config.resolveLoader
+      .modules
+        .add(path.resolve(__dirname, '../node_modules'))
+        .end()
+  }
+
   getChain () {
     if (!this.packages.length) {
       this.packages = [chain => chain]
@@ -96,6 +108,8 @@ module.exports = class WebpackConfigManager {
       if (typeof chainBuilder !== 'function') {
         throw new Error('A parameter "pack" must be a function.')
       }
+
+      this.addDefaultConfigProperties(config)
 
       chainBuilder(config)
       configs.push(config)

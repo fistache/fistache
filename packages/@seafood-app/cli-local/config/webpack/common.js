@@ -29,15 +29,15 @@ module.exports = config => {
       .merge(['.ts', '.seafood', '.js', '.json'])
       .end()
     .modules
-      .add('node_modules')
       .add(path.resolve('node_modules'))
+      .add('node_modules')
       .add(path.resolve(__dirname, '../../node_modules'))
       .end()
 
   config.resolveLoader
     .modules
-      .add('node_modules')
       .add(path.resolve('node_modules'))
+      .add('node_modules')
       .add(path.resolve(__dirname, '../../node_modules'))
 
   config.module
