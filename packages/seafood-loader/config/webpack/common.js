@@ -12,9 +12,9 @@ module.exports = config => {
       .libraryTarget('commonjs2')
       .filename('[name].js')
       .end()
-    // .node
-    //   .set('__dirname', false)
-    //   .set('__filename', false)
+    .node
+      .set('__dirname', false)
+      .set('__filename', false)
 
   config.resolve
     .symlinks(true)
