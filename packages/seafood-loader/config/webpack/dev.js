@@ -6,13 +6,13 @@ module.exports = config => {
       .mode('development')
       .devtool('cheap-module-eval-source-map')
 
-    config.module
-      .rule('ts-lint')
-        .test(/\.ts$/)
-        .enforce('pre')
-        .use('tslint-loader')
-          .loader('tslint-loader')
-          .end()
+    // config.module
+    //   .rule('ts-lint')
+    //     .test(/\.ts$/)
+    //     .enforce('pre')
+    //     .use('tslint-loader')
+    //       .loader('tslint-loader')
+    //       .end()
 
     // https://github.com/webpack/webpack/issues/6642
     config
