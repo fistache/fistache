@@ -10,7 +10,7 @@ module.exports = (program, projectManager) => {
       const webpack = require('webpack')
       const config = projectManager.webpackConfigManager.getConfig()
 
-      const {console} = require('@seafood/project-manager')
+      const {console} = require('@seafood-app/webpack-kit')
 
       webpack(config.map(config => {
         return Object.assign(config, {

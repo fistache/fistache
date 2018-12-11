@@ -11,6 +11,10 @@ export class CompactRequestQuery {
         this.query = query;
     }
 
+    public get(key: string) {
+        return _.get(this.query, key);
+    }
+
     public hasKey(key: string) {
         return _.has(this.query, key);
     }
@@ -20,8 +24,15 @@ export class CompactRequestQuery {
 
         for (const key in this.query) {
             if (this.query.hasOwnProperty(key)) {
-                const value: any = this.query[key];
-                result += `${key}${value ? `=${value}` : ""}`;
+                let value: any = this.query[key];
+
+                if (typeof value === "undefined") {
+                    value = "";
+                } else {
+                    value = `=${value}`;
+                }
+
+                result += `${key}${value}`;
             }
         }
 

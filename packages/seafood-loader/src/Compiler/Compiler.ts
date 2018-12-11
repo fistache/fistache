@@ -1,15 +1,39 @@
-export class Compiler {
+export abstract class Compiler {
+    protected readonly loader: any;
     protected readonly source: string;
+    protected parsingTagName?: string;
+    protected content: any;
 
-    constructor(source: string) {
+    constructor(loader: any, source: any) {
+        this.loader = loader;
         this.source = source;
+        this.init();
+        this.parseContent();
     }
 
-    public compile(): string {
-        return `
-        export default class Component {
-            const i = 2;
+    public abstract compile(): string;
+
+    protected abstract init(): void;
+
+    protected parseContent(): void {
+        if (!this.parsingTagName) {
+            this.content = "";
+            return;
         }
-        `;
+
+        // todo: Возвращать значения между первым открывающим о последним
+        // закрывающим тегом, а не первым открывающим и ПЕРВЫМ закрывающим
+        // как сейчас.
+        const regex = new RegExp(
+            `<\\s*\\/?\\s*${this.parsingTagName}\\s*.*?>(.|\\n)*?<\\s*\\/\\s*${this.parsingTagName}\\s*.*?>`,
+            "mi",
+        );
+        const result = this.source.match(regex);
+
+        if (result && result.length) {
+            this.content = result[0];
+        } else {
+            this.content = "";
+        }
     }
 }

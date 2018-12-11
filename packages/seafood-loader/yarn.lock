@@ -130,6 +130,10 @@
   version "10.12.12"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-10.12.12.tgz#e15a9d034d9210f00320ef718a50c4a799417c47"
 
+"@types/parse5@^5.0.0":
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/@types/parse5/-/parse5-5.0.0.tgz#9ae2106efc443d7c1e26570aa8247828c9c80f11"
+
 "@types/query-string@^6.1.1":
   version "6.1.1"
   resolved "https://registry.yarnpkg.com/@types/query-string/-/query-string-6.1.1.tgz#1cfd9209c8dbd91b940192c8a2b7005d2a743e6f"

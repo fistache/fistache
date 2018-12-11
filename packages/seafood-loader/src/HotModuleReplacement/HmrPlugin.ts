@@ -8,7 +8,7 @@ export class HmrPlugin {
         this.requestId = requestId;
     }
 
-    public setComponentRequest(request: string) {
+    public setTemplateRequest(request: string) {
         this.componentRequest = request;
     }
 
@@ -16,9 +16,9 @@ export class HmrPlugin {
         return `
         if (module.hot) {
             if (!module.hot.data) {
-                ${SeafoodLoader.EXPORT_HMR_CLASS_NAME}.register(
+                ${SeafoodLoader.EXPORT_HMR_INSTANCE}.register(
                     '${this.requestId}',
-                    ${SeafoodLoader.EXPORT_COMPONENT_INSTANCE_NAME}
+                    ${SeafoodLoader.EXPORT_SCRIPT_INSTANCE}
                 )
             }
 
@@ -34,9 +34,9 @@ export class HmrPlugin {
 
         return `
         module.hot.accept(${this.componentRequest}, () => {
-            ${SeafoodLoader.EXPORT_HMR_CLASS_NAME}.update(
+            ${SeafoodLoader.EXPORT_HMR_INSTANCE}.update(
                 '${this.requestId}',
-                ${SeafoodLoader.EXPORT_COMPONENT_INSTANCE_NAME}
+                ${SeafoodLoader.EXPORT_SCRIPT_INSTANCE}
             )
         })
         `;
