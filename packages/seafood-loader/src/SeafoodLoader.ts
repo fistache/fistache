@@ -123,15 +123,15 @@ export class SeafoodLoader {
 
             class ${SeafoodLoader.EXPORT_COMPILED_COMPONENT_CLASS}
             extends ${SeafoodLoader.EXPORT_SCRIPT_CLASS} implements ICompiledComponent {
-                private readonly templateRenderer: any;
+                private readonly renderer: any;
 
-                constructor(templateRenderer: any) {
+                constructor(renderer: any) {
                     super();
-                    this.templateRenderer = templateRenderer;
+                    this.renderer = renderer;
                 }
 
                 render(element) {
-                    this.templateRenderer.render(element)
+                    this.renderer.render(element)
                 }
             }
 

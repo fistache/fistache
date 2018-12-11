@@ -1,3 +1,3 @@
 export interface ICompiledComponent {
-    render(): void;
+    render(element: any): void;
 }

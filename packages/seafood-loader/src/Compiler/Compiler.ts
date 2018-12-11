@@ -28,10 +28,15 @@ export abstract class Compiler {
             `<\\s*\\/?\\s*${this.parsingTagName}\\s*.*?>(.|\\n)*?<\\s*\\/\\s*${this.parsingTagName}\\s*.*?>`,
             "mi",
         );
-        const result = this.source.match(regex);
+        let result: any = this.source.match(regex);
 
         if (result && result.length) {
-            this.content = result[0];
+            // todo: Check is it always first element or not.
+            result = result[0];
+
+            const start = result.indexOf(">") + 1;
+            const end = result.lastIndexOf("<");
+            this.content = result.slice(start, end);
         } else {
             this.content = "";
         }

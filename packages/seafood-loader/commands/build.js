@@ -19,7 +19,6 @@ module.exports = (program, projectManager) => {
             chunks: false,
             colors: true
           }))
-          return
         }
       })
     });
