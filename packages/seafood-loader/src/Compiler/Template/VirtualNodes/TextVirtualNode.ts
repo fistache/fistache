@@ -8,6 +8,6 @@ export class TextVirtualNode extends VirtualNode {
     }
 
     public render(): void {
-        //
+        this.renderedElement = document.createTextNode(this.parsedElement.data);
     }
 }

@@ -8,9 +8,6 @@ export abstract class ComplexVirtualNode extends VirtualNode {
         super(parent);
 
         this.childNodes = [];
-        if (this.parent) {
-            this.parent.addChildNode(this);
-        }
     }
 
     public addChildNode(node: VirtualNode) {

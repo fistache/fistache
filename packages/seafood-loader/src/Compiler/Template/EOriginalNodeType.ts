@@ -1,5 +1,5 @@
 export enum EOriginalNodeType {
-    DocumentFragment = "#document-fragment",
-    Text = "#text",
-    Comment = "#comment",
+    Tag = "tag",
+    Text = "text",
+    Comment = "comment",
 }

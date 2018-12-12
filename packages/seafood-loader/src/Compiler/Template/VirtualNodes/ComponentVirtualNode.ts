@@ -1,18 +1,7 @@
-import {ComplexVirtualNode} from "./ComplexVirtualNode";
+import {TagVirtualNode} from "./TagVirtualNode";
 
-export class ComponentVirtualNode extends ComplexVirtualNode {
-    public constructor(element: any, parent?: ComplexVirtualNode) {
-        super(parent);
-        this.parsedElement = element;
-    }
-
+export class ComponentVirtualNode extends TagVirtualNode {
     public render(): void {
-        const parentElement = this.parent && this.parent.renderedElement;
-
-        if (!parentElement) {
-            throw new Error("Parent element must be specified.");
-        }
-
-        // this.renderedElement.appendChild();
+        super.render();
     }
 }

@@ -1,4 +1,3 @@
-import _ from "lodash";
 import {VirtualNode} from "./VirtualNodes/VirtualNode";
 
 export class VirtualTree {
@@ -13,19 +12,32 @@ export class VirtualTree {
         this.childNodes.push(node);
     }
 
-    public render(rootElement?: any): void {
+    public renderTree(rootElement: any): void {
         if (!rootElement) {
             throw new Error("Root element must be specified.");
         }
 
         this.renderedElement = rootElement;
-        let stack = [rootElement];
+        let stack = this.childNodes.slice();
 
         while (stack.length) {
-            const virtualElement = stack.pop();
-            const childNodes = _.slice(virtualElement.childNodes).reverse();
-            virtualElement.render();
+            const virtualElement: any = stack.pop();
+            const childNodes = virtualElement.childNodes ? virtualElement.childNodes.slice().reverse() : [];
+            virtualElement.renderAndAppend();
             stack = stack.concat(childNodes);
         }
+    }
+
+    public render() {
+        //
+    }
+
+    public append() {
+        //
+    }
+
+    public renderAndAppend() {
+        this.render();
+        this.append();
     }
 }

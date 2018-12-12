@@ -8,6 +8,6 @@ export class CommentVirtualNode extends VirtualNode {
     }
 
     public render(): void {
-        //
+        // do not render comment
     }
 }

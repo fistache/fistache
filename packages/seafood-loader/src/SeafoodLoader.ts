@@ -130,8 +130,8 @@ export class SeafoodLoader {
                     this.renderer = renderer;
                 }
 
-                render(element) {
-                    this.renderer.render(element)
+                public render(element) {
+                    this.renderer.renderTree(element);
                 }
             }
 

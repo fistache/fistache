@@ -1,5 +1,5 @@
-import _ from "lodash";
-import parser from "parse5";
+import HtmlParser from "htmlparser2";
+import {SynchronousPromise} from "synchronous-promise";
 import {EOriginalNodeType} from "./EOriginalNodeType";
 import {CommentVirtualNode} from "./VirtualNodes/CommentVirtualNode";
 import {ComplexVirtualNode} from "./VirtualNodes/ComplexVirtualNode";
@@ -40,18 +40,21 @@ export default class TemplateBuilder {
     constructor(source: string) {
         this.source = source;
         this.virtualTree = new VirtualTree();
-        console.log(this.virtualTree);
         this.parseContent();
         this.buildVirtualTree();
     }
 
+    public renderTree(element: any) {
+        this.virtualTree.renderTree(element);
+    }
+
     protected buildVirtualTree() {
-        let stack = [this.originalContent];
+        let stack: any = this.originalContent;
         this.setVirtualParentNodeForChildNodes(stack);
 
         while (stack.length) {
             const element = stack.pop();
-            const childNodes = _.slice(element.childNodes).reverse();
+            const childNodes = element.children ? element.children.slice().reverse() : [];
             const virtualParentNode = this.createVirtualNodeRefferingToElement(element, element.virtualParentNode);
 
             this.setVirtualParentNodeForChildNodes(childNodes, virtualParentNode);
@@ -62,17 +65,15 @@ export default class TemplateBuilder {
     protected createVirtualNodeRefferingToElement(element: any, parentElement?: ComplexVirtualNode): VirtualNode {
         let virtualNode = null;
 
-        switch (element.nodeName) {
-            case(EOriginalNodeType.DocumentFragment):
-                virtualNode = this.createComponentVirtualNode(element, parentElement);
-                break;
+        // console.log(element);
+        switch (element.type) {
             case(EOriginalNodeType.Text):
                 virtualNode = this.createTextVirtualNode(element, parentElement);
                 break;
             case(EOriginalNodeType.Comment):
                 virtualNode = this.createCommentVirtualNode(element, parentElement);
                 break;
-            default:
+            case(EOriginalNodeType.Tag):
                 if (this.isItHtmlTag(element)) {
                     virtualNode = this.createTagVirtualNode(element, parentElement);
                 } else if (this.isItReservedTag(element)) {
@@ -80,6 +81,9 @@ export default class TemplateBuilder {
                 } else {
                     virtualNode = this.createComponentVirtualNode(element, parentElement);
                 }
+                break;
+            default:
+                virtualNode = this.createComponentVirtualNode(element, parentElement);
         }
 
         return virtualNode;
@@ -109,24 +113,42 @@ export default class TemplateBuilder {
         // return new VirtualNode(`embed content`);
     }
 
-    protected parseContent(): void {
-        let parsedContent: any = parser.parseFragment(this.source, {
-            scriptingEnabled: false,
+    protected parseContent() {
+        let parsedContent: any;
+        this.parseFragment(this.source).then((content: any) => {
+            parsedContent = content;
+        }).catch((error: any) => {
+            throw new Error(error);
         });
-
-        if (!parsedContent || !parsedContent.childNodes || !Array.isArray(parsedContent.childNodes)) {
-            parsedContent = {};
-        }
+        // console.log(parsedContent);
 
         this.originalContent = parsedContent;
     }
 
+    private parseFragment(fragment: string) {
+        return new SynchronousPromise((resolve, reject) => {
+            // @ts-ignore
+            const handler = new HtmlParser.DomHandler((error, dom) => {
+                if (error) {
+                    reject(error);
+                }
+
+                resolve(dom);
+            });
+            const parser = new HtmlParser.Parser(handler, {
+                xmlMode: true,
+            });
+            parser.write(fragment);
+            parser.end();
+        });
+    }
+
     private isItHtmlTag(element: any): boolean {
-        return this.htmlTags.includes(element.tagName);
+        return this.htmlTags.includes(element.name);
     }
 
     private isItReservedTag(element: any): boolean {
-        return this.reservedTags.includes(element.tagName);
+        return this.reservedTags.includes(element.name);
     }
 
     private setVirtualParentNodeForChildNodes(childNodes: any[], parent?: any): void {
