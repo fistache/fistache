@@ -12,6 +12,7 @@
     "@types/query-string": "^6.1.1",
     "babel-loader": "^8.0.4",
     "cross-env": "^5.2.0",
+    "fork-ts-checker-webpack-plugin": "^0.5.1",
     "friendly-errors-webpack-plugin": "^1.7.0",
     "loader-utils": "^1.1.0",
     "merge": "^1.2.1",
@@ -19,6 +20,7 @@
     "query-string": "^6.2.0",
     "simple-progress-webpack-plugin": "^1.1.2",
     "ts-loader": "^5.3.1",
+    "tslint": "^5.11.0",
     "typescript": "^3.2.2",
     "webpack": "^4.27.1"
   },

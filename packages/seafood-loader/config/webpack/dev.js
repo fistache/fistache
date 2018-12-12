@@ -39,11 +39,11 @@ module.exports = config => {
     //         cacheCompression: false
     //       }))
 
-    // config
-    //   .plugin('fork-ts-checker')
-    //     .use(require('fork-ts-checker-webpack-plugin'), [{
-    //       tslint: true,
-    //       // checkSyntacticErrors: true
-    //     }])
+    config
+      .plugin('fork-ts-checker')
+        .use(require('fork-ts-checker-webpack-plugin'), [{
+          tslint: true,
+          checkSyntacticErrors: true
+        }])
   }
 }

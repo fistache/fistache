@@ -1,8 +1,16 @@
-export /*abstract*/
-class VirtualNode implements IVirtualNode {
-    public readonly type: string;
+import {VirtualTree} from "../VirtualTree";
+import {ComplexVirtualNode} from "./ComplexVirtualNode";
 
-    constructor(type: string) {
-        this.type = type;
+export abstract class VirtualNode {
+    public parsedElement: any;
+    public renderedElement: any;
+    public parent?: ComplexVirtualNode|VirtualTree;
+
+    protected constructor(parent?: ComplexVirtualNode|VirtualTree) {
+        if (parent) {
+            this.parent = parent;
+        }
     }
+
+    public abstract render(): void;
 }

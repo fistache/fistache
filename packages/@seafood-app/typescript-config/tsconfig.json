@@ -4,7 +4,7 @@
     "lib": ["es5", "es6", "es7", "dom"],
     "module": "commonjs",
     "strict": true,
-    "allowJs": true,
+    "allowJs": false,
     "noImplicitAny": true,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
@@ -23,6 +23,7 @@
     "sourceMap": true
   },
   "exclude": [
+    "dist",
     "node_modules",
     "**/*.spec.ts"
   ]
