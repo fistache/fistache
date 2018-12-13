@@ -9,7 +9,7 @@ export default class Hmr {
         this.data = {};
     }
 
-    public getInstance(): Hmr {
+    public static getInstance(): Hmr {
         if (!Hmr.instance) {
             Hmr.instance = new Hmr();
         }

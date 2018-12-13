@@ -159,7 +159,6 @@ export class SeafoodLoader {
                 }
             }
 
-            const ${SeafoodLoader.EXPORT_HMR_INSTANCE} = new ${SeafoodLoader.EXPORT_HMR_CLASS}
             const ${SeafoodLoader.EXPORT_SCRIPT_INSTANCE} =
             new ${SeafoodLoader.EXPORT_COMPILED_COMPONENT_CLASS}(${SeafoodLoader.EXPORT_TEMPLATE_INSTANCE})
 
