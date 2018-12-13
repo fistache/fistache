@@ -5,6 +5,7 @@ export abstract class VirtualNode {
     public parsedElement: any;
     public renderedElement: any;
     public parent?: ComplexVirtualNode | VirtualTree;
+    public parentRenderedElementId?: string;
 
     protected constructor(parent?: ComplexVirtualNode | VirtualTree) {
         if (parent) {
@@ -13,20 +14,31 @@ export abstract class VirtualNode {
         }
     }
 
-    public abstract render(): void;
+    public abstract render(parent: VirtualNode | VirtualTree, parsedElement: any): void;
 
-    public append(): void {
-        if (!this.parent) {
-            throw new Error("Parent must be specified.");
-        }
+    public renderAndAppend(parentRenderedElementId: string, parsedElementId: string) {
+        const renderId = this.genarateId();
+        const renderedElementId = this.genarateId();
+        const renderFunction = `
+            const ${renderId} = ${this.render.toString()}
+            const ${renderedElementId} = ${renderId}(${parsedElementId});
+            ${VirtualTree.RENDER_FUNCTION_APPEND_FUNCTION}(${parentRenderedElementId}, ${renderedElementId});
+        `;
 
-        if (this.renderedElement) {
-            this.parent.renderedElement.appendChild(this.renderedElement);
-        }
+        return {
+            renderFunction,
+            renderedElementId,
+        };
     }
 
-    public renderAndAppend(): void {
-        this.render();
-        this.append();
+    private genarateId(len: number = 20) {
+        let text = "";
+        const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+        for (let i = 0; i < len; i++) {
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
+        }
+
+        return text;
     }
 }

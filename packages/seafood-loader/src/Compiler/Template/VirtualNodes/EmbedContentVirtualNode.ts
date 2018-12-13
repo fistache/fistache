@@ -6,7 +6,7 @@ export class EmbedContentVirtualNode extends ComplexVirtualNode {
         this.parsedElement = element;
     }
 
-    public render(): void {
-        this.renderedElement = document.createElement("div");
+    public render() {
+        return document.createElement("div");
     }
 }

@@ -7,7 +7,7 @@ export class TextVirtualNode extends VirtualNode {
         this.parsedElement = element;
     }
 
-    public render(): void {
-        this.renderedElement = document.createTextNode(this.parsedElement.data);
+    public render(parsedElement: any) {
+        return document.createTextNode(parsedElement.data);
     }
 }

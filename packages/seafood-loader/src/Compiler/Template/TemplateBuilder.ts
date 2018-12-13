@@ -44,8 +44,8 @@ export default class TemplateBuilder {
         this.buildVirtualTree();
     }
 
-    public renderTree(element: any) {
-        this.virtualTree.renderTree(element);
+    public compileTree(): string {
+        return this.virtualTree.compileTree();
     }
 
     protected buildVirtualTree() {

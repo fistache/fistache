@@ -6,14 +6,16 @@ export class TagVirtualNode extends ComplexVirtualNode {
         this.parsedElement = element;
     }
 
-    public render(): void {
-        this.renderedElement = document.createElement(this.parsedElement.name);
+    public render(parsedElement: any) {
+        const renderedElement = document.createElement(parsedElement.name);
 
-        const attribs = this.parsedElement.attribs;
+        const attribs = parsedElement.attribs;
         for (const attribName in attribs) {
             if (attribs.hasOwnProperty(attribName)) {
-                this.renderedElement.setAttribute(attribName, attribs[attribName]);
+                renderedElement.setAttribute(attribName, attribs[attribName]);
             }
         }
+
+        return renderedElement;
     }
 }

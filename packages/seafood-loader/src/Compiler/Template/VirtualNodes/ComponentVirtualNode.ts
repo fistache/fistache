@@ -1,7 +1,7 @@
 import {TagVirtualNode} from "./TagVirtualNode";
 
 export class ComponentVirtualNode extends TagVirtualNode {
-    public render(): void {
-        super.render();
+    public render(parsedElement: any): void {
+        return super.render(parsedElement);
     }
 }

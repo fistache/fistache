@@ -12,7 +12,7 @@ export class SeafoodLoader {
     public static readonly EXPORT_SCRIPT_CLASS = "Component";
     public static readonly EXPORT_SCRIPT_INSTANCE = "component";
     public static readonly EXPORT_TEMPLATE_CLASS = "Template";
-    public static readonly EXPORT_TEMPLATE_INSTANCE = "template";
+    public static readonly EXPORT_TEMPLATE_RENDER_FUNCTION = "template";
     public static readonly EXPORT_HMR_CLASS = "Hmr";
     public static readonly EXPORT_HMR_INSTANCE = "hmr";
     public static readonly EXPORT_COMPILED_COMPONENT_CLASS = "CompiledComponent";
@@ -117,27 +117,28 @@ export class SeafoodLoader {
         // everything needed to render itself.
         return `
             import {default as ${SeafoodLoader.EXPORT_SCRIPT_CLASS}} from ${scriptRequest}
-            import {default as ${SeafoodLoader.EXPORT_TEMPLATE_INSTANCE}} from ${templateRequest}
+            import {default as ${SeafoodLoader.EXPORT_TEMPLATE_RENDER_FUNCTION}} from ${templateRequest}
             import {default as ${SeafoodLoader.EXPORT_HMR_CLASS}} from ${hmrRequest}
             import {ICompiledComponent} from "@seafood/app"
 
+            console.log(${SeafoodLoader.EXPORT_TEMPLATE_RENDER_FUNCTION});
             class ${SeafoodLoader.EXPORT_COMPILED_COMPONENT_CLASS}
             extends ${SeafoodLoader.EXPORT_SCRIPT_CLASS} implements ICompiledComponent {
-                private readonly renderer: any;
+                private readonly renderFunction: any;
 
-                constructor(renderer: any) {
+                constructor(renderFunction: any) {
                     super();
-                    this.renderer = renderer;
+                    this.renderFunction = renderFunction;
                 }
 
                 public render(element) {
-                    this.renderer.renderTree(element);
+                    this.renderFunction(element);
                 }
             }
 
             const ${SeafoodLoader.EXPORT_HMR_INSTANCE} = new ${SeafoodLoader.EXPORT_HMR_CLASS}
             const ${SeafoodLoader.EXPORT_SCRIPT_INSTANCE} =
-            new ${SeafoodLoader.EXPORT_COMPILED_COMPONENT_CLASS}(${SeafoodLoader.EXPORT_TEMPLATE_INSTANCE})
+            new ${SeafoodLoader.EXPORT_COMPILED_COMPONENT_CLASS}(${SeafoodLoader.EXPORT_TEMPLATE_RENDER_FUNCTION})
 
             ${this.getHmrCode()}
 
