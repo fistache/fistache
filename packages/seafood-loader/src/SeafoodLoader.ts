@@ -123,15 +123,39 @@ export class SeafoodLoader {
 
             class ${SeafoodLoader.EXPORT_COMPILED_COMPONENT_CLASS}
             extends ${SeafoodLoader.EXPORT_SCRIPT_CLASS} implements ICompiledComponent {
+                public rootElement: any;
+                public hmrOptions: any;
+                public renderer: any;
+
                 private readonly renderer: any;
 
                 constructor(renderer: any) {
                     super();
+                    this.hmrOptions = {
+                        events: [],
+                    };
                     this.renderer = renderer;
                 }
 
-                public render(element) {
+                public render(element): void {
+                    if (element) {
+                        this.rootElement = element;
+                    } else {
+                        this.clearContent();
+                        element = this.rootElement;
+                    }
+
                     this.renderer.renderTree(element);
+                }
+
+                public setRenderer(renderer): void {
+                    this.renderer = renderer;
+                }
+
+                private clearContent() {
+                    while (this.rootElement.hasChildNodes()) {
+                        this.rootElement.removeChild(this.rootElement.lastChild);
+                    }
                 }
             }
 

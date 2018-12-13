@@ -15,10 +15,18 @@ export class HmrPlugin {
     public generateCode(): string {
         return `
         if (module.hot) {
-            if (!module.hot.data) {
-                ${SeafoodLoader.EXPORT_HMR_INSTANCE}.register(
+            module.hot.accept();
+            if (module.hot.data) {
+                ${SeafoodLoader.EXPORT_HMR_INSTANCE}.getInstance().rerender(
                     '${this.requestId}',
-                    ${SeafoodLoader.EXPORT_SCRIPT_INSTANCE}
+                    {
+                        ${SeafoodLoader.EXPORT_SCRIPT_INSTANCE},
+                    }
+                )
+            } else {
+                ${SeafoodLoader.EXPORT_HMR_INSTANCE}.getInstance().register(
+                    '${this.requestId}',
+                    ${SeafoodLoader.EXPORT_SCRIPT_INSTANCE}.hmrOptions
                 )
             }
 
@@ -34,9 +42,11 @@ export class HmrPlugin {
 
         return `
         module.hot.accept(${this.componentRequest}, () => {
-            ${SeafoodLoader.EXPORT_HMR_INSTANCE}.update(
+            ${SeafoodLoader.EXPORT_HMR_INSTANCE}.getInstance().rerender(
                 '${this.requestId}',
-                ${SeafoodLoader.EXPORT_SCRIPT_INSTANCE}
+                {
+                    ${SeafoodLoader.EXPORT_SCRIPT_INSTANCE},
+                }
             )
         })
         `;
