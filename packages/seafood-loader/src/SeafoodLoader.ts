@@ -16,6 +16,7 @@ export class SeafoodLoader {
     public static readonly EXPORT_HMR_CLASS = "Hmr";
     public static readonly EXPORT_HMR_INSTANCE = "hmr";
     public static readonly EXPORT_COMPILED_COMPONENT_CLASS = "CompiledComponent";
+    public static readonly EXPORT_COMPILED_COMPONENT_INSTANCE = "compiledComponent";
 
     protected readonly loader: any;
     protected readonly context: string;
@@ -119,52 +120,15 @@ export class SeafoodLoader {
             import {default as ${SeafoodLoader.EXPORT_SCRIPT_CLASS}} from ${scriptRequest}
             import {default as ${SeafoodLoader.EXPORT_TEMPLATE_INSTANCE}} from ${templateRequest}
             import {default as ${SeafoodLoader.EXPORT_HMR_CLASS}} from ${hmrRequest}
-            import {ICompiledComponent} from "@seafood/app"
+            import {CompiledComponent} from "@seafood/app"
 
-            class ${SeafoodLoader.EXPORT_COMPILED_COMPONENT_CLASS}
-            extends ${SeafoodLoader.EXPORT_SCRIPT_CLASS} implements ICompiledComponent {
-                public rootElement: any;
-                public hmrOptions: any;
-                public renderer: any;
-
-                private readonly renderer: any;
-
-                constructor(renderer: any) {
-                    super();
-                    this.hmrOptions = {
-                        events: [],
-                    };
-                    this.renderer = renderer;
-                }
-
-                public render(element): void {
-                    if (element) {
-                        this.rootElement = element;
-                    } else {
-                        this.clearContent();
-                        element = this.rootElement;
-                    }
-
-                    this.renderer.renderTree(element);
-                }
-
-                public setRenderer(renderer): void {
-                    this.renderer = renderer;
-                }
-
-                private clearContent() {
-                    while (this.rootElement.hasChildNodes()) {
-                        this.rootElement.removeChild(this.rootElement.lastChild);
-                    }
-                }
-            }
-
-            const ${SeafoodLoader.EXPORT_SCRIPT_INSTANCE} =
-            new ${SeafoodLoader.EXPORT_COMPILED_COMPONENT_CLASS}(${SeafoodLoader.EXPORT_TEMPLATE_INSTANCE})
+            const ${SeafoodLoader.EXPORT_SCRIPT_INSTANCE} = new ${SeafoodLoader.EXPORT_SCRIPT_CLASS}()
+            const ${SeafoodLoader.EXPORT_COMPILED_COMPONENT_INSTANCE} =
+            new CompiledComponent(${SeafoodLoader.EXPORT_SCRIPT_INSTANCE}, ${SeafoodLoader.EXPORT_TEMPLATE_INSTANCE})
 
             ${this.getHmrCode()}
 
-            export default ${SeafoodLoader.EXPORT_SCRIPT_INSTANCE}
+            export default ${SeafoodLoader.EXPORT_COMPILED_COMPONENT_INSTANCE}
         `;
     }
 }

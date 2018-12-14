@@ -1,30 +1,42 @@
 import {Component} from "@seafood/component";
-import {ICompiledComponent} from "./ICompiledComponent";
 import {IHmrOptions} from "./IHmrOptions";
 
-export abstract class CompiledComponent extends Component implements ICompiledComponent {
+export class CompiledComponent {
     public rootElement: any;
     public hmrOptions: IHmrOptions;
-    public renderer: any;
+    public component: Component;
+    public templateRenderer: any;
 
-    protected constructor() {
-        super();
+    constructor(component: Component, templateRenderer: any) {
         this.hmrOptions = {
             events: [],
         };
+        this.component = component;
+        this.templateRenderer = templateRenderer;
     }
 
-    // @ts-ignore
     public render(element?: any): void {
-        //
+        if (element) {
+            this.rootElement = element;
+        } else {
+            this.clearContent();
+            element = this.rootElement;
+        }
+
+        this.templateRenderer.renderTree(element, this.component);
     }
 
-    // @ts-ignore
-    public rerender(): void {
-        //
+    public setComponent(component: Component): void {
+        this.component = component;
     }
 
-    public setRenderer(renderer: any): void {
-        this.renderer = renderer;
+    public setTemplateRenderer(templateRenderer: any): void {
+        this.templateRenderer = templateRenderer;
+    }
+
+    private clearContent() {
+        while (this.rootElement.hasChildNodes()) {
+            this.rootElement.removeChild(this.rootElement.lastChild);
+        }
     }
 }

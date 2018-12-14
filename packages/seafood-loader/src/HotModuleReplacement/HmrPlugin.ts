@@ -20,13 +20,13 @@ export class HmrPlugin {
                 ${SeafoodLoader.EXPORT_HMR_CLASS}.getInstance().rerender(
                     '${this.requestId}',
                     {
-                        ${SeafoodLoader.EXPORT_SCRIPT_INSTANCE},
+                        ${SeafoodLoader.EXPORT_COMPILED_COMPONENT_INSTANCE},
                     }
                 )
             } else {
                 ${SeafoodLoader.EXPORT_HMR_CLASS}.getInstance().register(
                     '${this.requestId}',
-                    ${SeafoodLoader.EXPORT_SCRIPT_INSTANCE}.hmrOptions
+                    ${SeafoodLoader.EXPORT_COMPILED_COMPONENT_INSTANCE}.hmrOptions
                 )
             }
 
@@ -45,7 +45,7 @@ export class HmrPlugin {
             ${SeafoodLoader.EXPORT_HMR_CLASS}.getInstance().rerender(
                 '${this.requestId}',
                 {
-                    ${SeafoodLoader.EXPORT_SCRIPT_INSTANCE},
+                    ${SeafoodLoader.EXPORT_COMPILED_COMPONENT_INSTANCE},
                 }
             )
         })

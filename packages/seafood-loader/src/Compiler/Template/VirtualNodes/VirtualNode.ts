@@ -13,7 +13,7 @@ export abstract class VirtualNode {
         }
     }
 
-    public abstract render(): void;
+    public abstract render(component: any): void;
 
     public append(): void {
         if (!this.parent) {
@@ -25,8 +25,8 @@ export abstract class VirtualNode {
         }
     }
 
-    public renderAndAppend(): void {
-        this.render();
+    public renderAndAppend(component: any): void {
+        this.render(component);
         this.append();
     }
 }

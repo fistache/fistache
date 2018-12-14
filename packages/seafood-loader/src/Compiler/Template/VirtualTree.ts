@@ -12,7 +12,7 @@ export class VirtualTree {
         this.childNodes.push(node);
     }
 
-    public renderTree(rootElement: any): void {
+    public renderTree(rootElement: any, component: any): void {
         if (!rootElement) {
             throw new Error("Root element must be specified.");
         }
@@ -23,7 +23,7 @@ export class VirtualTree {
         while (stack.length) {
             const virtualElement: any = stack.pop();
             const childNodes = virtualElement.childNodes ? virtualElement.childNodes.slice().reverse() : [];
-            virtualElement.renderAndAppend();
+            virtualElement.renderAndAppend(component);
             stack = stack.concat(childNodes);
         }
     }

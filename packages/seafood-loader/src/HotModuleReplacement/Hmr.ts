@@ -1,5 +1,6 @@
 import {CompiledComponent, IHmrOptions} from "@seafood/app";
 import {Event} from "@seafood/component";
+import {SeafoodLoader} from "../SeafoodLoader";
 
 export default class Hmr {
     public static instance: Hmr;
@@ -38,7 +39,10 @@ export default class Hmr {
             const data = this.data[id];
             if (data && data.constructor) {
                 data.components.forEach((component: CompiledComponent) => {
-                    component.setRenderer(options.component.renderer);
+                    component.setTemplateRenderer(
+                        options[SeafoodLoader.EXPORT_COMPILED_COMPONENT_INSTANCE].templateRenderer
+                    );
+                    component.setComponent(options[SeafoodLoader.EXPORT_COMPILED_COMPONENT_INSTANCE].component);
                     component.render();
                 });
             }
@@ -48,7 +52,7 @@ export default class Hmr {
     protected bindConstructor(id: string, options: IHmrOptions) {
         const data = this.data;
         // do not use arrow function cause we need to bind a context for "this"
-        this.addComponentEventHandler(options, Event.Created, function (this: any) {
+        this.addComponentEventHandler(options, Event.Created, function(this: any) {
             const hmrData = data[id];
 
             if (!hmrData.constructor) {
@@ -57,7 +61,7 @@ export default class Hmr {
 
             hmrData.components.push(this);
         });
-        this.addComponentEventHandler(options, Event.Destroyed, function (this: any) {
+        this.addComponentEventHandler(options, Event.Destroyed, function(this: any) {
             // todo: implement
         });
     }

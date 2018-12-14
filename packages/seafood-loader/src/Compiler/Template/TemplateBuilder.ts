@@ -44,8 +44,8 @@ export default class TemplateBuilder {
         this.buildVirtualTree();
     }
 
-    public renderTree(element: any) {
-        this.virtualTree.renderTree(element);
+    public renderTree(element: any, component: any) {
+        this.virtualTree.renderTree(element, component);
     }
 
     protected buildVirtualTree() {
@@ -65,7 +65,6 @@ export default class TemplateBuilder {
     protected createVirtualNodeRefferingToElement(element: any, parentElement?: ComplexVirtualNode): VirtualNode {
         let virtualNode = null;
 
-        // console.log(element);
         switch (element.type) {
             case(EOriginalNodeType.Text):
                 virtualNode = this.createTextVirtualNode(element, parentElement);
@@ -120,7 +119,6 @@ export default class TemplateBuilder {
         }).catch((error: any) => {
             throw new Error(error);
         });
-        // console.log(parsedContent);
 
         this.originalContent = parsedContent;
     }
