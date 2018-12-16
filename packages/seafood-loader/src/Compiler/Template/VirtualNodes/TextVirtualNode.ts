@@ -32,9 +32,11 @@ export class TextVirtualNode extends VirtualNode {
                         obj,
                         metadataProperty,
                     );
-                    reactiveProperty.depend(() => {
-                        this.rerender();
-                    });
+                    if (reactiveProperty) {
+                        reactiveProperty.depend(() => {
+                            this.rerender();
+                        });
+                    }
                 }
             };
 

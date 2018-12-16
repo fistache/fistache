@@ -17,11 +17,11 @@ export class TagVirtualNode extends ComplexVirtualNode {
         for (const attribName in attribs) {
             if (attribs.hasOwnProperty(attribName)) {
                 if (this.isItDynamicAttribute(attribName)) {
-                    if (this.isItConditionalAttribute(attribName)) {
-                        this.resolveConditionalAttribute(attribName, attribs[attribName]);
-                    } else {
-                        this.bindDynamicAttribute(attribName, attribs[attribName]);
-                    }
+                    this.bindDynamicAttribute(attribName, attribs[attribName]);
+                } else if (this.isItSystemAttribute(attribName)) {
+                    this.bindSystemAttribute(attribName, attribs[attribName]);
+                } else if (this.isItDynamicAndConditionalAttribute(attribName)) {
+                    // todo: implement dynamic and conditional only for component attributes
                 } else {
                     this.bindStaticAttribute(attribName, attribs[attribName]);
                 }
@@ -29,22 +29,27 @@ export class TagVirtualNode extends ComplexVirtualNode {
         }
     }
 
-    protected isItDynamicAttribute(attribName: string): boolean {
+    protected isItDynamicAndConditionalAttribute(attribName: string): boolean {
         const regex = new RegExp(/^(@[a-zA-Z0-9_.-]+(?<!-))?(:[a-zA-Z0-9_.-]+(?<!-))?$/);
         return regex.test(attribName);
     }
 
-    protected isItConditionalAttribute(attribName: string): boolean {
-        const regex = new RegExp(/^(@[a-zA-Z0-9_.-]+(?<!-))(:[a-zA-Z0-9_.-]+(?<!-))?$/);
+    protected isItDynamicAttribute(attribName: string): boolean {
+        const regex = new RegExp(/^(:[a-zA-Z0-9_.-]+(?<!-))$/);
         return regex.test(attribName);
     }
 
-    protected resolveConditionalAttribute(name: string, value: string): void {
-        console.log("conditional", name, value);
+    protected isItSystemAttribute(attribName: string): boolean {
+        const regex = new RegExp(/^(@[a-zA-Z0-9_.-]+(?<!-))$/);
+        return regex.test(attribName);
     }
 
-    protected bindConditionalAttribute(name: string, value: string): void {
-        //
+    protected resolveSystemAttributeState(name: string, value: string): void {
+        console.log("system state", name, value);
+    }
+
+    protected bindSystemAttribute(name: string, value: string): void {
+        console.log("system", name, value);
     }
 
     protected bindDynamicAttribute(name: string, value: string): void {
