@@ -1,4 +1,5 @@
 import {ComponentAttribute} from "./ComponentAttribute";
+import {unreactive} from "./Decorators/Unreactive";
 
 export enum Event {
     Created,
@@ -16,9 +17,11 @@ export interface IComponentEvent {
 }
 
 export class Component implements IComponent, IComponentEvent {
+    @unreactive()
     private attributes: ComponentAttribute[] = [];
 
-    private eventHandlers: Event[][];
+    @unreactive()
+    private readonly eventHandlers: Event[][];
 
     constructor() {
         this.eventHandlers = [];

@@ -1,4 +1,6 @@
-export class ReactivePropertyManager {
+export const REACTIVE_PROPERTY_FLAG = "reactiveProperty";
+
+export class ReactiveProperty {
     private readonly dependentFunctions: Array<() => void>;
 
     constructor() {

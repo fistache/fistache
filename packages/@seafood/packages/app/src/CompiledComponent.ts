@@ -1,5 +1,6 @@
 import {Component} from "@seafood/component";
 import {IHmrOptions} from "./IHmrOptions";
+import {Reactivity} from "./Reactivity/Reactivity";
 
 export class CompiledComponent {
     public rootElement: any;
@@ -8,6 +9,8 @@ export class CompiledComponent {
     public templateRenderer: any;
 
     constructor(component: Component, templateRenderer: any) {
+        Reactivity.addReactivityToObtainableComponentFields(component);
+
         this.hmrOptions = {
             events: [],
         };

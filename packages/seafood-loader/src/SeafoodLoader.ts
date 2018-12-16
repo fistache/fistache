@@ -114,8 +114,6 @@ export class SeafoodLoader {
 
         this.hmrPlugin.setTemplateRequest(templateRequest);
 
-        // Export a class object, which in the constructor will calculate
-        // everything needed to render itself.
         return `
             import {default as ${SeafoodLoader.EXPORT_SCRIPT_CLASS}} from ${scriptRequest}
             import {default as ${SeafoodLoader.EXPORT_TEMPLATE_INSTANCE}} from ${templateRequest}

@@ -5,6 +5,7 @@ export abstract class VirtualNode {
     public parsedElement: any;
     public renderedElement: any;
     public parent?: ComplexVirtualNode | VirtualTree;
+    protected component: any;
 
     protected constructor(parent?: ComplexVirtualNode | VirtualTree) {
         if (parent) {
@@ -13,7 +14,19 @@ export abstract class VirtualNode {
         }
     }
 
-    public abstract render(component: any): void;
+    public abstract render(): void;
+
+    public rerender() {
+        if (this.parent) {
+            const prevRenderedElement = this.renderedElement;
+
+            this.render();
+            this.parent.renderedElement.replaceChild(this.renderedElement, prevRenderedElement);
+            this.removeRenderedElement(prevRenderedElement);
+        } else {
+            throw new Error("Parent element must be specified.");
+        }
+    }
 
     public append(): void {
         if (!this.parent) {
@@ -26,7 +39,23 @@ export abstract class VirtualNode {
     }
 
     public renderAndAppend(component: any): void {
-        this.render(component);
+        this.component = component;
+        this.addReactivity();
+        this.render();
         this.append();
+    }
+
+    protected addReactivity() {
+        //
+    }
+
+    protected removeRenderedElement(renderedElement: any) {
+        if (!renderedElement) {
+            renderedElement = this.renderedElement;
+        }
+
+        while (renderedElement.hasChildNodes()) {
+            renderedElement.removeChild(renderedElement.lastChild);
+        }
     }
 }
