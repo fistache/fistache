@@ -7,25 +7,68 @@ export class TagVirtualNode extends ComplexVirtualNode {
     }
 
     public render(): void {
-        this.renderedElement = document.createElement(this.parsedElement.name);
+        this.renderSystemAttributes();
 
-        this.renderAttributes();
+        if (this.renderedElement !== this.invisibleFragment) {
+            this.renderedElement = document.createElement(this.parsedElement.name);
+
+            this.renderAttributes();
+        }
+    }
+
+    protected addReactivity() {
+        const attribs = this.parsedElement.attribs;
+        for (const attribName in attribs) {
+            if (attribs.hasOwnProperty(attribName)) {
+                this.addReactivityToAttribute(attribName, attribs[attribName]);
+            }
+        }
     }
 
     protected renderAttributes(): void {
         const attribs = this.parsedElement.attribs;
         for (const attribName in attribs) {
             if (attribs.hasOwnProperty(attribName)) {
-                if (this.isItDynamicAttribute(attribName)) {
-                    this.bindDynamicAttribute(attribName, attribs[attribName]);
-                } else if (this.isItSystemAttribute(attribName)) {
+                this.renderAttribute(attribName, attribs[attribName]);
+            }
+        }
+    }
+
+    protected renderAttribute(name: string, value: string) {
+        if (this.isItDynamicAttribute(name)) {
+            this.bindDynamicAttribute(name, value);
+        } else if (
+            !this.isItSystemAttribute(name) &&
+            !this.isItDynamicAndConditionalAttribute(name)
+        ) {
+            this.bindStaticAttribute(name, value);
+        }
+    }
+
+    protected renderSystemAttributes() {
+        const attribs = this.parsedElement.attribs;
+        for (const attribName in attribs) {
+            if (attribs.hasOwnProperty(attribName)) {
+                if (this.isItSystemAttribute(attribName)) {
                     this.bindSystemAttribute(attribName, attribs[attribName]);
                 } else if (this.isItDynamicAndConditionalAttribute(attribName)) {
-                    // todo: implement dynamic and conditional only for component attributes
-                } else {
-                    this.bindStaticAttribute(attribName, attribs[attribName]);
+                    this.bindDynamicAndConditionalAttribute(attribName, attribs[attribName]);
                 }
             }
+        }
+    }
+
+    protected addReactivityToAttribute(name: string, value: string) {
+        if (this.isItDynamicAttribute(name)) {
+            this.resolveDependentVars([value], () => {
+                this.renderAttribute(name, value);
+            });
+        } else if (this.isItSystemAttribute(name) ||
+            this.isItDynamicAndConditionalAttribute(name)
+        ) {
+            this.resolveDependentVars([value], () => {
+                this.rerender();
+            });
         }
     }
 
@@ -44,20 +87,42 @@ export class TagVirtualNode extends ComplexVirtualNode {
         return regex.test(attribName);
     }
 
-    protected resolveSystemAttributeState(name: string, value: string): void {
-        console.log("system state", name, value);
+    protected bindDynamicAndConditionalAttribute(name: string, value: string): void {
+        // @if:products="products"
+        // @if:products
     }
 
     protected bindSystemAttribute(name: string, value: string): void {
-        console.log("system", name, value);
+        switch (name) {
+            case("@if"):
+                this.bindIfSystemAttribute(value);
+                break;
+        }
+        // console.log("system", name, value);
+    }
+
+    protected bindIfSystemAttribute(value: string): void {
+        const property = this.getComponentPropertyByVariableName(value);
+        const realValue = property.obj[property.varName];
+        if (realValue) {
+            this.renderedElement = null;
+        } else {
+            this.renderedElement = this.invisibleFragment;
+        }
     }
 
     protected bindDynamicAttribute(name: string, value: string): void {
-        console.log("dynamic", name, value);
+        const realName = this.getRealNameOfDynamicAttribute(name);
+        const property = this.getComponentPropertyByVariableName(value);
+
+        this.bindStaticAttribute(realName, property.obj[property.varName]);
     }
 
     protected bindStaticAttribute(name: string, value: string): void {
-        console.log("static", name, value);
         this.renderedElement.setAttribute(name, value);
+    }
+
+    protected getRealNameOfDynamicAttribute(name: string): string {
+        return name.slice(1);
     }
 }

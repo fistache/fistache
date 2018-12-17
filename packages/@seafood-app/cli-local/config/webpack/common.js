@@ -107,26 +107,8 @@ module.exports = config => {
   config
     .plugin('html')
     .use(require('html-webpack-plugin'), [{
-      template: path.resolve(__dirname, '../../index.html')
-    }])
-
-  config
-    .plugin('favicon')
-    .use(require('favicons-webpack-plugin'), [{
-      logo: path.resolve('resources/images/logo.svg'),
-      background: false,
-      icons: {
-        android: true,
-        appleIcon: true,
-        appleStartup: true,
-        favicons: true,
-        firefox: true,
-        coast: false,
-        opengraph: false,
-        twitter: false,
-        yandex: false,
-        windows: false
-      }
+      template: path.resolve(__dirname, '../../index.html'),
+      favicon: process.env.NODE_ENV === 'development' ? path.resolve('resources/images/logo/logo@32.png') : undefined,
     }])
 
   config

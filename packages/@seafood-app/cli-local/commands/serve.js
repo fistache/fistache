@@ -7,6 +7,8 @@ module.exports = (program, projectManager) => {
     .description('run development server')
     .allowUnknownOption()
     .action(() => {
+      process.env.NODE_ENV = 'development';
+
       const webpack = require('webpack')
 
       const provider = require('express-https-provider')()

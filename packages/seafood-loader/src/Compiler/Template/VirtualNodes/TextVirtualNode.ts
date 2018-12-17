@@ -1,5 +1,3 @@
-import {REACTIVE_PROPERTY_FLAG, ReactiveProperty} from "@seafood/app";
-import {DECORATOR_UNREACTIVE_FLAG} from "@seafood/component";
 import "reflect-metadata";
 import {ComplexVirtualNode} from "./ComplexVirtualNode";
 import {VirtualNode} from "./VirtualNode";
@@ -23,39 +21,11 @@ export class TextVirtualNode extends VirtualNode {
             const vars = matches.map((variable: string) => {
                 return variable.slice(2, -2).trim();
             });
-
-            const depend = (obj: any, metadataProperty: any) => {
-                const isObtainable = !Reflect.hasMetadata(DECORATOR_UNREACTIVE_FLAG, obj, metadataProperty);
-                if (isObtainable) {
-                    const reactiveProperty: ReactiveProperty = Reflect.getMetadata(
-                        REACTIVE_PROPERTY_FLAG,
-                        obj,
-                        metadataProperty,
-                    );
-                    if (reactiveProperty) {
-                        reactiveProperty.depend(() => {
-                            this.rerender();
-                        });
-                    }
-                }
+            const rerenderCallback = () => {
+                this.rerender();
             };
 
-            vars.forEach((variable: string) => {
-                const isObject = variable.includes(".");
-
-                if (isObject) {
-                    let resObj = this.component;
-                    const nameParts = variable.split(".");
-                    const lastNamePart = nameParts.pop();
-
-                    nameParts.forEach((varName: string) => {
-                        resObj = resObj[varName];
-                    });
-                    depend(resObj, lastNamePart);
-                } else {
-                    depend(this.component, variable);
-                }
-            });
+            this.resolveDependentVars(vars, rerenderCallback);
         }
     }
 
