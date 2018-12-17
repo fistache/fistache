@@ -1,3 +1,5 @@
 dist/
 node_modules/
+/src/Compiler/Template/VirtualDocumentTree/Docs/
+/src/Compiler/Template/VirtualNodes/
 *.log

@@ -1,5 +1,2 @@
 .idea/
 node_modules/
-
-# todo: remove
-packages/seafood-loader-old/

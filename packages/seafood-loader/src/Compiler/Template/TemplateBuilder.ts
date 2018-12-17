@@ -1,6 +1,6 @@
 import HtmlParser from "htmlparser2";
 import {SynchronousPromise} from "synchronous-promise";
-import {EOriginalNodeType} from "./EOriginalNodeType";
+import {EParsedNodeType} from "./EParsedNodeType";
 import {CommentVirtualNode} from "./VirtualNodes/CommentVirtualNode";
 import {ComplexVirtualNode} from "./VirtualNodes/ComplexVirtualNode";
 import {ComponentVirtualNode} from "./VirtualNodes/ComponentVirtualNode";
@@ -8,7 +8,7 @@ import {EmbedContentVirtualNode} from "./VirtualNodes/EmbedContentVirtualNode";
 import {TagVirtualNode} from "./VirtualNodes/TagVirtualNode";
 import {TextVirtualNode} from "./VirtualNodes/TextVirtualNode";
 import {VirtualNode} from "./VirtualNodes/VirtualNode";
-import {VirtualTree} from "./VirtualTree";
+import {VirtualTree} from "./VirtualNodes/VirtualTree";
 
 export default class TemplateBuilder {
     public readonly htmlTags: string[] = [
@@ -66,13 +66,13 @@ export default class TemplateBuilder {
         let virtualNode = null;
 
         switch (element.type) {
-            case(EOriginalNodeType.Text):
+            case(EParsedNodeType.Text):
                 virtualNode = this.createTextVirtualNode(element, parentElement);
                 break;
-            case(EOriginalNodeType.Comment):
+            case(EParsedNodeType.Comment):
                 virtualNode = this.createCommentVirtualNode(element, parentElement);
                 break;
-            case(EOriginalNodeType.Tag):
+            case(EParsedNodeType.Tag):
                 if (this.isItHtmlTag(element)) {
                     virtualNode = this.createTagVirtualNode(element, parentElement);
                 } else if (this.isItReservedTag(element)) {

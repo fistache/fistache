@@ -1,4 +1,4 @@
-export enum EOriginalNodeType {
+export enum EParsedNodeType {
     Tag = "tag",
     Text = "text",
     Comment = "comment",
