@@ -32,8 +32,8 @@ export class Scope {
         return this.areas;
     }
 
-    public executeExpression(expression: string): any {
-        const properties: any[] = this.normalizeProperties(this.getProperties());
+    public executeExpression(expression: string, rerenderFunction?: () => void): any {
+        const properties: any[] = this.normalizeProperties(this.getProperties(), rerenderFunction);
         this.expressionFunction = this.makeExpressionFunction(properties, expression);
 
         return this.expressionFunction();
@@ -44,31 +44,35 @@ export class Scope {
     }
 
     protected makeExpressionFunction(properties: any[], expression: string): () => void {
-        const areas = this.getAreas();
-        let thisContext = {};
+        // const areas = this.getAreas();
+        // let thisContext = {};
+        //
+        // if (areas.length) {
+        //     // First area is the component instance.
+        //     thisContext = areas[0];
+        // }
 
-        if (areas.length) {
-            // First area is the component instance.
-            thisContext = areas[0];
+        // const func = function () {
+        let finalExpression = ``;
+
+        for (const propertyName in properties) {
+            if (properties.hasOwnProperty(propertyName)) {
+                finalExpression += `
+                var ${propertyName} = this.${propertyName};
+                console.log(${propertyName});
+                `;
+            }
         }
 
-        const func = function () {
-            let finalExpression = "";
-
-            for (const propertyName in properties) {
-                if (properties.hasOwnProperty(propertyName)) {
-                    finalExpression += `var ${propertyName} = properties.${propertyName} \n`;
-                }
-            }
-
-            finalExpression += `\n ${expression}`;
-            return eval(finalExpression);
-        };
-
-        return func.bind(thisContext);
+        finalExpression += `\n ${expression}`;
+        const func = new Function(finalExpression) as () => void;
+        return func.bind(properties);
+        // };
+        //
+        // return func// func.bind(thisContext);
     }
 
-    protected normalizeProperties(properties: Property[]): any {
+    protected normalizeProperties(properties: Property[], rerenderFunction?: () => void): any {
         const normilizedProperties: any[] = [];
 
         for (const property of properties) {
@@ -77,6 +81,10 @@ export class Scope {
 
             if (property instanceof ReactiveProperty) {
                 this.bindGetterForReactivityProperty(property, normilizedProperties, propertyName);
+
+                if (rerenderFunction) {
+                    property.setRerenderFunction(rerenderFunction);
+                }
             }
         }
 
@@ -88,26 +96,28 @@ export class Scope {
         normalizedProperties: any[],
         propertyName: string,
     ): void {
-        const context = this;
-        let propertyValue = normalizedProperties[propertyName as any];
-
+        let isDependCalled = false;
         Object.defineProperty(normalizedProperties, propertyName, {
             get(): any {
-                const reactivity = Reflect.getMetadata(
-                    REACTIVE_PROPERTY_FLAG,
-                    reactiveProperty.getArea(),
-                    propertyName,
-                );
-                const expressionFunction = context.getExpressionFunction();
+                if (!isDependCalled) {
+                    // const reactivity = Reflect.getMetadata(
+                    //     REACTIVE_PROPERTY_FLAG,
+                    //     reactiveProperty.getArea(),
+                    //     propertyName,
+                    // );
+                    //
+                    // if (reactivity) {
+                    //     const rerenderFunction = reactiveProperty.getRerenderFunction();
+                    //
+                    //     if (rerenderFunction) {
+                    //         reactivity.depend(rerenderFunction);
+                    //     }
+                    // }
 
-                if (reactivity && expressionFunction) {
-                    reactivity.depend(expressionFunction);
+                    isDependCalled = true;
                 }
 
-                return propertyValue;
-            },
-            set(value: any): void {
-                propertyValue = value;
+                return reactiveProperty.getArea()[propertyName];
             },
         });
     }

@@ -35,6 +35,10 @@ export class VirtualTagNode extends VirtualNode {
         }
     }
 
+    public setPresentState(presentState: VirtualTagNodePresentState): void {
+        this.presentState = presentState;
+    }
+
     public getPresentState(): VirtualTagNodePresentState {
         return this.presentState;
     }

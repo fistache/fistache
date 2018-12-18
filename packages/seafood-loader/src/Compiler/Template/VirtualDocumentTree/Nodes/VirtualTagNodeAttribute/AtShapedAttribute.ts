@@ -1,14 +1,8 @@
+import {VirtualTagNodePresentState} from "../VirtualTagNode";
 import {NonStaticAttribute} from "./NonStaticAttribute";
 
 export class AtShapedAttribute extends NonStaticAttribute {
     public append(): void {
-        // const virtualTagNode = this.getVirtualTagNode();
-        // const buildedNode = (virtualTagNode.getBuildedNode() as Element);
-        //
-        // if (buildedNode) {
-        //     buildedNode.setAttribute(this.getName(), this.value);
-        // }
-
         this.resolveAttributeByName(this.getName());
     }
 
@@ -26,7 +20,16 @@ export class AtShapedAttribute extends NonStaticAttribute {
     protected appendIfAttribute(): void {
         const virtualTagNode = this.getVirtualTagNode();
         const scope = virtualTagNode.getScope();
-        const expressionValue = scope.executeExpression(this.value);
-        console.log(expressionValue);
+        const rerenderFunction = () => {
+            console.log("rerender", virtualTagNode);
+            virtualTagNode.render();
+        };
+        const expressionValue = scope.executeExpression(this.value, rerenderFunction);
+
+        console.log(scope.getAreas()[0]);
+
+        if (!expressionValue) {
+            virtualTagNode.setPresentState(VirtualTagNodePresentState.Missing);
+        }
     }
 }

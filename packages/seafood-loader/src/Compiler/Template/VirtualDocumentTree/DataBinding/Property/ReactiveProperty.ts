@@ -1,6 +1,8 @@
 import {Property} from "./Property";
 
 export class ReactiveProperty extends Property {
+    protected rerenderFunction?: () => void;
+
     protected area: any;
 
     public constructor(name: string, value: any, area: any) {
@@ -10,5 +12,13 @@ export class ReactiveProperty extends Property {
 
     public getArea(): any {
         return this.area;
+    }
+
+    public setRerenderFunction(rerenderFunction: () => void): void {
+        this.rerenderFunction = rerenderFunction;
+    }
+
+    public getRerenderFunction(): (() => void) | undefined {
+        return this.rerenderFunction;
     }
 }
