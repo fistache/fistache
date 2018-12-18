@@ -1,14 +1,5 @@
 import {Scope} from "./DataBinding/Scope";
 
-/**
- * More details in presentState variable declaration in
- * VirtualElement class.
- */
-enum VirtualElementPresentState {
-    Present,
-    Missing,
-}
-
 export abstract class VirtualElement {
     /**
      * A node in browser where buildedNode will append.
@@ -20,14 +11,6 @@ export abstract class VirtualElement {
      */
     protected buildedNode?: Node;
 
-    /**
-     * Used for @if conditinal rendering.
-     *
-     * A virtual element should not to be rendered if state
-     * is missing.
-     */
-    protected presentState: VirtualElementPresentState;
-
     protected parentVirtualElement?: VirtualElement;
 
     /**
@@ -38,29 +21,24 @@ export abstract class VirtualElement {
     /**
      * A virtual document tree or virtual nodes.
      */
-    protected virtualElements: VirtualElement[];
+    protected childVirtualElements: VirtualElement[];
 
-    protected constructor() {
-        this.presentState = VirtualElementPresentState.Present;
+    public constructor() {
         this.scope = new Scope();
-        this.virtualElements = [];
+        this.childVirtualElements = [];
     }
 
     public render(): void {
         this.buildedNode = this.buildNode();
-
-        if (this.getPresentState() !== VirtualElementPresentState.Missing) {
-            this.appendRenderedElement();
-
-            for (const virtualElement of this.virtualElements) {
-                virtualElement.scope.extend(this.getScope());
-                virtualElement.render();
-            }
-        }
     }
 
-    public addVirtualElement(node: VirtualElement): void {
-        this.virtualElements.push(node);
+    public addChildVirtualElement(node: VirtualElement): void {
+        this.childVirtualElements.push(node);
+    }
+
+    public setParentVirtualElement(parentVirtualElement: VirtualElement): void {
+        this.parentVirtualElement = parentVirtualElement;
+        this.parentVirtualElement.addChildVirtualElement(this);
     }
 
     public setParentNode(parentNode: Node): void {
@@ -69,10 +47,6 @@ export abstract class VirtualElement {
 
     public getParentVirtualElement(): VirtualElement | undefined {
         return this.parentVirtualElement;
-    }
-
-    public getPresentState(): VirtualElementPresentState {
-        return this.presentState;
     }
 
     public getBuildedNode(): Node | undefined {
@@ -87,16 +61,14 @@ export abstract class VirtualElement {
         return this.scope;
     }
 
-    protected abstract buildNode(): Node | undefined;
-
-    protected appendRenderedElement() {
-        if (this.parentVirtualElement) {
-            const parentBuildedNode = this.parentVirtualElement.getBuildedNode();
-            const renderedNode = this.getBuildedNode();
-
-            if (parentBuildedNode && renderedNode) {
-                parentBuildedNode.appendChild(renderedNode);
-            }
+    protected extendChildVirtualElementsAndRender(): void {
+        for (const virtualElement of this.childVirtualElements) {
+            virtualElement.getScope().extend(this.getScope());
+            virtualElement.render();
         }
     }
+
+    protected abstract buildNode(): Node | undefined;
+
+    protected abstract appendRenderedElement(): void;
 }

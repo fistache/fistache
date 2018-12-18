@@ -1,14 +1,14 @@
 import HtmlParser from "htmlparser2";
 import {SynchronousPromise} from "synchronous-promise";
 import {EParsedNodeType} from "./EParsedNodeType";
-import {CommentVirtualNode} from "./VirtualNodes/CommentVirtualNode";
-import {ComplexVirtualNode} from "./VirtualNodes/ComplexVirtualNode";
-import {ComponentVirtualNode} from "./VirtualNodes/ComponentVirtualNode";
-import {EmbedContentVirtualNode} from "./VirtualNodes/EmbedContentVirtualNode";
-import {TagVirtualNode} from "./VirtualNodes/TagVirtualNode";
-import {TextVirtualNode} from "./VirtualNodes/TextVirtualNode";
-import {VirtualNode} from "./VirtualNodes/VirtualNode";
-import {VirtualTree} from "./VirtualNodes/VirtualTree";
+import {VirtualComponentNode} from "./VirtualDocumentTree/Nodes/VirtualComponentNode";
+import {VirtualEmbeddedContentNode} from "./VirtualDocumentTree/Nodes/VirtualEmbeddedContentNode";
+import {VirtualTagNode} from "./VirtualDocumentTree/Nodes/VirtualTagNode";
+import {VirtualTextNode} from "./VirtualDocumentTree/Nodes/VirtualTextNode";
+import {VirtualDocumentTree} from "./VirtualDocumentTree/VirtualDocumentTree";
+import {VirtualElement} from "./VirtualDocumentTree/VirtualElement";
+import {VirtualNode} from "./VirtualDocumentTree/VirtualNode";
+import {VirtualCommentNode} from "./VirtualDocumentTree/Nodes/VirtualCommentNode";
 
 export default class TemplateBuilder {
     public readonly htmlTags: string[] = [
@@ -34,18 +34,20 @@ export default class TemplateBuilder {
 
     public source: string;
 
-    private readonly virtualTree: VirtualTree;
+    private readonly virtualDocumentTree: VirtualDocumentTree;
     private originalContent: any;
 
     constructor(source: string) {
         this.source = source;
-        this.virtualTree = new VirtualTree();
+        this.virtualDocumentTree = new VirtualDocumentTree();
         this.parseContent();
         this.buildVirtualTree();
     }
 
-    public renderTree(element: any, component: any) {
-        this.virtualTree.renderTree(element, component);
+    public renderTree(parentNode: any, initialScope: any) {
+        this.virtualDocumentTree.setParentNode(parentNode);
+        this.virtualDocumentTree.getScope().addArea(initialScope);
+        this.virtualDocumentTree.render();
     }
 
     protected buildVirtualTree() {
@@ -62,7 +64,7 @@ export default class TemplateBuilder {
         }
     }
 
-    protected createVirtualNodeRefferingToElement(element: any, parentElement?: ComplexVirtualNode): VirtualNode {
+    protected createVirtualNodeRefferingToElement(element: any, parentElement?: VirtualElement): VirtualNode {
         let virtualNode = null;
 
         switch (element.type) {
@@ -88,28 +90,39 @@ export default class TemplateBuilder {
         return virtualNode;
     }
 
-    protected createComponentVirtualNode(element: any, parentElement?: ComplexVirtualNode): VirtualNode {
-        return new ComponentVirtualNode(element, parentElement);
+    protected createVirtualNodeOfType(
+        type: new () => VirtualNode,
+        parsedNode: any,
+        parentVirtualElement?: VirtualElement,
+    ) {
+        const virtualComponentNode = new type();
+        virtualComponentNode.setParsedNode(parsedNode);
+
+        if (parentVirtualElement) {
+            virtualComponentNode.setParentVirtualElement(parentVirtualElement);
+        }
+
+        return virtualComponentNode;
     }
 
-    protected createTagVirtualNode(element: any, parentElement?: ComplexVirtualNode): VirtualNode {
-        return new TagVirtualNode(element, parentElement);
-        // return new VirtualNode(`tag ${element.tagName}`);
+    protected createComponentVirtualNode(parsedNode: any, parentVirtualElement?: VirtualElement): VirtualNode {
+        return this.createVirtualNodeOfType(VirtualComponentNode, parsedNode, parentVirtualElement);
     }
 
-    protected createTextVirtualNode(element: any, parentElement?: ComplexVirtualNode): VirtualNode {
-        return new TextVirtualNode(element, parentElement);
-        // return new VirtualNode(`text "${element.value}"`);
+    protected createTagVirtualNode(parsedNode: any, parentVirtualElement?: VirtualElement): VirtualNode {
+        return this.createVirtualNodeOfType(VirtualTagNode, parsedNode, parentVirtualElement);
     }
 
-    protected createCommentVirtualNode(element: any, parentElement?: ComplexVirtualNode): VirtualNode {
-        return new CommentVirtualNode(element, parentElement);
-        // return new VirtualNode(`comment "${element.data}"`);
+    protected createTextVirtualNode(parsedNode: any, parentVirtualElement?: VirtualElement): VirtualNode {
+        return this.createVirtualNodeOfType(VirtualTextNode, parsedNode, parentVirtualElement);
     }
 
-    protected createEmbedContentVirtualNode(element: any, parentElement?: ComplexVirtualNode): VirtualNode {
-        return new EmbedContentVirtualNode(element, parentElement);
-        // return new VirtualNode(`embed content`);
+    protected createCommentVirtualNode(parsedNode: any, parentVirtualElement?: VirtualElement): VirtualNode {
+        return this.createVirtualNodeOfType(VirtualCommentNode, parsedNode, parentVirtualElement);
+    }
+
+    protected createEmbedContentVirtualNode(parsedNode: any, parentVirtualElement?: VirtualElement): VirtualNode {
+        return this.createVirtualNodeOfType(VirtualEmbeddedContentNode, parsedNode, parentVirtualElement);
     }
 
     protected parseContent() {
@@ -150,7 +163,7 @@ export default class TemplateBuilder {
     }
 
     private setVirtualParentNodeForChildNodes(childNodes: any[], parent?: any): void {
-        let parentElement = this.virtualTree;
+        let parentElement = this.virtualDocumentTree;
 
         if (parent) {
             parentElement = parent;
