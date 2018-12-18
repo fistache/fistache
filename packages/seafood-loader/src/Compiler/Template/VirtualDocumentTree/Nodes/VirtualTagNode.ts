@@ -1,4 +1,5 @@
 import {VirtualNode} from "../VirtualNode";
+import {VirtualTagAttributesManager} from "./VirtualTagNodeAttribute/VirtualTagAttributesManager";
 
 /**
  * More details in presentState variable declaration in
@@ -27,7 +28,8 @@ export class VirtualTagNode extends VirtualNode {
     public render(): void {
         super.render();
 
-        if (this.getPresentState() !== VirtualTagNodePresentState.Missing) {
+        if (this.getBuildedNode()) {
+            this.renderDynamicAndStaticAttributes();
             this.appendRenderedElement();
             this.extendChildVirtualElementsAndRender();
         }
@@ -40,14 +42,20 @@ export class VirtualTagNode extends VirtualNode {
     protected buildNode(): Node {
         let node;
 
-        // render @-types attributes
+        this.renderAtShapedAttributes();
 
         if (this.getPresentState() === VirtualTagNodePresentState.Present) {
             node = document.createElement(this.parsedNode.name);
-        } else {
-            node = document.createDocumentFragment();
         }
 
         return node;
+    }
+
+    protected renderAtShapedAttributes(): void {
+        VirtualTagAttributesManager.renderAtShapedAttributes(this);
+    }
+
+    protected renderDynamicAndStaticAttributes(): void {
+        VirtualTagAttributesManager.renderDynamicAndStaticAttributes(this);
     }
 }
