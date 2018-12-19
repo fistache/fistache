@@ -17,6 +17,9 @@ export class Scope {
 
     protected parentScope?: Scope;
 
+    protected rerenderFunction?: (updatedExpressionValue: any) => void;
+    protected executeFunction?: () => void;
+
     constructor() {
         this.areas = [];
         this.properties = [];
@@ -65,10 +68,24 @@ export class Scope {
         return properties;
     }
 
-    public executeExpression(expression: string, rerenderFunction: () => void): any {
+    public setRerenderFunction(rerenderFunction: (updatedExpressionValue: any) => void) {
+        this.rerenderFunction = rerenderFunction;
+    }
+
+    public setExecuteFunction(rerenderFunction: () => void) {
+        this.executeFunction = rerenderFunction;
+    }
+
+    public executeExpression(expression: string, rerenderFunction: (updatedExpressionValue: any) => void): any {
+        const componentScope = this.getComponentScope();
         const expressionFunction = this.makeExpressionFunction(expression);
 
-        return expressionFunction();
+        if (componentScope) {
+            componentScope.setRerenderFunction(rerenderFunction);
+            componentScope.setExecuteFunction(expressionFunction);
+        }
+
+        return this.bindExecuteFunctionContext(expressionFunction)();
     }
 
     protected computeAreaProperties(area: any): any[] {
@@ -76,16 +93,20 @@ export class Scope {
     }
 
     protected makeExpressionFunction(expression: string): () => void {
+        return new Function(`return ${expression};`) as () => void;
+    }
+
+    protected bindExecuteFunctionContext(executeFunction: () => void): () => void {
         let context = {};
 
         if (this.componentScope) {
             context = this.componentScope.getNormalizedProperties();
         }
 
-        return new Function(`return ${expression};`).bind(context);
+        return executeFunction.bind(context);
     }
 
-    protected normalizeProperties(properties: Property[], rerenderFunction?: () => void): any {
+    protected normalizeProperties(properties: Property[]): any {
         const normilizedProperties: any[] = [];
 
         for (const property of properties) {
@@ -93,10 +114,6 @@ export class Scope {
             normilizedProperties[propertyName] = property.getValue();
 
             if (property instanceof ReactiveProperty) {
-                // if (rerenderFunction) {
-                //     property.setRerenderFunction(rerenderFunction);
-                // }
-
                 this.bindGetterForReactivityProperty(property, normilizedProperties);
             }
         }
@@ -108,6 +125,7 @@ export class Scope {
         reactiveProperty: ReactiveProperty,
         normalizedProperties: any[],
     ): void {
+        const scopeContext = this;
         Object.defineProperty(normalizedProperties, reactiveProperty.getName(), {
             get(): any {
                 const reactivity = Reflect.getMetadata(
@@ -116,14 +134,23 @@ export class Scope {
                     reactiveProperty.getName(),
                 );
 
-                if (reactivity) {
-                    // reactivity.depend(reactiveProperty.getRerenderFunction);
+                if (reactivity &&
+                    scopeContext.rerenderFunction &&
+                    scopeContext.executeFunction &&
+                    !reactivity.hasFunction(scopeContext.executeFunction)
+                ) {
+                    const rerenderFunction = scopeContext.rerenderFunction;
+                    const executeFunction = scopeContext.executeFunction;
                     reactivity.depend(() => {
-                        console.log(`The value of "${reactiveProperty.getName()}" variable was updated.`);
+                        console.log(
+                            `The value of "${reactiveProperty.getName()}" was set to`,
+                            reactiveProperty.getArea()[reactiveProperty.getName()],
+                        );
+                    });
+                    reactivity.depend(() => {
+                        rerenderFunction(scopeContext.bindExecuteFunctionContext(executeFunction)(),);
                     });
                 }
-
-                console.log("reactive property: ", reactiveProperty.getName());
 
                 return reactiveProperty.getArea()[reactiveProperty.getName()];
             },

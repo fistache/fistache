@@ -8,7 +8,7 @@ export class ReactiveProperty {
     }
 
     public depend(dependentFunction: () => void) {
-        if (dependentFunction && !this.dependentFunctions.includes(dependentFunction)) {
+        if (dependentFunction && !this.hasFunction(dependentFunction)) {
             this.dependentFunctions.push(dependentFunction);
         }
     }
@@ -19,5 +19,9 @@ export class ReactiveProperty {
                 this.dependentFunctions[index]();
             }
         }
+    }
+
+    public hasFunction(dependentFunction: () => void): boolean {
+        return this.dependentFunctions.includes(dependentFunction);
     }
 }

@@ -26,13 +26,11 @@ export class VirtualTagNode extends VirtualNode {
     }
 
     public render(): void {
+        this.renderAtShapedAttributes();
+
         super.render();
 
-        if (this.getBuildedNode()) {
-            this.renderDynamicAndStaticAttributes();
-            this.appendRenderedElement();
-            this.extendChildVirtualElementsAndRender();
-        }
+        this.renderIfNodeExists();
     }
 
     public setPresentState(presentState: VirtualTagNodePresentState): void {
@@ -43,16 +41,22 @@ export class VirtualTagNode extends VirtualNode {
         return this.presentState;
     }
 
-    protected buildNode(): Node {
+    public buildNode(): Node {
         let node;
-
-        this.renderAtShapedAttributes();
 
         if (this.getPresentState() === VirtualTagNodePresentState.Present) {
             node = document.createElement(this.parsedNode.name);
         }
 
         return node;
+    }
+
+    public renderIfNodeExists(): void {
+        if (this.getBuildedNode()) {
+            this.renderDynamicAndStaticAttributes();
+            this.appendRenderedElement();
+            this.extendChildVirtualElementsAndRender();
+        }
     }
 
     protected renderAtShapedAttributes(): void {

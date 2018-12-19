@@ -65,6 +65,10 @@ export abstract class VirtualElement {
         this.parentNode = parentNode;
     }
 
+    public setBuildedNode(buildedNode: Node): void {
+        this.buildedNode = buildedNode;
+    }
+
     public getParentVirtualElement(): VirtualElement | undefined {
         return this.parentVirtualElement;
     }
@@ -81,6 +85,14 @@ export abstract class VirtualElement {
         return this.scope;
     }
 
+    public removeBuildedNodeFromDom(): void {
+        const buildedNode = this.getBuildedNode();
+
+        if (buildedNode && buildedNode.parentNode) {
+            buildedNode.parentNode.removeChild(buildedNode);
+        }
+    }
+
     protected extendChildVirtualElementsAndRender(): void {
         const componentScope = this.getScope().getComponentScope();
 
@@ -90,14 +102,6 @@ export abstract class VirtualElement {
             }
 
             virtualElement.render();
-        }
-    }
-
-    protected removeBuildedNodeFromDom(): void {
-        const buildedNode = this.getBuildedNode();
-
-        if (buildedNode && buildedNode.parentNode) {
-            buildedNode.parentNode.removeChild(buildedNode);
         }
     }
 

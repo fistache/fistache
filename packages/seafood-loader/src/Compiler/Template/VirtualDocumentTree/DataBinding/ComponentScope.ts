@@ -26,4 +26,14 @@ export class ComponentScope extends Scope {
         this.properties = this.computeAreaProperties(this.componentInstance);
         this.normalizedProperties = this.normalizeProperties(this.properties);
     }
+
+    protected bindExecuteFunctionContext(executeFunction: () => void): () => void {
+        let context = {};
+
+        if (this.componentInstance) {
+            context = this.componentInstance;
+        }
+
+        return executeFunction.bind(context);
+    }
 }
