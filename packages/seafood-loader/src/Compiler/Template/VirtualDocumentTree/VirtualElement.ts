@@ -31,16 +31,9 @@ export abstract class VirtualElement {
         this.nodesBeforeBuildedNode = [];
     }
 
-    public render(isItRerender: boolean = false): void {
-        if (!isItRerender) {
-            this.rememberNodesBeforeBuildedNode();
-        }
+    public render(): void {
+        this.rememberNodesBeforeBuildedNode();
         this.buildedNode = this.buildNode();
-    }
-
-    public rerender(): void {
-        this.removeBuildedNodeFromDom();
-        this.render(true);
     }
 
     public getPreviousSiblingNode(): Node | null {
@@ -89,8 +82,13 @@ export abstract class VirtualElement {
     }
 
     protected extendChildVirtualElementsAndRender(): void {
+        const componentScope = this.getScope().getComponentScope();
+
         for (const virtualElement of this.childVirtualElements) {
-            virtualElement.getScope().extend(this.getScope());
+            if (componentScope) {
+                virtualElement.getScope().setComponentScope(componentScope);
+            }
+
             virtualElement.render();
         }
     }

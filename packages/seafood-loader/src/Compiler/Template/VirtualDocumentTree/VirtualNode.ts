@@ -24,6 +24,10 @@ export abstract class VirtualNode extends VirtualElement {
                     nextSiblingNode = previousSiblingNode.nextSibling || previousSiblingNode;
                 }
 
+                if (renderedNode instanceof Element && (renderedNode as Element).getAttribute("class") === "spbgd") {
+                    console.log(this.nodesBeforeBuildedNode);
+                }
+
                 parentBuildedNode.insertBefore(renderedNode, nextSiblingNode);
             }
         }

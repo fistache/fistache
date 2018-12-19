@@ -1,5 +1,6 @@
 import {REACTIVE_PROPERTY_FLAG} from "@seafood/app";
 import "reflect-metadata";
+import {ComponentScope} from "./ComponentScope";
 import {Property} from "./Property/Property";
 import {ReactiveProperty} from "./Property/ReactiveProperty";
 
@@ -10,12 +11,32 @@ export class Scope {
      */
     protected areas: any[];
 
+    protected properties: any[];
+
+    protected componentScope?: ComponentScope;
+
+    protected parentScope?: Scope;
+
     constructor() {
         this.areas = [];
+        this.properties = [];
     }
 
-    public extend(scope: Scope): void {
-        this.areas = scope.getAreas();
+    public setComponentScope(componentScope: ComponentScope): void {
+        this.componentScope = componentScope;
+    }
+
+    public setParentScope(scope: Scope): void {
+        this.parentScope = scope;
+        this.properties = this.computeProperties();
+    }
+
+    public getParentScope(): Scope | undefined {
+        return this.parentScope;
+    }
+
+    public getComponentScope(): ComponentScope | undefined {
+        return this.componentScope;
     }
 
     public addArea(area: any): void {
@@ -24,22 +45,44 @@ export class Scope {
         }
 
         this.areas.push(area);
+        this.mergeProperties(this.properties, this.computeAreaProperties(area));
     }
 
     public getAreas(): any[] {
         return this.areas;
     }
 
-    public executeExpression(expression: string, rerenderFunction?: () => void): any {
-        const properties = this.getProperties();
-        const normalizedProperties: any[] = this.normalizeProperties(properties, rerenderFunction);
-        const expressionFunction = this.makeExpressionFunction(normalizedProperties, expression);
+    public getProperties(): any[] {
+        const properties: Property[] = [];
+        const parentScope = this.getParentScope();
+
+        if (parentScope) {
+            this.mergeProperties(properties, parentScope.getProperties());
+        }
+
+        this.mergeProperties(properties, this.properties);
+
+        return properties;
+    }
+
+    public executeExpression(expression: string, rerenderFunction: () => void): any {
+        const expressionFunction = this.makeExpressionFunction(expression);
 
         return expressionFunction();
     }
 
-    protected makeExpressionFunction(normalizedProperties: any[], expression: string): () => void {
-        return new Function(`return ${expression};`).bind(normalizedProperties);
+    protected computeAreaProperties(area: any): any[] {
+        return this.getAreaProperties(area);
+    }
+
+    protected makeExpressionFunction(expression: string): () => void {
+        let context = {};
+
+        if (this.componentScope) {
+            context = this.componentScope.getNormalizedProperties();
+        }
+
+        return new Function(`return ${expression};`).bind(context);
     }
 
     protected normalizeProperties(properties: Property[], rerenderFunction?: () => void): any {
@@ -50,11 +93,11 @@ export class Scope {
             normilizedProperties[propertyName] = property.getValue();
 
             if (property instanceof ReactiveProperty) {
-                this.bindGetterForReactivityProperty(property, normilizedProperties);
+                // if (rerenderFunction) {
+                //     property.setRerenderFunction(rerenderFunction);
+                // }
 
-                if (rerenderFunction) {
-                    property.setRerenderFunction(rerenderFunction);
-                }
+                this.bindGetterForReactivityProperty(property, normilizedProperties);
             }
         }
 
@@ -65,39 +108,35 @@ export class Scope {
         reactiveProperty: ReactiveProperty,
         normalizedProperties: any[],
     ): void {
-        let isDependCalled = false;
         Object.defineProperty(normalizedProperties, reactiveProperty.getName(), {
             get(): any {
-                if (!isDependCalled) {
-                    const reactivity = Reflect.getMetadata(
-                        REACTIVE_PROPERTY_FLAG,
-                        reactiveProperty.getArea(),
-                        reactiveProperty.getName(),
-                    );
+                const reactivity = Reflect.getMetadata(
+                    REACTIVE_PROPERTY_FLAG,
+                    reactiveProperty.getArea(),
+                    reactiveProperty.getName(),
+                );
 
-                    if (reactivity) {
-                        const rerenderFunction = reactiveProperty.getRerenderFunction();
-
-                        if (rerenderFunction) {
-                            reactivity.depend(rerenderFunction);
-                        }
-                    }
-
-                    isDependCalled = true;
+                if (reactivity) {
+                    // reactivity.depend(reactiveProperty.getRerenderFunction);
+                    reactivity.depend(() => {
+                        console.log(`The value of "${reactiveProperty.getName()}" variable was updated.`);
+                    });
                 }
+
+                console.log("reactive property: ", reactiveProperty.getName());
 
                 return reactiveProperty.getArea()[reactiveProperty.getName()];
             },
         });
     }
 
-    protected getProperties(): Property[] {
+    protected computeProperties(): Property[] {
         const properties: Property[] = [];
 
-        for (const area of this.areas) {
+        for (const area of this.getAreas()) {
             Array.prototype.push.apply(
                 properties,
-                this.getAreaProperties(area),
+                this.computeAreaProperties(area),
             );
         }
 
@@ -125,5 +164,17 @@ export class Scope {
         }
 
         return properties;
+    }
+
+    private mergeProperties(into: any[], from: any[]): void {
+        for (const propertyName in from) {
+            if (from.hasOwnProperty(propertyName)) {
+                if (into.hasOwnProperty(propertyName)) {
+                    console.warn(`Dubplicate declaration of "${propertyName}" variable.`);
+                } else {
+                    into[propertyName] = from[propertyName];
+                }
+            }
+        }
     }
 }

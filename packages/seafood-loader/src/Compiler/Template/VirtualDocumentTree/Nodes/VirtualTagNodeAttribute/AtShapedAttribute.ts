@@ -20,10 +20,11 @@ export class AtShapedAttribute extends NonStaticAttribute {
     protected appendIfAttribute(): void {
         const virtualTagNode = this.getVirtualTagNode();
         const scope = virtualTagNode.getScope();
-        const rerenderFunction = () => {
-            virtualTagNode.rerender();
-        };
-        const expressionValue = scope.executeExpression(this.value, rerenderFunction);
+        const expressionValue = scope.executeExpression(this.value, () => {
+            console.log("rerender");
+            // virtualTagNode.rerenderAttribute(this);
+        });
+        console.log(expressionValue);
 
         if (expressionValue) {
             virtualTagNode.setPresentState(VirtualTagNodePresentState.Present);
