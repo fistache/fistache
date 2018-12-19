@@ -21,14 +21,13 @@ export class AtShapedAttribute extends NonStaticAttribute {
         const virtualTagNode = this.getVirtualTagNode();
         const scope = virtualTagNode.getScope();
         const rerenderFunction = () => {
-            console.log("rerender", virtualTagNode);
-            virtualTagNode.render();
+            virtualTagNode.rerender();
         };
         const expressionValue = scope.executeExpression(this.value, rerenderFunction);
 
-        console.log(scope.getAreas()[0]);
-
-        if (!expressionValue) {
+        if (expressionValue) {
+            virtualTagNode.setPresentState(VirtualTagNodePresentState.Present);
+        } else {
             virtualTagNode.setPresentState(VirtualTagNodePresentState.Missing);
         }
     }

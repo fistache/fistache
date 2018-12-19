@@ -17,7 +17,14 @@ export abstract class VirtualNode extends VirtualElement {
             const renderedNode = this.getBuildedNode();
 
             if (parentBuildedNode && renderedNode) {
-                parentBuildedNode.appendChild(renderedNode);
+                const previousSiblingNode = this.getPreviousSiblingNode();
+                let nextSiblingNode = null;
+
+                if (previousSiblingNode) {
+                    nextSiblingNode = previousSiblingNode.nextSibling || previousSiblingNode;
+                }
+
+                parentBuildedNode.insertBefore(renderedNode, nextSiblingNode);
             }
         }
     }

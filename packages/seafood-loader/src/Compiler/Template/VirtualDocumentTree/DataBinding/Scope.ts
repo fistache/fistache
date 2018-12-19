@@ -10,8 +10,6 @@ export class Scope {
      */
     protected areas: any[];
 
-    protected expressionFunction?: () => void;
-
     constructor() {
         this.areas = [];
     }
@@ -33,43 +31,15 @@ export class Scope {
     }
 
     public executeExpression(expression: string, rerenderFunction?: () => void): any {
-        const properties: any[] = this.normalizeProperties(this.getProperties(), rerenderFunction);
-        this.expressionFunction = this.makeExpressionFunction(properties, expression);
+        const properties = this.getProperties();
+        const normalizedProperties: any[] = this.normalizeProperties(properties, rerenderFunction);
+        const expressionFunction = this.makeExpressionFunction(normalizedProperties, expression);
 
-        return this.expressionFunction();
+        return expressionFunction();
     }
 
-    public getExpressionFunction(): (() => void) | undefined {
-        return this.expressionFunction;
-    }
-
-    protected makeExpressionFunction(properties: any[], expression: string): () => void {
-        // const areas = this.getAreas();
-        // let thisContext = {};
-        //
-        // if (areas.length) {
-        //     // First area is the component instance.
-        //     thisContext = areas[0];
-        // }
-
-        // const func = function () {
-        let finalExpression = ``;
-
-        for (const propertyName in properties) {
-            if (properties.hasOwnProperty(propertyName)) {
-                finalExpression += `
-                var ${propertyName} = this.${propertyName};
-                console.log(${propertyName});
-                `;
-            }
-        }
-
-        finalExpression += `\n ${expression}`;
-        const func = new Function(finalExpression) as () => void;
-        return func.bind(properties);
-        // };
-        //
-        // return func// func.bind(thisContext);
+    protected makeExpressionFunction(normalizedProperties: any[], expression: string): () => void {
+        return new Function(`return ${expression};`).bind(normalizedProperties);
     }
 
     protected normalizeProperties(properties: Property[], rerenderFunction?: () => void): any {
@@ -80,7 +50,7 @@ export class Scope {
             normilizedProperties[propertyName] = property.getValue();
 
             if (property instanceof ReactiveProperty) {
-                this.bindGetterForReactivityProperty(property, normilizedProperties, propertyName);
+                this.bindGetterForReactivityProperty(property, normilizedProperties);
 
                 if (rerenderFunction) {
                     property.setRerenderFunction(rerenderFunction);
@@ -94,30 +64,29 @@ export class Scope {
     protected bindGetterForReactivityProperty(
         reactiveProperty: ReactiveProperty,
         normalizedProperties: any[],
-        propertyName: string,
     ): void {
         let isDependCalled = false;
-        Object.defineProperty(normalizedProperties, propertyName, {
+        Object.defineProperty(normalizedProperties, reactiveProperty.getName(), {
             get(): any {
                 if (!isDependCalled) {
-                    // const reactivity = Reflect.getMetadata(
-                    //     REACTIVE_PROPERTY_FLAG,
-                    //     reactiveProperty.getArea(),
-                    //     propertyName,
-                    // );
-                    //
-                    // if (reactivity) {
-                    //     const rerenderFunction = reactiveProperty.getRerenderFunction();
-                    //
-                    //     if (rerenderFunction) {
-                    //         reactivity.depend(rerenderFunction);
-                    //     }
-                    // }
+                    const reactivity = Reflect.getMetadata(
+                        REACTIVE_PROPERTY_FLAG,
+                        reactiveProperty.getArea(),
+                        reactiveProperty.getName(),
+                    );
+
+                    if (reactivity) {
+                        const rerenderFunction = reactiveProperty.getRerenderFunction();
+
+                        if (rerenderFunction) {
+                            reactivity.depend(rerenderFunction);
+                        }
+                    }
 
                     isDependCalled = true;
                 }
 
-                return reactiveProperty.getArea()[propertyName];
+                return reactiveProperty.getArea()[reactiveProperty.getName()];
             },
         });
     }
