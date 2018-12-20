@@ -9,7 +9,7 @@ export abstract class VirtualElement {
     /**
      * A node in browser created after rendering.
      */
-    protected buildedNode?: Node;
+    protected buildedNode?: Node | null;
 
     protected parentVirtualElement?: VirtualElement;
 
@@ -73,11 +73,11 @@ export abstract class VirtualElement {
         return this.parentVirtualElement;
     }
 
-    public getBuildedNode(): Node | undefined {
+    public getBuildedNode(): Node | undefined | null {
         return this.buildedNode;
     }
 
-    public getParentNode(): Node | undefined {
+    public getParentNode(): Node | undefined | null {
         return this.parentNode;
     }
 
@@ -86,10 +86,26 @@ export abstract class VirtualElement {
     }
 
     public removeBuildedNodeFromDom(): void {
-        const buildedNode = this.getBuildedNode();
+        const buildedNode = this.getBuildedNode() as Element;
 
         if (buildedNode && buildedNode.parentNode) {
             buildedNode.parentNode.removeChild(buildedNode);
+        }
+
+        this.buildedNode = null;
+    }
+
+    public removeChildVirtualElementsSibling(sibling: Node): void {
+        for (const childVirtualElement of this.childVirtualElements) {
+            childVirtualElement.removeSibling(sibling);
+        }
+    }
+
+    public removeSibling(sibling: Node): void {
+        if (this.nodesBeforeBuildedNode.includes(sibling)) {
+            this.nodesBeforeBuildedNode.splice(
+                this.nodesBeforeBuildedNode.indexOf(sibling),
+            );
         }
     }
 
@@ -129,7 +145,7 @@ export abstract class VirtualElement {
         this.nodesBeforeBuildedNode = nodes.reverse();
     }
 
-    protected abstract buildNode(): Node | undefined;
+    protected abstract buildNode(): Node | undefined | null;
 
     protected abstract appendRenderedElement(): void;
 }

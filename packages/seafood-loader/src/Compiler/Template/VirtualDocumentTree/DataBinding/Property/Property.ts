@@ -15,4 +15,8 @@ export class Property {
     public getValue(): any {
         return this.value;
     }
+
+    public setValue(value: any): any {
+        this.value = value;
+    }
 }

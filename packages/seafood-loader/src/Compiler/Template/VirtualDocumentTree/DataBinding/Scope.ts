@@ -106,15 +106,24 @@ export class Scope {
         return executeFunction.bind(context);
     }
 
-    protected normalizeProperties(properties: Property[]): any {
+    protected normalizeProperties(properties: Property[], nested: boolean = false): any {
         const normilizedProperties: any[] = [];
 
         for (const property of properties) {
             const propertyName = property.getName() as any;
-            normilizedProperties[propertyName] = property.getValue();
+            const propertyValue = property.getValue();
 
-            if (property instanceof ReactiveProperty) {
-                this.bindGetterForReactivityProperty(property, normilizedProperties);
+            normilizedProperties[propertyName] = propertyValue;
+
+            if (nested || property instanceof ReactiveProperty) {
+                if (typeof propertyValue === "object") {
+                    for (const childReactiveProperty of propertyValue) {
+                        this.normalizeProperties(childReactiveProperty, true);
+                    }
+                }
+
+                console.log(propertyName, propertyValue);
+                this.bindGetterForReactivityProperty(property as ReactiveProperty, normilizedProperties);
             }
         }
 
@@ -148,11 +157,14 @@ export class Scope {
                         );
                     });
                     reactivity.depend(() => {
-                        rerenderFunction(scopeContext.bindExecuteFunctionContext(executeFunction)(),);
+                        rerenderFunction(scopeContext.bindExecuteFunctionContext(executeFunction)());
                     });
                 }
 
                 return reactiveProperty.getArea()[reactiveProperty.getName()];
+            },
+            set(value: any): void {
+                reactiveProperty.setValue(value);
             },
         });
     }
@@ -170,23 +182,26 @@ export class Scope {
         return properties;
     }
 
-    protected getAreaProperties(area: any): Property[] {
+    protected getAreaProperties(area: any, nested: boolean = false): Property[] {
         const properties: Property[] = [];
 
         for (const propertyName in area) {
             if (area.hasOwnProperty(propertyName)) {
-                const propertyValue = area[propertyName];
+                let propertyValue = area[propertyName];
                 const isReactive = Reflect.hasMetadata(REACTIVE_PROPERTY_FLAG, area, propertyName);
+                let property;
 
-                if (isReactive) {
-                    properties.push(
-                        new ReactiveProperty(propertyName, propertyValue, area),
-                    );
+                if (nested || isReactive) {
+                    if (typeof propertyValue === "object") {
+                        propertyValue = this.getAreaProperties(propertyValue, true);
+                    }
+
+                    property = new ReactiveProperty(propertyName, propertyValue, area);
                 } else {
-                    properties.push(
-                        new Property(propertyName, propertyValue),
-                    );
+                    property = new Property(propertyName, propertyValue);
                 }
+
+                properties.push(property);
             }
         }
 
