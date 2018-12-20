@@ -107,33 +107,40 @@ export class Scope {
     }
 
     protected normalizeProperties(properties: Property[], nested: boolean = false): any {
-        const normilizedProperties: any[] = [];
+        const normilizedProperties: any = {};
 
-        for (const property of properties) {
-            const propertyName = property.getName() as any;
+        // console.log(properties);
+        for (const propertyName in properties) {
+            const property = properties[propertyName];
             const propertyValue = property.getValue();
 
             normilizedProperties[propertyName] = propertyValue;
 
             if (nested || property instanceof ReactiveProperty) {
-                if (typeof propertyValue === "object") {
-                    for (const childReactiveProperty of propertyValue) {
-                        this.normalizeProperties(childReactiveProperty, true);
-                    }
+                let root = true;
+
+                if (typeof propertyValue === "object" && !(propertyValue instanceof ReactiveProperty)) {
+                    root = false;
+                    this.normalizeProperties(propertyValue, true);
                 }
 
-                console.log(propertyName, propertyValue);
-                this.bindGetterForReactivityProperty(property as ReactiveProperty, normilizedProperties);
+                const propertyOwner = (root || !nested)
+                    ? normilizedProperties
+                    : propertyValue;
+
+                this.bindGetterForReactivityProperty(property as ReactiveProperty, propertyOwner);
             }
         }
 
         return normilizedProperties;
     }
-
     protected bindGetterForReactivityProperty(
         reactiveProperty: ReactiveProperty,
         normalizedProperties: any[],
     ): void {
+        // console.log(normalizedProperties);
+        // console.log(reactiveProperty, reactiveProperty.getName(), normalizedProperties);
+        // console.log(reactiveProperty, normalizedProperties);
         const scopeContext = this;
         Object.defineProperty(normalizedProperties, reactiveProperty.getName(), {
             get(): any {
@@ -160,6 +167,7 @@ export class Scope {
                         rerenderFunction(scopeContext.bindExecuteFunctionContext(executeFunction)());
                     });
                 }
+                // console.log(reactiveProperty.getName(), reactiveProperty.getName(), reactiveProperty.getValue());
 
                 return reactiveProperty.getArea()[reactiveProperty.getName()];
             },
@@ -183,7 +191,7 @@ export class Scope {
     }
 
     protected getAreaProperties(area: any, nested: boolean = false): Property[] {
-        const properties: Property[] = [];
+        const properties: any = {};
 
         for (const propertyName in area) {
             if (area.hasOwnProperty(propertyName)) {
@@ -201,7 +209,7 @@ export class Scope {
                     property = new Property(propertyName, propertyValue);
                 }
 
-                properties.push(property);
+                properties[propertyName] = property;
             }
         }
 
