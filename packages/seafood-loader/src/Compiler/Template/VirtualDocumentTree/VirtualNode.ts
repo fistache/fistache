@@ -14,17 +14,17 @@ export abstract class VirtualNode extends VirtualElement {
     protected appendRenderedElement(): void {
         if (this.parentVirtualElement) {
             const parentBuildedNode = this.parentVirtualElement.getBuildedNode();
-            const renderedNode = this.getBuildedNode();
+            const buildedNode = this.getBuildedNode();
 
-            if (parentBuildedNode && renderedNode) {
+            if (parentBuildedNode && buildedNode) {
                 const previousSiblingNode = this.getPreviousSiblingNode();
                 let nextSiblingNode = null;
 
                 if (previousSiblingNode) {
-                    nextSiblingNode = previousSiblingNode.nextSibling || previousSiblingNode;
+                    nextSiblingNode = previousSiblingNode.nextSibling;
                 }
 
-                parentBuildedNode.insertBefore(renderedNode, nextSiblingNode);
+                parentBuildedNode.insertBefore(buildedNode, nextSiblingNode);
             }
         }
     }

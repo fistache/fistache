@@ -31,8 +31,11 @@ export abstract class VirtualElement {
         this.nodesBeforeBuildedNode = [];
     }
 
-    public render(): void {
+    public beforeRender(): void {
         this.rememberNodesBeforeBuildedNode();
+    }
+
+    public render(): void {
         this.buildedNode = this.buildNode();
     }
 
@@ -117,6 +120,7 @@ export abstract class VirtualElement {
                 virtualElement.getScope().setComponentScope(componentScope);
             }
 
+            virtualElement.beforeRender();
             virtualElement.render();
         }
     }
@@ -142,7 +146,7 @@ export abstract class VirtualElement {
             previousSibling = previousSibling.previousSibling;
         }
 
-        this.nodesBeforeBuildedNode = nodes.reverse();
+        this.nodesBeforeBuildedNode = nodes;
     }
 
     protected abstract buildNode(): Node | undefined | null;
