@@ -30,7 +30,6 @@ export class AtShapedAttribute extends NonStaticAttribute {
     }
 
     private updateIfAttribute(expressionValue: any) {
-        console.log(expressionValue);
         const virtualTagNode = this.getVirtualTagNode();
         let virtualTagNodeNewPresentState;
 

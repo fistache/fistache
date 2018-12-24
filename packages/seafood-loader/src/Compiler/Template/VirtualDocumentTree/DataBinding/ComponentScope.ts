@@ -23,8 +23,10 @@ export class ComponentScope extends Scope {
     }
 
     public bindNormalizedProperties(): void {
-        this.properties = this.computeAreaProperties(this.componentInstance);
-        this.normalizedProperties = this.normalizeProperties(this.properties);
+        // this.properties = this.computeAreaProperties(this.componentInstance);
+        // console.log(this.properties);
+        // this.normalizedProperties = this.normalizeProperties(this.properties);
+        this.normalizedProperties = this.makeComponentInstanceReactive(this.componentInstance);
     }
 
     protected bindExecuteFunctionContext(executeFunction: () => void): () => void {
