@@ -7,9 +7,14 @@ interface IDependentFunction {
 
 export class ReactiveProperty {
     private readonly dependentFunctions: IDependentFunction[];
+    private parent?: ReactiveProperty;
 
     constructor() {
         this.dependentFunctions = [];
+    }
+
+    public setParent(parent: ReactiveProperty): void {
+        this.parent = parent;
     }
 
     public depend(trigger: () => void, depend?: () => void) {
@@ -27,6 +32,10 @@ export class ReactiveProperty {
             if (this.dependentFunctions.hasOwnProperty(index)) {
                 this.dependentFunctions[index].trigger();
             }
+        }
+
+        if (this.parent) {
+            this.parent.notify();
         }
     }
 

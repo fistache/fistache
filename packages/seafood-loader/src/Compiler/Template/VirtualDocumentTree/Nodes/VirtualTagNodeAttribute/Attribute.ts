@@ -10,7 +10,7 @@ export abstract class Attribute {
     public constructor(virtualTagNode: VirtualTagNode, name: string, value: string) {
         this.virtualTagNode = virtualTagNode;
         this.name = name;
-        this.value = value;
+        this.value = value.trim();
     }
 
     public abstract getName(): string;

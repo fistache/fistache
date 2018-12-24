@@ -20,16 +20,14 @@ export class VirtualTextNode extends SingleVirtualNode {
     protected buildNode(): Node {
         let expressionIndex = 0;
         const text = this.parsedNode.data.replace(this.injectionFinderRegExp, () => {
-            let value = this.expressionResults[expressionIndex];
-
-
-            if (typeof value === "object") {
-                value = JSON.stringify(value);
-            }
-
+            const value = this.expressionResults[expressionIndex];
             expressionIndex++;
 
-            return value;
+            if (typeof value === "object") {
+                return JSON.stringify(value);
+            } else {
+                return value;
+            }
         });
         return document.createTextNode(text);
     }

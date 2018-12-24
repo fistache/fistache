@@ -98,26 +98,16 @@ export abstract class VirtualElement {
         this.buildedNode = null;
     }
 
-    public removeChildVirtualElementsSibling(sibling: Node): void {
-        for (const childVirtualElement of this.childVirtualElements) {
-            childVirtualElement.removeSibling(sibling);
-        }
-    }
-
-    public removeSibling(sibling: Node): void {
-        if (this.nodesBeforeBuildedNode.includes(sibling)) {
-            this.nodesBeforeBuildedNode.splice(
-                this.nodesBeforeBuildedNode.indexOf(sibling),
-            );
-        }
-    }
-
     protected extendChildVirtualElementsAndRender(): void {
-        const componentScope = this.getScope().getComponentScope();
+        const scope = this.getScope();
+        const componentScope = scope.getComponentScope();
 
         for (const virtualElement of this.childVirtualElements) {
+            const childVirtualElementScope = virtualElement.getScope();
+            childVirtualElementScope.setParentScope(scope);
+
             if (componentScope) {
-                virtualElement.getScope().setComponentScope(componentScope);
+                childVirtualElementScope.setComponentScope(componentScope);
             }
 
             virtualElement.beforeRender();
