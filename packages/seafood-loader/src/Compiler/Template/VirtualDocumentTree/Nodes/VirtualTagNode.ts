@@ -71,6 +71,7 @@ export class VirtualTagNode extends VirtualNode {
         if (this.getBuildedNode()) {
             this.renderDynamicAndStaticAttributes();
             this.appendRenderedElement();
+            this.storeBuildedNodes();
             this.extendChildVirtualElementsAndRender();
         }
     }
@@ -94,7 +95,6 @@ export class VirtualTagNode extends VirtualNode {
             for (const value of Object.values(this.forOfData.value).reverse()) {
                 scope.setVariable(this.forOfData.newVariableName, value);
                 this.renderFragment();
-                this.storeBuildedNodes();
             }
         }
     }

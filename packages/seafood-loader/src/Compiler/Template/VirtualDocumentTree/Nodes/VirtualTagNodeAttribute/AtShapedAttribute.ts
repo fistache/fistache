@@ -1,6 +1,6 @@
 import {IForTagExpression, VirtualTagNodePresentState} from "../VirtualTagNode";
 import {NonStaticAttribute} from "./NonStaticAttribute";
-import {REACTIVE_PROPERTY_FLAG} from "@seafood/app";
+// import {REACTIVE_PROPERTY_FLAG} from "@seafood/app";
 
 export class AtShapedAttribute extends NonStaticAttribute {
     private isIfAttributeSwitchedValue: boolean = false;

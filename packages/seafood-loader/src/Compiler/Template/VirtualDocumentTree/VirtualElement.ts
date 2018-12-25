@@ -1,4 +1,5 @@
 import {Scope} from "./DataBinding/Scope";
+import {VirtualTagNode} from "./Nodes/VirtualTagNode";
 
 export abstract class VirtualElement {
     /**
@@ -13,7 +14,7 @@ export abstract class VirtualElement {
 
     protected parentVirtualElement?: VirtualElement;
 
-    protected nodesBeforeBuildedNode: Node[];
+    protected position?: number;
 
     /**
      * A property which the element will use to bind a data.
@@ -28,31 +29,61 @@ export abstract class VirtualElement {
     public constructor() {
         this.scope = new Scope();
         this.childVirtualElements = [];
-        this.nodesBeforeBuildedNode = [];
     }
 
     public beforeRender(): void {
-        this.rememberNodesBeforeBuildedNode();
+        //
     }
 
     public render(): void {
         this.buildedNode = this.buildNode();
     }
 
-    public getPreviousSiblingNode(): Node | null {
+    public getChildVirtualElements(): VirtualElement[] {
+        return this.childVirtualElements;
+    }
+
+    public getChildVirtualElementsReversed(): VirtualElement[] {
+        const elements: VirtualElement[] = [];
+
+        for (let i = this.childVirtualElements.length - 1; i > 0; i--) {
+            elements.push(this.childVirtualElements[i]);
+        }
+
+        return elements;
+    }
+
+    public getNextSiblingNode(): Node | null {
         const parentVirtualElement = this.getParentVirtualElement();
+        const position = this.getPosition();
+        let nextSiblingNode: Node | null = null;
 
-        if (parentVirtualElement && this.nodesBeforeBuildedNode.length) {
-            for (const previousSibling of this.nodesBeforeBuildedNode) {
-                if (previousSibling.parentNode !== parentVirtualElement.getBuildedNode()) {
-                    continue;
+        if (position && parentVirtualElement) {
+            const childVirtualElements = parentVirtualElement.getChildVirtualElementsReversed();
+
+            for (const childVirtualElement of childVirtualElements) {
+                if (childVirtualElement !== this) {
+                    let childBuildedNode = childVirtualElement.getBuildedNode();
+
+                    if (childVirtualElement instanceof VirtualTagNode) {
+                        const childBuildedNodes = childVirtualElement.getBuildedNodes();
+                        childBuildedNode = childBuildedNodes[0];
+                    }
+
+                    const childPosition = childVirtualElement.getPosition();
+
+                    if (childBuildedNode && childPosition) {
+                        if (position < childPosition) {
+                            nextSiblingNode = childBuildedNode;
+                        } else {
+                            break;
+                        }
+                    }
                 }
-
-                return previousSibling;
             }
         }
 
-        return null;
+        return nextSiblingNode;
     }
 
     public addChildVirtualElement(node: VirtualElement): void {
@@ -62,6 +93,14 @@ export abstract class VirtualElement {
     public setParentVirtualElement(parentVirtualElement: VirtualElement): void {
         this.parentVirtualElement = parentVirtualElement;
         this.parentVirtualElement.addChildVirtualElement(this);
+    }
+
+    public setPosition(position: number): void {
+        this.position = position;
+    }
+
+    public getPosition(): number | undefined {
+        return this.position;
     }
 
     public setParentNode(parentNode: Node): void {
@@ -101,6 +140,7 @@ export abstract class VirtualElement {
     protected extendChildVirtualElementsAndRender(): void {
         const scope = this.getScope();
         const componentScope = scope.getComponentScope();
+        let position = 0;
 
         for (const virtualElement of this.childVirtualElements) {
             const childVirtualElementScope = virtualElement.getScope();
@@ -110,33 +150,12 @@ export abstract class VirtualElement {
                 childVirtualElementScope.setComponentScope(componentScope);
             }
 
+            virtualElement.setPosition(position);
             virtualElement.beforeRender();
             virtualElement.render();
+
+            position++;
         }
-    }
-
-    protected rememberNodesBeforeBuildedNode(): void {
-        const nodes: Node[] = [];
-        let previousSibling;
-
-        if (this.buildedNode) {
-            previousSibling = this.buildedNode.previousSibling;
-        } else {
-            const parentVirtualElement = this.getParentVirtualElement();
-            if (parentVirtualElement) {
-                const parentVirtualElementBuildedNode = parentVirtualElement.getBuildedNode();
-                if (parentVirtualElementBuildedNode) {
-                    previousSibling = parentVirtualElementBuildedNode.lastChild;
-                }
-            }
-        }
-
-        while (previousSibling) {
-            nodes.push(previousSibling);
-            previousSibling = previousSibling.previousSibling;
-        }
-
-        this.nodesBeforeBuildedNode = nodes;
     }
 
     protected abstract buildNode(): Node | undefined | null;
