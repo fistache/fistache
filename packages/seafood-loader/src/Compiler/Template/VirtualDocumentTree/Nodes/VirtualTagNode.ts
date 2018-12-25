@@ -25,6 +25,7 @@ export class VirtualTagNode extends VirtualNode {
     protected presentState: VirtualTagNodePresentState;
 
     protected forOfData?: IForTagExpression;
+    protected forInData?: IForTagExpression;
 
     protected buildedNodes: Element[];
 
@@ -48,6 +49,8 @@ export class VirtualTagNode extends VirtualNode {
 
         if (this.forOfData) {
             this.renderForOf();
+        } else if (this.forInData) {
+            this.renderForIn();
         } else {
             this.renderFragment();
         }
@@ -55,6 +58,10 @@ export class VirtualTagNode extends VirtualNode {
 
     public setForOfData(forOfData: IForTagExpression) {
         this.forOfData = forOfData;
+    }
+
+    public setForInData(forInData: IForTagExpression) {
+        this.forInData = forInData;
     }
 
     public setPresentState(presentState: VirtualTagNodePresentState): void {
@@ -100,8 +107,19 @@ export class VirtualTagNode extends VirtualNode {
         if (this.forOfData) {
             const scope = this.getScope();
 
-            for (const value of Object.values(this.forOfData.value).reverse()) {
+            for (const value of this.forOfData.value) {
                 scope.setVariable(this.forOfData.newVariableName, value);
+                this.renderFragment();
+            }
+        }
+    }
+
+    public renderForIn(): void {
+        if (this.forInData) {
+            const scope = this.getScope();
+
+            for (const value in this.forInData.value) {
+                scope.setVariable(this.forInData.newVariableName, value);
                 this.renderFragment();
             }
         }

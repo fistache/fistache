@@ -1,5 +1,7 @@
 import {IForTagExpression, VirtualTagNodePresentState} from "../VirtualTagNode";
 import {NonStaticAttribute} from "./NonStaticAttribute";
+import {REACTIVE_PROPERTY_FLAG} from "@seafood/app";
+
 // import {REACTIVE_PROPERTY_FLAG} from "@seafood/app";
 
 export class AtShapedAttribute extends NonStaticAttribute {
@@ -41,13 +43,8 @@ export class AtShapedAttribute extends NonStaticAttribute {
         const scope = virtualTagNode.getScope();
 
         if (scopeNewVarName.length && expression.length) {
-            const expressionResult = scope.executeExpression(expression, () => {
-                // todo: optimize
-                // if (Array.isArray(expressionResult)) {
-                //     console.log("force rerender");
-                    virtualTagNode.removeBuildedNodeFromDom();
-                    virtualTagNode.renderForOf();
-                // }
+            const expressionResult = scope.executeExpression(expression, (value: any) => {
+                // todo: add reactivity
             });
             const forOfData: IForTagExpression = {
                 newVariableName: scopeNewVarName,
@@ -61,7 +58,25 @@ export class AtShapedAttribute extends NonStaticAttribute {
     }
 
     protected appendForInAttribute(): void {
-        //
+        const expressionParts = this.value.split(" in ");
+        const scopeNewVarName = expressionParts[0];
+        const expression = expressionParts[1];
+        const virtualTagNode = this.getVirtualTagNode();
+        const scope = virtualTagNode.getScope();
+
+        if (scopeNewVarName.length && expression.length) {
+            const expressionResult = scope.executeExpression(expression, () => {
+                // todo: add reactivity
+            });
+            const forInData: IForTagExpression = {
+                newVariableName: scopeNewVarName,
+                value: expressionResult,
+            };
+
+            virtualTagNode.setForInData(forInData);
+        } else {
+            console.warn("Variable name or expression is not provided in for..of attribute.");
+        }
     }
 
     protected appendForNAttribute(): void {
