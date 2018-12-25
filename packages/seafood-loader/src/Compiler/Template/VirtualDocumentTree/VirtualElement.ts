@@ -67,7 +67,9 @@ export abstract class VirtualElement {
 
                     if (childVirtualElement instanceof VirtualTagNode) {
                         const childBuildedNodes = childVirtualElement.getBuildedNodes();
-                        childBuildedNode = childBuildedNodes[0];
+                        if (childBuildedNodes[0]) {
+                            childBuildedNode = childBuildedNodes[0].element;
+                        }
                     }
 
                     const childPosition = childVirtualElement.getPosition();
@@ -127,8 +129,10 @@ export abstract class VirtualElement {
         return this.scope;
     }
 
-    public removeBuildedNodeFromDom(): void {
-        const buildedNode = this.getBuildedNode() as Element;
+    public removeBuildedNodeFromDom(buildedNode?: Node): void {
+        if (!buildedNode) {
+            buildedNode = this.getBuildedNode() as Element;
+        }
 
         if (buildedNode && buildedNode.parentNode) {
             buildedNode.parentNode.removeChild(buildedNode);

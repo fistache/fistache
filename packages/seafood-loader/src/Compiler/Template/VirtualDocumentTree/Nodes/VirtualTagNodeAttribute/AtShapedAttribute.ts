@@ -80,7 +80,19 @@ export class AtShapedAttribute extends NonStaticAttribute {
     }
 
     protected appendForNAttribute(): void {
-        //
+        const virtualTagNode = this.getVirtualTagNode();
+        const scope = virtualTagNode.getScope();
+
+        if (this.value.length) {
+            const expressionResult = scope.executeExpression(this.value, (value: any) => {
+                // todo: add reactivity
+                virtualTagNode.updateForNData(value);
+            });
+
+            virtualTagNode.setForNData(expressionResult);
+        } else {
+            console.warn("Variable name or expression is not provided in @for attribute.");
+        }
     }
 
     protected appendIfAttribute(): void {

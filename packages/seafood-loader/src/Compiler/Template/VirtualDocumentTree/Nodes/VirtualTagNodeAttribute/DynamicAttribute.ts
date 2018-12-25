@@ -10,6 +10,5 @@ export class DynamicAttribute extends NonStaticAttribute {
             this.setAttribute(attributeName, value);
         });
         this.setAttribute(attributeName, expressionResult);
-        console.log(attributeName, expressionResult);
     }
 }

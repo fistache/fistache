@@ -8,7 +8,8 @@
       "options": [120]
     },
     "no-console": false,
-    "no-empty-interface": false
+    "no-empty-interface": false,
+    "object-literal-sort-keys": false
   },
   "jsRules": {
     "max-line-length": {
