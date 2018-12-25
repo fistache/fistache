@@ -6,11 +6,15 @@ export class StaticAttribute extends Attribute {
     }
 
     public append(): void {
+        this.setAttribute(this.getName(), this.value);
+    }
+
+    protected setAttribute(name: string, value: string): void {
         const virtualTagNode = this.getVirtualTagNode();
         const buildedNode = (virtualTagNode.getBuildedNode() as Element);
 
         if (buildedNode) {
-            buildedNode.setAttribute(this.getName(), this.value);
+            buildedNode.setAttribute(name, value);
         }
     }
 }

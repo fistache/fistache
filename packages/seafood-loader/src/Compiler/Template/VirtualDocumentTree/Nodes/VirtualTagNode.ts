@@ -28,11 +28,19 @@ export class VirtualTagNode extends VirtualNode {
 
     protected buildedNodes: Element[];
 
+    protected attributesManager: VirtualTagAttributesManager;
+
     public constructor() {
         super();
 
+        this.attributesManager = new VirtualTagAttributesManager(this);
         this.presentState = VirtualTagNodePresentState.Present;
         this.buildedNodes = [];
+    }
+
+    public beforeRender(): void {
+        super.beforeRender();
+        this.attributesManager.initialize();
     }
 
     public render(): void {
@@ -117,10 +125,10 @@ export class VirtualTagNode extends VirtualNode {
     }
 
     protected renderAtShapedAttributes(): void {
-        VirtualTagAttributesManager.renderAtShapedAttributes(this);
+        this.attributesManager.renderAtShapedAttributes();
     }
 
     protected renderDynamicAndStaticAttributes(): void {
-        VirtualTagAttributesManager.renderDynamicAndStaticAttributes(this);
+        this.attributesManager.renderDynamicAndStaticAttributes();
     }
 }
