@@ -1,6 +1,5 @@
 import {IForTagExpression, VirtualTagNodePresentState} from "../VirtualTagNode";
 import {NonStaticAttribute} from "./NonStaticAttribute";
-import {REACTIVE_PROPERTY_FLAG} from "@seafood/app";
 
 // import {REACTIVE_PROPERTY_FLAG} from "@seafood/app";
 
@@ -43,7 +42,7 @@ export class AtShapedAttribute extends NonStaticAttribute {
         const scope = virtualTagNode.getScope();
 
         if (scopeNewVarName.length && expression.length) {
-            const expressionResult = scope.executeExpression(expression, (value: any) => {
+            const expressionResult = scope.executeExpression(expression, () => {
                 // todo: add reactivity
             });
             const forOfData: IForTagExpression = {

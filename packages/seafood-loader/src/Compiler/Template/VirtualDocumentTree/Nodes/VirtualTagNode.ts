@@ -160,10 +160,9 @@ export class VirtualTagNode extends VirtualNode {
     }
 
     public updateForNData(updatedValue: any): void {
-        if (updatedValue && Number.isInteger(updatedValue) && updatedValue >= 0) {
+        if (Number.isInteger(updatedValue) && updatedValue >= 0) {
             const difference = Math.abs(this.forNData - updatedValue);
 
-            console.log(updatedValue);
             if (this.forNData > updatedValue) {
                 for (let i = this.forNData; i > updatedValue; i--) {
                     super.removeBuildedNodeFromDom(this.buildedNodes[i - 1].element);
@@ -171,8 +170,14 @@ export class VirtualTagNode extends VirtualNode {
                 this.buildedNodes.splice(updatedValue, difference);
                 this.forNData = updatedValue;
             } else {
-                // add
+                for (let i = this.forNData; i < updatedValue; i++) {
+                    this.renderFragment();
+                }
+                this.forNData = updatedValue;
             }
+        } else {
+            console.warn(`Invalid value was passed in @for attribute (${updatedValue})`);
+            console.warn(`It must be positive integer.`);
         }
     }
 
