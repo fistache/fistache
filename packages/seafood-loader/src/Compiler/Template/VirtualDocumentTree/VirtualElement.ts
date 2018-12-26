@@ -65,12 +65,12 @@ export abstract class VirtualElement {
                 if (childVirtualElement !== this) {
                     let childBuildedNode = childVirtualElement.getBuildedNode();
 
-                    if (childVirtualElement instanceof VirtualTagNode) {
-                        const childBuildedNodes = childVirtualElement.getBuildedNodes();
-                        if (childBuildedNodes[0]) {
-                            childBuildedNode = childBuildedNodes[0].element;
-                        }
-                    }
+                    // if (childVirtualElement instanceof VirtualTagNode) {
+                    //     const childBuildedNodes = childVirtualElement.getBuildedNodes();
+                    //     if (childBuildedNodes[0]) {
+                    //         childBuildedNode = childBuildedNodes[0].element;
+                    //     }
+                    // }
 
                     const childPosition = childVirtualElement.getPosition();
 

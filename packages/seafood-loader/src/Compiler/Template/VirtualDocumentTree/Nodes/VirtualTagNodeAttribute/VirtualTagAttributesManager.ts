@@ -1,25 +1,18 @@
-import {VirtualTagNode} from "../VirtualTagNode";
+import {VirtualTagNodeCollection} from "../VirtualTagNodeCollection";
 import {AtShapedAttribute} from "./AtShapedAttribute";
 import {AtShapedDynamicAttribute} from "./AtShapedDynamicAttribute";
 import {Attribute} from "./Attribute";
 import {DynamicAttribute} from "./DynamicAttribute";
 import {StaticAttribute} from "./StaticAttribute";
 
-export enum VirtualTagAttributeType {
-    AtShaped,
-    Dynamic,
-    AtShapedDynamic,
-    Static,
-}
-
 export class VirtualTagAttributesManager {
-    private readonly virtualTagNode: VirtualTagNode;
-    private readonly staticAttributes: Attribute[];
-    private readonly dynamicAttributes: Attribute[];
-    private readonly atShapedAttributes: Attribute[];
-    private atShapedDynamicAttributes: Attribute[];
+    private readonly virtualTagNode: VirtualTagNodeCollection;
+    private readonly staticAttributes: StaticAttribute[];
+    private readonly dynamicAttributes: DynamicAttribute[];
+    private readonly atShapedAttributes: AtShapedAttribute[];
+    private atShapedDynamicAttributes: AtShapedDynamicAttribute[];
 
-    public constructor(virtualTagNode: VirtualTagNode) {
+    public constructor(virtualTagNode: VirtualTagNodeCollection) {
         this.virtualTagNode = virtualTagNode;
         this.staticAttributes = [];
         this.dynamicAttributes = [];
