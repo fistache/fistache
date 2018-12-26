@@ -1,4 +1,4 @@
-export enum ECompilationFlag {
+export enum CompilationFlag {
     Script,
     Template,
     Style,

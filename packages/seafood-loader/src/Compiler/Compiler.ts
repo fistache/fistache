@@ -21,22 +21,14 @@ export abstract class Compiler {
             return;
         }
 
-        // todo: Возвращать значения между первым открывающим о последним
-        // закрывающим тегом, а не первым открывающим и ПЕРВЫМ закрывающим
-        // как сейчас.
         const regex = new RegExp(
-            `<\\s*\\/?\\s*${this.parsingTagName}\\s*.*?>(.|\\n)*?<\\s*\\/\\s*${this.parsingTagName}\\s*.*?>`,
-            "mi",
+            `<\s*\/?\s*${this.parsingTagName}\s*.*?>(.*)<\s*\/\s*${this.parsingTagName}\s*.*?>`,
+            "s",
         );
-        let result: any = this.source.match(regex);
+        const result: any = this.source.match(regex);
 
         if (result && result.length) {
-            // todo: Check is it always first element or not.
-            result = result[0];
-
-            const start = result.indexOf(">") + 1;
-            const end = result.lastIndexOf("<");
-            this.content = result.slice(start, end);
+            this.content = result[1];
         } else {
             this.content = "";
         }

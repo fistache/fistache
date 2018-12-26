@@ -1,5 +1,3 @@
-import _ from "lodash";
-
 interface IQueryObject {
     [key: string]: any;
 }
@@ -8,15 +6,15 @@ export class CompactRequestQuery {
     protected query: IQueryObject;
 
     constructor(query: IQueryObject) {
-        this.query = query;
+        this.query = Object.assign({}, query); // add object prototype
     }
 
     public get(key: string) {
-        return _.get(this.query, key);
+        return this.query[key];
     }
 
     public hasKey(key: string) {
-        return _.has(this.query, key);
+        return this.query.hasOwnProperty(key);
     }
 
     public toString(): string {

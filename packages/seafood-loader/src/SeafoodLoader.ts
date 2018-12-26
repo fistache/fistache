@@ -1,9 +1,9 @@
 import hash from "hash-sum";
 import path from "path";
 import {CompactRequestQuery} from "./CompactRequestQuery";
+import {CompilationFlag} from "./CompilationFlag";
 import {ScriptCompiler} from "./Compiler/Script/ScriptCompiler";
 import {TemplateCompiler} from "./Compiler/Template/TemplateCompiler";
-import {ECompilationFlag} from "./ECompilationFlag";
 import {HmrPlugin} from "./HotModuleReplacement/HmrPlugin";
 import {RequestGenerator} from "./RequestGenerator";
 
@@ -69,7 +69,7 @@ export class SeafoodLoader {
         return this.hmrPlugin.generateCode();
     }
 
-    protected makeCompilationRequest(flag: ECompilationFlag) {
+    protected makeCompilationRequest(flag: CompilationFlag) {
         const query = new CompactRequestQuery({
             [SeafoodLoader.REQUEST_COMPILATION_FLAG]: flag,
         });
@@ -78,11 +78,11 @@ export class SeafoodLoader {
     }
 
     private getScriptCompilationRequest() {
-        return this.makeCompilationRequest(ECompilationFlag.Script);
+        return this.makeCompilationRequest(CompilationFlag.Script);
     }
 
     private getTemplateCompilationRequest() {
-        return this.makeCompilationRequest(ECompilationFlag.Template);
+        return this.makeCompilationRequest(CompilationFlag.Template);
     }
 
     private resolveCompilationRequest(): string {
@@ -90,10 +90,10 @@ export class SeafoodLoader {
         const compilationFlag = this.query.get(SeafoodLoader.REQUEST_COMPILATION_FLAG);
 
         switch (Number(compilationFlag)) {
-            case (ECompilationFlag.Script):
+            case (CompilationFlag.Script):
                 CompilerClass = ScriptCompiler;
                 break;
-            case (ECompilationFlag.Template):
+            case (CompilationFlag.Template):
                 CompilerClass = TemplateCompiler;
                 break;
             default:

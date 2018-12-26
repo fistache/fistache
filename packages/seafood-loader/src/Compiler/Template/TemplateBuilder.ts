@@ -1,6 +1,4 @@
-import HtmlParser from "htmlparser2";
-import {SynchronousPromise} from "synchronous-promise";
-import {EParsedNodeType} from "./EParsedNodeType";
+import {ParsedNodeType} from "./ParsedNodeType";
 import {VirtualCommentNode} from "./VirtualDocumentTree/Nodes/VirtualCommentNode";
 import {VirtualComponentNode} from "./VirtualDocumentTree/Nodes/VirtualComponentNode";
 import {VirtualEmbeddedContentNode} from "./VirtualDocumentTree/Nodes/VirtualEmbeddedContentNode";
@@ -28,16 +26,15 @@ export default class TemplateBuilder {
         "caption", "center", "cite", "code", "col", "colgroup", "comment", "dd", "ins", "dfn",
     ];
 
-    public source: string;
-
     private readonly virtualDocumentTree: VirtualDocumentTree;
-    private originalContent: any;
+    private parsedContent: any;
 
-    constructor(source: string) {
-        this.source = source;
+    constructor() {
         this.virtualDocumentTree = new VirtualDocumentTree();
-        this.parseContent();
-        this.buildVirtualTree();
+    }
+
+    public setParsedContent(parsedContent: any): void {
+        this.parsedContent = parsedContent;
     }
 
     public renderTree(parentNode: any, initialScope: any) {
@@ -46,8 +43,8 @@ export default class TemplateBuilder {
         this.virtualDocumentTree.render();
     }
 
-    protected buildVirtualTree() {
-        let stack: any = this.originalContent;
+    public buildVirtualTree() {
+        let stack: any = this.parsedContent;
         this.setVirtualParentNodeForChildNodes(stack);
 
         while (stack.length) {
@@ -64,13 +61,13 @@ export default class TemplateBuilder {
         let virtualNode = null;
 
         switch (element.type) {
-            case(EParsedNodeType.Text):
+            case(ParsedNodeType.Text):
                 virtualNode = this.createTextVirtualNode(element, parentElement);
                 break;
-            case(EParsedNodeType.Comment):
+            case(ParsedNodeType.Comment):
                 virtualNode = this.createCommentVirtualNode(element, parentElement);
                 break;
-            case(EParsedNodeType.Tag):
+            case(ParsedNodeType.Tag):
                 if (this.isItHtmlTag(element)) {
                     virtualNode = this.createTagVirtualNode(element, parentElement);
                 } else if (this.isItEmbedContentTag(element)) {
@@ -119,35 +116,6 @@ export default class TemplateBuilder {
 
     protected createEmbedContentVirtualNode(parsedNode: any, parentVirtualElement?: VirtualElement): VirtualNode {
         return this.createVirtualNodeOfType(VirtualEmbeddedContentNode, parsedNode, parentVirtualElement);
-    }
-
-    protected parseContent() {
-        let parsedContent: any;
-        this.parseFragment(this.source).then((content: any) => {
-            parsedContent = content;
-        }).catch((error: any) => {
-            throw new Error(error);
-        });
-
-        this.originalContent = parsedContent;
-    }
-
-    private parseFragment(fragment: string) {
-        return new SynchronousPromise((resolve, reject) => {
-            // @ts-ignore
-            const handler = new HtmlParser.DomHandler((error, dom) => {
-                if (error) {
-                    reject(error);
-                }
-
-                resolve(dom);
-            });
-            const parser = new HtmlParser.Parser(handler, {
-                xmlMode: true,
-            });
-            parser.write(fragment);
-            parser.end();
-        });
     }
 
     private isItHtmlTag(element: any): boolean {
