@@ -10,11 +10,10 @@ export class StaticAttribute extends Attribute {
     }
 
     protected setAttribute(name: string, value: string): void {
-        const virtualTagNode = this.getVirtualTagNode();
-        const buildedNode = (virtualTagNode.getBuildedNode() as Element);
+        const collection = this.getCollection();
 
-        if (buildedNode) {
-            buildedNode.setAttribute(name, value);
-        }
+        collection.useCollection((element: Element) => {
+            element.setAttribute(name, value);
+        });
     }
 }

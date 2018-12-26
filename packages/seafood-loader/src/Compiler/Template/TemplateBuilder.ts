@@ -1,6 +1,7 @@
 import HtmlParser from "htmlparser2";
 import {SynchronousPromise} from "synchronous-promise";
 import {EParsedNodeType} from "./EParsedNodeType";
+import {VirtualCommentNode} from "./VirtualDocumentTree/Nodes/VirtualCommentNode";
 import {VirtualComponentNode} from "./VirtualDocumentTree/Nodes/VirtualComponentNode";
 import {VirtualEmbeddedContentNode} from "./VirtualDocumentTree/Nodes/VirtualEmbeddedContentNode";
 import {VirtualTagNode} from "./VirtualDocumentTree/Nodes/VirtualTagNode";
@@ -8,7 +9,6 @@ import {VirtualTextNode} from "./VirtualDocumentTree/Nodes/VirtualTextNode";
 import {VirtualDocumentTree} from "./VirtualDocumentTree/VirtualDocumentTree";
 import {VirtualElement} from "./VirtualDocumentTree/VirtualElement";
 import {VirtualNode} from "./VirtualDocumentTree/VirtualNode";
-import {VirtualCommentNode} from "./VirtualDocumentTree/Nodes/VirtualCommentNode";
 
 export default class TemplateBuilder {
     public readonly htmlTags: string[] = [
@@ -26,10 +26,6 @@ export default class TemplateBuilder {
         "style", "sub", "table", "thead", "td", "a", "address", "app", "applet", "area", "b",
         "base", "basefont", "bgsound", "big", "blink", "blockquote", /* "body",*/ "br", "button",
         "caption", "center", "cite", "code", "col", "colgroup", "comment", "dd", "ins", "dfn",
-    ];
-
-    public readonly reservedTags: string[] = [
-        "content",
     ];
 
     public source: string;
@@ -77,7 +73,7 @@ export default class TemplateBuilder {
             case(EParsedNodeType.Tag):
                 if (this.isItHtmlTag(element)) {
                     virtualNode = this.createTagVirtualNode(element, parentElement);
-                } else if (this.isItReservedTag(element)) {
+                } else if (this.isItEmbedContentTag(element)) {
                     virtualNode = this.createEmbedContentVirtualNode(element, parentElement);
                 } else {
                     virtualNode = this.createComponentVirtualNode(element, parentElement);
@@ -158,8 +154,8 @@ export default class TemplateBuilder {
         return this.htmlTags.includes(element.name);
     }
 
-    private isItReservedTag(element: any): boolean {
-        return this.reservedTags.includes(element.name);
+    private isItEmbedContentTag(element: any): boolean {
+        return element.name === "content";
     }
 
     private setVirtualParentNodeForChildNodes(childNodes: any[], parent?: any): void {

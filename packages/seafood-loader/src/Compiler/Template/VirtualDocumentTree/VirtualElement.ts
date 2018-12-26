@@ -1,5 +1,4 @@
 import {Scope} from "./DataBinding/Scope";
-import {VirtualTagNode} from "./Nodes/VirtualTagNode";
 
 export abstract class VirtualElement {
     /**
@@ -63,7 +62,7 @@ export abstract class VirtualElement {
 
             for (const childVirtualElement of childVirtualElements) {
                 if (childVirtualElement !== this) {
-                    let childBuildedNode = childVirtualElement.getBuildedNode();
+                    const childBuildedNode = childVirtualElement.getBuildedNode();
 
                     // if (childVirtualElement instanceof VirtualTagNode) {
                     //     const childBuildedNodes = childVirtualElement.getBuildedNodes();
@@ -95,6 +94,10 @@ export abstract class VirtualElement {
     public setParentVirtualElement(parentVirtualElement: VirtualElement): void {
         this.parentVirtualElement = parentVirtualElement;
         this.parentVirtualElement.addChildVirtualElement(this);
+    }
+
+    public setChildVirtualElements(childVirtualElements: VirtualElement[]): void {
+        this.childVirtualElements = childVirtualElements;
     }
 
     public setPosition(position: number): void {

@@ -1,14 +1,14 @@
-import {VirtualTagNodeCollection} from "../VirtualTagNodeCollection";
+import {VirtualTagNode} from "../VirtualTagNode";
 
 export abstract class Attribute {
-    protected virtualTagNode: VirtualTagNodeCollection;
+    protected collection: VirtualTagNode;
 
     protected name: string;
 
     protected value: string;
 
-    public constructor(virtualTagNode: VirtualTagNodeCollection, name: string, value: string) {
-        this.virtualTagNode = virtualTagNode;
+    public constructor(virtualTagNode: VirtualTagNode, name: string, value: string) {
+        this.collection = virtualTagNode;
         this.name = name;
         this.value = value.trim();
     }
@@ -17,7 +17,7 @@ export abstract class Attribute {
 
     public abstract append(): void;
 
-    public getVirtualTagNode(): VirtualTagNodeCollection {
-        return this.virtualTagNode;
+    public getCollection(): VirtualTagNode {
+        return this.collection;
     }
 }
