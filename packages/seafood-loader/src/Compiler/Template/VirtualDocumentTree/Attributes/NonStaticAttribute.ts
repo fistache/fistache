@@ -1,10 +1,10 @@
-import {VirtualTagNode} from "../Nodes/VirtualTagNode";
+import {VirtualTagNodeCollection} from "../VirtualTagNodeCollection";
 import {StaticAttribute} from "./StaticAttribute";
 
 export abstract class NonStaticAttribute extends StaticAttribute {
     // protected reactiveProperty: ReactiveProperty;
 
-    public constructor(virtualTagNode: VirtualTagNode, name: string, value: string) {
+    public constructor(virtualTagNode: VirtualTagNodeCollection, name: string, value: string) {
         super(virtualTagNode, name, value);
         // this.reactiveProperty = new ReactiveProperty(collection.getScope());
     }

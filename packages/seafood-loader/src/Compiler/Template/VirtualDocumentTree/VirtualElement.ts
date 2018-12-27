@@ -1,6 +1,7 @@
 import {Scope} from "../DataBinding/Scope";
+import {VirtualElementInterface} from "./VirtualElementInterface";
 
-export abstract class VirtualElement {
+export abstract class VirtualElement implements VirtualElementInterface {
     /**
      * A node in browser where buildedNode will append.
      */
@@ -64,7 +65,7 @@ export abstract class VirtualElement {
                 if (childVirtualElement !== this) {
                     const childBuildedNode = childVirtualElement.getBuildedNode();
 
-                    // if (childVirtualElement instanceof VirtualTagNode) {
+                    // if (childVirtualElement instanceof VirtualTagNodeCollection) {
                     //     const childBuildedNodes = childVirtualElement.getBuildedNodes();
                     //     if (childBuildedNodes[0]) {
                     //         childBuildedNode = childBuildedNodes[0].element;

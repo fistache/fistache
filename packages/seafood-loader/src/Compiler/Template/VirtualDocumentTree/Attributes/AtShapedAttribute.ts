@@ -1,4 +1,5 @@
 import {NonStaticAttribute} from "./NonStaticAttribute";
+import {VirtualTagNodeForExpression} from "../VirtualTagNodeCollection";
 
 export class AtShapedAttribute extends NonStaticAttribute {
     public append(): void {
@@ -30,25 +31,26 @@ export class AtShapedAttribute extends NonStaticAttribute {
     }
 
     protected appendForOfAttribute(): void {
-        // const expressionParts = this.value.split(" of ");
-        // const scopeNewVarName = expressionParts[0];
-        // const expression = expressionParts[1];
-        // const collection = this.getCollection();
-        // const scope = collection.getScope();
-        //
-        // if (scopeNewVarName.length && expression.length) {
-        //     const expressionResult = scope.executeExpression(expression, () => {
-        //         // todo: add reactivity
-        //     });
-        //     const forOfData: IForTagExpression = {
-        //         newVariableName: scopeNewVarName,
-        //         value: expressionResult,
-        //     };
-        //
-        //     collection.setForOfData(forOfData);
-        // } else {
-        //     console.warn("Variable name or expression is not provided in for..of attribute.");
-        // }
+        const expressionParts = this.value.split(" of ", 2);
+        const variableName = expressionParts[0];
+        const expression = expressionParts[1];
+
+        const collection = this.getCollection();
+        const scope = collection.getScope();
+
+        if (variableName.length && expression.length) {
+            const expressionResult = scope.executeExpression(expression, () => {
+                // todo: add reactivity
+            });
+            const forExpression: VirtualTagNodeForExpression = {
+                variableName,
+                value: expressionResult,
+            };
+
+            collection.setForOfExpression(forExpression);
+        } else {
+            console.warn("Variable name or expression is not provided in @for..of attribute.");
+        }
     }
 
     protected appendForInAttribute(): void {

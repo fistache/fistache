@@ -2,7 +2,7 @@ import {ParsedNodeType} from "./ParsedNodeType";
 import {VirtualCommentNode} from "./VirtualDocumentTree/Nodes/VirtualCommentNode";
 import {VirtualComponentNode} from "./VirtualDocumentTree/Nodes/VirtualComponentNode";
 import {VirtualEmbeddedContentNode} from "./VirtualDocumentTree/Nodes/VirtualEmbeddedContentNode";
-import {VirtualTagNode} from "./VirtualDocumentTree/Nodes/VirtualTagNode";
+import {VirtualTagNodeCollection} from "./VirtualDocumentTree/VirtualTagNodeCollection";
 import {VirtualTextNode} from "./VirtualDocumentTree/Nodes/VirtualTextNode";
 import {VirtualDocumentTree} from "./VirtualDocumentTree/VirtualDocumentTree";
 import {VirtualElement} from "./VirtualDocumentTree/VirtualElement";
@@ -104,7 +104,7 @@ export default class TemplateBuilder {
     }
 
     protected createTagVirtualNode(parsedNode: any, parentVirtualElement?: VirtualElement): VirtualNode {
-        return this.createVirtualNodeOfType(VirtualTagNode, parsedNode, parentVirtualElement);
+        return this.createVirtualNodeOfType(VirtualTagNodeCollection, parsedNode, parentVirtualElement);
     }
 
     protected createTextVirtualNode(parsedNode: any, parentVirtualElement?: VirtualElement): VirtualNode {
