@@ -1,6 +1,6 @@
 import {CompiledComponent, HmrOptions} from "@seafood/app";
 import {Event} from "@seafood/component";
-import {SeafoodLoader} from "../SeafoodLoader";
+// import {SeafoodLoader} from "../SeafoodLoader";
 
 export default class Hmr {
     public static instance: Hmr;
@@ -39,9 +39,11 @@ export default class Hmr {
             if (data && data.constructor) {
                 data.components.forEach((component: CompiledComponent) => {
                     component.setTemplateRenderer(
-                        options[SeafoodLoader.EXPORT_COMPILED_COMPONENT_INSTANCE].templateRenderer
+                        // compiledComponent is SeafoodLoader.EXPORT_COMPILED_COMPONENT_INSTANCE
+                        options.compiledComponent.templateRenderer,
                     );
-                    component.setComponent(options[SeafoodLoader.EXPORT_COMPILED_COMPONENT_INSTANCE].component);
+                    // compiledComponent is SeafoodLoader.EXPORT_COMPILED_COMPONENT_INSTANCE
+                    component.setComponent(options.compiledComponent.component);
                     component.render();
                 });
             }
