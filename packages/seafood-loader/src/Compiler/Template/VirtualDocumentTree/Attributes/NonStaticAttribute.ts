@@ -1,4 +1,4 @@
-import {VirtualTagNode} from "../VirtualTagNode";
+import {VirtualTagNode} from "../Nodes/VirtualTagNode";
 import {StaticAttribute} from "./StaticAttribute";
 
 export abstract class NonStaticAttribute extends StaticAttribute {

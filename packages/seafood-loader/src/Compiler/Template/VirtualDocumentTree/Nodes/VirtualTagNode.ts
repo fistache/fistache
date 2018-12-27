@@ -1,5 +1,5 @@
+import {VirtualTagAttributesManager} from "../Attributes/VirtualTagAttributesManager";
 import {VirtualNode} from "../VirtualNode";
-import {VirtualTagAttributesManager} from "./VirtualTagNodeAttribute/VirtualTagAttributesManager";
 
 /**
  * More details in presentState variable declaration in

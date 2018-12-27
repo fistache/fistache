@@ -1,4 +1,4 @@
-import {VirtualTagNode} from "../VirtualTagNode";
+import {VirtualTagNode} from "../Nodes/VirtualTagNode";
 import {AtShapedAttribute} from "./AtShapedAttribute";
 import {AtShapedDynamicAttribute} from "./AtShapedDynamicAttribute";
 import {Attribute} from "./Attribute";

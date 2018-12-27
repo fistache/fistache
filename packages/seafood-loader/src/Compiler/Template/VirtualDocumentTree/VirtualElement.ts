@@ -1,4 +1,4 @@
-import {Scope} from "./DataBinding/Scope";
+import {Scope} from "../DataBinding/Scope";
 
 export abstract class VirtualElement {
     /**

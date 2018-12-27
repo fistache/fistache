@@ -1,4 +1,4 @@
-import {ComponentScope} from "./DataBinding/ComponentScope";
+import {ComponentScope} from "../DataBinding/ComponentScope";
 import {VirtualElement} from "./VirtualElement";
 
 export class VirtualDocumentTree extends VirtualElement {

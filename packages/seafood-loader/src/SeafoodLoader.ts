@@ -4,7 +4,7 @@ import {CompactRequestQuery} from "./CompactRequestQuery";
 import {CompilationFlag} from "./CompilationFlag";
 import {ScriptCompiler} from "./Compiler/Script/ScriptCompiler";
 import {TemplateCompiler} from "./Compiler/Template/TemplateCompiler";
-import {HmrPlugin} from "./HotModuleReplacement/HmrPlugin";
+import {HmrPlugin} from "./Hmr/HmrPlugin";
 import {RequestGenerator} from "./RequestGenerator";
 
 export class SeafoodLoader {
@@ -132,7 +132,7 @@ export class SeafoodLoader {
                 );
                 const hmrRequest = RequestGenerator.generate(
                     this.loader,
-                    path.resolve(__dirname, "../src/HotModuleReplacement/Hmr.ts"),
+                    path.resolve(__dirname, "../src/Hmr/Hmr.ts"),
                 );
 
                 this.hmrPlugin.setTemplateRequest(templateContentRequest);

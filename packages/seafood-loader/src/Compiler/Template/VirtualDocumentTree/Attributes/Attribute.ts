@@ -1,4 +1,4 @@
-import {VirtualTagNode} from "../VirtualTagNode";
+import {VirtualTagNode} from "../Nodes/VirtualTagNode";
 
 export abstract class Attribute {
     protected collection: VirtualTagNode;
