@@ -5,15 +5,18 @@ export class TemplateCompiler extends Compiler {
     public static readonly EXPORT_BUILDER_CLASS = "Builder";
     public static readonly EXPORT_BUILDER_INSTANCE = "builder";
 
-    private parser: Parser;
-
     constructor(loader: any, source: any) {
         super(loader, source);
-        this.parser = new Parser(this.content);
     }
 
     public compile(): string {
-        return JSON.stringify(this.parser.getParsedContent());
+        return "";
+    }
+
+    public compileAsync(callback: (error: any, parsedContent?: string) => void): void {
+        const parser = new Parser(this.content);
+        parser.setCallback(callback);
+        parser.parseContent();
     }
 
     protected init() {

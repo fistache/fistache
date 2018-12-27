@@ -1,32 +1,33 @@
 import HtmlParser from "htmlparser2";
-import {SynchronousPromise} from "synchronous-promise";
 
 export class Parser {
     private source: string;
-    private parsedContent: any;
+    private callback?: (error: any, parsedContent?: string) => void;
 
     public constructor(source: string) {
         this.source = source;
-        this.parseContent();
     }
 
-    public getParsedContent(): any {
-        return this.parsedContent;
+    public setCallback(callback: (error: any, parsedContent?: string) => void): void {
+        this.callback = callback;
     }
 
     public parseContent(): void {
-        let parsedContent: any;
-        this.parseFragment(this.source).then((content: any) => {
-            parsedContent = content;
-        }).catch((error: any) => {
-            throw new Error(error);
-        });
-
-        this.parsedContent = this.removeLinksToObjects(parsedContent);
+        if (this.callback) {
+            this.parseFragment(this.source).then((parsedContent: any) => {
+                if (this.callback) {
+                    this.callback(null, this.removeLinksToObjects(parsedContent));
+                }
+            }).catch((error: any) => {
+                if (this.callback) {
+                    this.callback(error);
+                }
+            });
+        }
     }
 
-    public parseFragment(fragment: string): SynchronousPromise<any> {
-        return new SynchronousPromise((resolve, reject) => {
+    public parseFragment(fragment: string): Promise<any> {
+        return new Promise((resolve, reject) => {
             // @ts-ignore
             const handler = new HtmlParser.DomHandler((error, dom) => {
                 if (error) {

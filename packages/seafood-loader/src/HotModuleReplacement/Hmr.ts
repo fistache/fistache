@@ -18,7 +18,6 @@ export default class Hmr {
         this.data = {};
     }
 
-    // todo: change component type to CompiledComponent.
     public register(id: string, options: HmrOptions): void {
         if (this.data.hasOwnProperty(id)) {
             return;
@@ -51,7 +50,7 @@ export default class Hmr {
 
     protected bindConstructor(id: string, options: HmrOptions) {
         const data = this.data;
-        // do not use arrow function cause we need to bind a context for "this"
+        // do not use arrow function cause we need to bind a context
         this.addComponentEventHandler(options, Event.Created, function(this: any) {
             const hmrData = data[id];
 
@@ -75,12 +74,12 @@ export default class Hmr {
     }
 
     private handleRerender(rerender: () => void) {
-        // try {
-        rerender();
-        // } catch (exception) {
-        //     console.error(exception.message);
-        //     console.error(exception.stackTrace);
-        //     console.warn("Something went wrong during hot-reload. Full reload required.");
-        // }
+        try {
+            rerender();
+        } catch (exception) {
+            console.error(exception.message);
+            console.error(exception.stackTrace);
+            console.warn("Something went wrong during hot-reload. Full reload required.");
+        }
     }
 }

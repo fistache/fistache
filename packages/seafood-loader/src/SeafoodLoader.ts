@@ -91,22 +91,27 @@ export class SeafoodLoader {
     }
 
     private resolveCompilationRequest(): void {
-        let CompilerClass;
+        let compiler;
         const compilationFlag = this.query.get(SeafoodLoader.REQUEST_COMPILATION_FLAG);
 
         switch (Number(compilationFlag)) {
             case (CompilationFlag.Script):
-                CompilerClass = ScriptCompiler;
+                compiler = new ScriptCompiler(this.loader, this.source);
+                this.loader.callback(null, compiler.compile());
                 break;
             case (CompilationFlag.Template):
-                CompilerClass = TemplateCompiler;
+                compiler = new TemplateCompiler(this.loader, this.source);
+                compiler.compileAsync((error: any, parsedContent?: string) => {
+                    if (error) {
+                        this.loader.callback(error);
+                    }
+
+                    this.loader.callback(null, JSON.stringify(parsedContent));
+                });
                 break;
             default:
                 throw new Error(`Unknown compilation flag "${compilationFlag}"`);
         }
-
-        const compiler = new CompilerClass(this.loader, this.source);
-        this.loader.callback(null, compiler.compile());
     }
 
     private exportCompiledComponentInstance(): void {

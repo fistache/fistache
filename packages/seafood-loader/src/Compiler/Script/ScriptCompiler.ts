@@ -5,6 +5,10 @@ export class ScriptCompiler extends Compiler {
         return this.content;
     }
 
+    public compileAsync(): void {
+        //
+    }
+
     protected init(): void {
         this.parsingTagName = "script";
     }

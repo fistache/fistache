@@ -13,6 +13,8 @@ export abstract class Compiler {
 
     public abstract compile(): string;
 
+    public abstract compileAsync(callback: (error: any, parsedContent?: string) => void): void;
+
     protected abstract init(): void;
 
     protected parseContent(): void {
