@@ -49,6 +49,10 @@ module.exports = config => {
   config.module
     .rule('seafood')
       .test(/\.seafood$/)
+      .exclude
+        .add(path.resolve('node_modules'))
+        .add(path.resolve(__dirname, '../../node_modules'))
+        .end()
       .use('babel-loader')
         .loader('babel-loader')
         .options({
@@ -69,10 +73,10 @@ module.exports = config => {
   config.module
     .rule('typescript')
     .test(/\.ts$/)
-    // .exclude
-    //   .add(path.resolve('node_modules'))
-    //   .add(path.resolve(__dirname, '../../node_modules'))
-    //   .end()
+    .exclude
+      .add(path.resolve('node_modules'))
+      .add(path.resolve(__dirname, '../../node_modules'))
+      .end()
     // .use('cache-loader')
     //   .loader('cache-loader')
     //   .end()
@@ -93,10 +97,10 @@ module.exports = config => {
   config.module
     .rule('javascript')
     .test(/\.js$/)
-    // .exclude
-    //   .add(path.resolve('node_modules'))
-    //   .add(path.resolve(__dirname, '../../node_modules'))
-    //   .end()
+    .exclude
+      .add(path.resolve('node_modules'))
+      .add(path.resolve(__dirname, '../../node_modules'))
+      .end()
     .use('babel-loader')
       .loader('babel-loader')
       .options({

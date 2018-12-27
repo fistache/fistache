@@ -31,6 +31,7 @@ export default class TemplateBuilder {
 
     constructor() {
         this.virtualDocumentTree = new VirtualDocumentTree();
+        this.parsedContent = [];
     }
 
     public setParsedContent(parsedContent: any): void {

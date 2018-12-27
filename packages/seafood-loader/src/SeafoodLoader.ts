@@ -11,8 +11,9 @@ export class SeafoodLoader {
     public static readonly REQUEST_COMPILATION_FLAG = "compile";
     public static readonly EXPORT_SCRIPT_CLASS = "Component";
     public static readonly EXPORT_SCRIPT_INSTANCE = "component";
-    public static readonly EXPORT_TEMPLATE_CLASS = "Template";
+    public static readonly EXPORT_TEMPLATE_BUILDER_CLASS = "TemplateBuilder";
     public static readonly EXPORT_TEMPLATE_INSTANCE = "template";
+    public static readonly EXPORT_TEMPLATE_CONTENT = "templateContent";
     public static readonly EXPORT_HMR_CLASS = "Hmr";
     public static readonly EXPORT_HMR_INSTANCE = "hmr";
     public static readonly EXPORT_COMPILED_COMPONENT_CLASS = "CompiledComponent";
@@ -38,12 +39,12 @@ export class SeafoodLoader {
         this.hmrPlugin = new HmrPlugin(this.requestHash);
     }
 
-    public resolveRequest(): string {
+    public resolveRequest(): void {
         if (this.isItCompilationRequest()) {
-            return this.resolveCompilationRequest();
+            this.resolveCompilationRequest();
+        } else {
+            this.exportCompiledComponentInstance();
         }
-
-        return this.exportCompiledComponentInstance();
     }
 
     protected isItCompilationRequest(): boolean {
@@ -82,10 +83,14 @@ export class SeafoodLoader {
     }
 
     private getTemplateCompilationRequest() {
-        return this.makeCompilationRequest(CompilationFlag.Template);
+        const query = new CompactRequestQuery({
+            [SeafoodLoader.REQUEST_COMPILATION_FLAG]: CompilationFlag.Template,
+        });
+
+        return RequestGenerator.generate(this.loader, this.resourcePath, query, ["seafood-loader"]);
     }
 
-    private resolveCompilationRequest(): string {
+    private resolveCompilationRequest(): void {
         let CompilerClass;
         const compilationFlag = this.query.get(SeafoodLoader.REQUEST_COMPILATION_FLAG);
 
@@ -101,32 +106,54 @@ export class SeafoodLoader {
         }
 
         const compiler = new CompilerClass(this.loader, this.source);
-        return compiler.compile();
+        this.loader.callback(null, compiler.compile());
     }
 
-    private exportCompiledComponentInstance(): string {
-        const scriptRequest = this.getScriptCompilationRequest();
-        const templateRequest = this.getTemplateCompilationRequest();
-        const hmrRequest = RequestGenerator.generate(
-            this.loader,
-            path.resolve(__dirname, "../src/HotModuleReplacement/Hmr.ts"),
+    private exportCompiledComponentInstance(): void {
+        const templateContentRequest = this.getTemplateCompilationRequest();
+
+        this.loader.loadModule(
+            JSON.parse(templateContentRequest),
+            (error: any, parsedContent: string) => {
+                if (error) {
+                    this.loader.callback(error);
+                    return;
+                }
+
+                const scriptRequest = this.getScriptCompilationRequest();
+                const templateRequest = RequestGenerator.generate(
+                    this.loader,
+                    path.resolve(__dirname, "../src/Compiler/Template/TemplateBuilder.ts"),
+                );
+                const hmrRequest = RequestGenerator.generate(
+                    this.loader,
+                    path.resolve(__dirname, "../src/HotModuleReplacement/Hmr.ts"),
+                );
+
+                this.hmrPlugin.setTemplateRequest(templateContentRequest);
+
+                this.loader.callback(null, `
+                import {default as ${SeafoodLoader.EXPORT_SCRIPT_CLASS}} from ${scriptRequest}
+                import {default as ${SeafoodLoader.EXPORT_TEMPLATE_BUILDER_CLASS}} from ${templateRequest}
+                import {default as ${SeafoodLoader.EXPORT_HMR_CLASS}} from ${hmrRequest}
+                import {CompiledComponent} from "@seafood/app"
+
+                const ${SeafoodLoader.EXPORT_TEMPLATE_INSTANCE} = new ${SeafoodLoader.EXPORT_TEMPLATE_BUILDER_CLASS}()
+                ${SeafoodLoader.EXPORT_TEMPLATE_INSTANCE}.setParsedContent(${parsedContent});
+                ${SeafoodLoader.EXPORT_TEMPLATE_INSTANCE}.buildVirtualTree();
+
+                const ${SeafoodLoader.EXPORT_SCRIPT_INSTANCE} = new ${SeafoodLoader.EXPORT_SCRIPT_CLASS}()
+                const ${SeafoodLoader.EXPORT_COMPILED_COMPONENT_INSTANCE} =
+                new CompiledComponent(
+                    ${SeafoodLoader.EXPORT_SCRIPT_INSTANCE},
+                    ${SeafoodLoader.EXPORT_TEMPLATE_INSTANCE}
+                )
+
+                ${this.getHmrCode()}
+
+                export default ${SeafoodLoader.EXPORT_COMPILED_COMPONENT_INSTANCE}
+                `);
+            },
         );
-
-        this.hmrPlugin.setTemplateRequest(templateRequest);
-
-        return `
-            import {default as ${SeafoodLoader.EXPORT_SCRIPT_CLASS}} from ${scriptRequest}
-            import {default as ${SeafoodLoader.EXPORT_TEMPLATE_INSTANCE}} from ${templateRequest}
-            import {default as ${SeafoodLoader.EXPORT_HMR_CLASS}} from ${hmrRequest}
-            import {CompiledComponent} from "@seafood/app"
-
-            const ${SeafoodLoader.EXPORT_SCRIPT_INSTANCE} = new ${SeafoodLoader.EXPORT_SCRIPT_CLASS}()
-            const ${SeafoodLoader.EXPORT_COMPILED_COMPONENT_INSTANCE} =
-            new CompiledComponent(${SeafoodLoader.EXPORT_SCRIPT_INSTANCE}, ${SeafoodLoader.EXPORT_TEMPLATE_INSTANCE})
-
-            ${this.getHmrCode()}
-
-            export default ${SeafoodLoader.EXPORT_COMPILED_COMPONENT_INSTANCE}
-        `;
     }
 }

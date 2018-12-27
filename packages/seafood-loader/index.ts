@@ -2,7 +2,11 @@ import QueryString from "query-string";
 import {CompactRequestQuery} from "./src/CompactRequestQuery";
 import {SeafoodLoader} from "./src/SeafoodLoader";
 
-export default function(this: any, source: any) {
+export default function(this: any, source: any): void {
+    // tslint:disable-next-line:no-unused-expression strict-boolean-expressions
+    this.cacheable && this.cacheable();
+    this.async();
+
     if (typeof source === "object") {
         source = source.toString("utf8");
     }
@@ -12,7 +16,7 @@ export default function(this: any, source: any) {
     const query = new CompactRequestQuery(QueryString.parse(resourceQuery.slice(1)));
     const loader = new SeafoodLoader(this, context, query, source);
 
-    return loader.resolveRequest();
+    loader.resolveRequest();
 }
 
 export const raw = true;

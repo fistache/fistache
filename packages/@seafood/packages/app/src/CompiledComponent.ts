@@ -1,10 +1,10 @@
 import {Component} from "@seafood/component";
-import {IHmrOptions} from "./IHmrOptions";
+import {HmrOptions} from "./HmrOptions";
 import {Reactivity} from "./Reactivity/Reactivity";
 
 export class CompiledComponent {
     public rootElement: any;
-    public hmrOptions: IHmrOptions;
+    public hmrOptions: HmrOptions;
     public component: Component;
     public templateRenderer: any;
 

@@ -1,5 +1,3 @@
-import path from "path";
-import {RequestGenerator} from "../../RequestGenerator";
 import {Compiler} from "../Compiler";
 import {Parser} from "./Parser";
 
@@ -15,21 +13,7 @@ export class TemplateCompiler extends Compiler {
     }
 
     public compile(): string {
-        const builderRequest = RequestGenerator.generate(
-            this.loader,
-            path.resolve(__dirname, "../src/Compiler/Template/TemplateBuilder.ts"),
-        );
-
-        return `
-        import {default as ${TemplateCompiler.EXPORT_BUILDER_CLASS}} from ${builderRequest}
-
-        const ${TemplateCompiler.EXPORT_BUILDER_INSTANCE} = new ${TemplateCompiler.EXPORT_BUILDER_CLASS}()
-
-        ${TemplateCompiler.EXPORT_BUILDER_INSTANCE}.setParsedContent(${JSON.stringify(this.parser.getParsedContent())})
-        ${TemplateCompiler.EXPORT_BUILDER_INSTANCE}.buildVirtualTree()
-
-        export default ${TemplateCompiler.EXPORT_BUILDER_INSTANCE}
-        `;
+        return JSON.stringify(this.parser.getParsedContent());
     }
 
     protected init() {
