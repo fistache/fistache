@@ -1,7 +1,7 @@
 import {VirtualTagAttributesManager} from "./Attributes/VirtualTagAttributesManager";
 import {VirtualTagNode} from "./Nodes/VirtualTagNode";
-import {VirtualNode} from "./VirtualNode";
 import {VirtualElement} from "./VirtualElement";
+import {VirtualNode} from "./VirtualNode";
 
 /**
  * More details in presentState variable declaration in
@@ -75,6 +75,19 @@ export class VirtualTagNodeCollection extends VirtualNode {
         }
     }
 
+    public removeBuildedNodeFromDom(): void {
+        for (const virtualTagNode of this.collection) {
+            const buildedNode = virtualTagNode.getBuildedNode();
+
+            if (buildedNode && buildedNode.parentNode) {
+                buildedNode.parentNode.removeChild(buildedNode);
+            }
+        }
+
+        this.buildedNode = null;
+        this.collection = [];
+    }
+
     public updateIfAttributeValue(expressionValue: any) {
         let presentState;
 
@@ -87,6 +100,12 @@ export class VirtualTagNodeCollection extends VirtualNode {
         this.hasBeenIfAttributeValueChanged = presentState !== this.getPresentState();
         if (this.hasBeenIfAttributeValueChanged) {
             this.setPresentState(presentState);
+
+            if (this.isPresent()) {
+                this.attachBuildedNode();
+            } else {
+                this.detachBuildedNode();
+            }
         }
     }
 
@@ -125,6 +144,15 @@ export class VirtualTagNodeCollection extends VirtualNode {
             //     this.renderSingleTag();
             // }
         }
+    }
+
+    protected attachBuildedNode(): void {
+        // если ребенок будет тоже коллекцией?
+        // надо будет аттачить/детатчить и ребенка тоже
+    }
+
+    protected detachBuildedNode(): void {
+        //
     }
 
     private isPresent(): boolean {

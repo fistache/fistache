@@ -106,10 +106,8 @@ export abstract class VirtualElement implements VirtualElementInterface {
         return this.scope;
     }
 
-    public removeBuildedNodeFromDom(buildedNode?: Node): void {
-        if (!buildedNode) {
-            buildedNode = this.getBuildedNode() as Element;
-        }
+    public removeBuildedNodeFromDom(): void {
+        const buildedNode = this.getBuildedNode() as Element;
 
         if (buildedNode && buildedNode.parentNode) {
             buildedNode.parentNode.removeChild(buildedNode);
