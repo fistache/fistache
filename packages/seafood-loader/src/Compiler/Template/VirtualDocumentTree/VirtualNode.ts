@@ -1,14 +1,35 @@
 import {VirtualElement} from "./VirtualElement";
 
 export abstract class VirtualNode extends VirtualElement {
-    protected parsedNode: any;
-
-    public setParsedNode(parsedNode: any): void {
-        this.parsedNode = parsedNode;
+    public render(): void {
+        this.buildedNode = this.buildNode();
     }
 
-    public getParsedNode(): any {
-        return this.parsedNode;
+    public getNextSiblingNode(): Node | null {
+        const parentVirtualElement = this.getParentVirtualElement();
+        const position = this.getPosition();
+        let nextSiblingNode: Node | null = null;
+
+        if (position && parentVirtualElement) {
+            const childVirtualElements = parentVirtualElement.getChildVirtualElementsReversed();
+
+            for (const childVirtualElement of childVirtualElements) {
+                if (childVirtualElement !== this) {
+                    const childBuildedNode = childVirtualElement.getBuildedNode();
+                    const childPosition = childVirtualElement.getPosition();
+
+                    if (childBuildedNode && childPosition) {
+                        if (position < childPosition) {
+                            nextSiblingNode = childBuildedNode;
+                        } else {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        return nextSiblingNode;
     }
 
     protected appendRenderedElement(): void {
@@ -21,4 +42,6 @@ export abstract class VirtualNode extends VirtualElement {
             }
         }
     }
+
+    protected abstract buildNode(): Node | undefined | null;
 }

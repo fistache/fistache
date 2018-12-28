@@ -1,7 +1,7 @@
 import {ComponentScope} from "../DataBinding/ComponentScope";
-import {VirtualElement} from "./VirtualElement";
+import {VirtualNode} from "./VirtualNode";
 
-export class VirtualDocumentTree extends VirtualElement {
+export class VirtualDocumentTree extends VirtualNode {
     protected componentScope: ComponentScope;
 
     constructor() {

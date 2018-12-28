@@ -7,6 +7,8 @@ export abstract class VirtualElement implements VirtualElementInterface {
      */
     protected parentNode?: Node;
 
+    protected parsedNode: any;
+
     /**
      * A node in browser created after rendering.
      */
@@ -35,8 +37,14 @@ export abstract class VirtualElement implements VirtualElementInterface {
         //
     }
 
-    public render(): void {
-        this.buildedNode = this.buildNode();
+    public abstract render(): void;
+
+    public setParsedNode(parsedNode: any): void {
+        this.parsedNode = parsedNode;
+    }
+
+    public getParsedNode(): any {
+        return this.parsedNode;
     }
 
     public getChildVirtualElements(): VirtualElement[] {
@@ -51,41 +59,6 @@ export abstract class VirtualElement implements VirtualElementInterface {
         }
 
         return elements;
-    }
-
-    public getNextSiblingNode(): Node | null {
-        const parentVirtualElement = this.getParentVirtualElement();
-        const position = this.getPosition();
-        let nextSiblingNode: Node | null = null;
-
-        if (position && parentVirtualElement) {
-            const childVirtualElements = parentVirtualElement.getChildVirtualElementsReversed();
-
-            for (const childVirtualElement of childVirtualElements) {
-                if (childVirtualElement !== this) {
-                    const childBuildedNode = childVirtualElement.getBuildedNode();
-
-                    // if (childVirtualElement instanceof VirtualTagNodeCollection) {
-                    //     const childBuildedNodes = childVirtualElement.getBuildedNodes();
-                    //     if (childBuildedNodes[0]) {
-                    //         childBuildedNode = childBuildedNodes[0].element;
-                    //     }
-                    // }
-
-                    const childPosition = childVirtualElement.getPosition();
-
-                    if (childBuildedNode && childPosition) {
-                        if (position < childPosition) {
-                            nextSiblingNode = childBuildedNode;
-                        } else {
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        return nextSiblingNode;
     }
 
     public addChildVirtualElement(node: VirtualElement): void {
@@ -165,8 +138,6 @@ export abstract class VirtualElement implements VirtualElementInterface {
             position++;
         }
     }
-
-    protected abstract buildNode(): Node | undefined | null;
 
     protected abstract appendRenderedElement(): void;
 }

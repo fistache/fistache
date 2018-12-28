@@ -1,7 +1,5 @@
-import {Component} from "../Component";
-
-export function use(...components: Component[]) {
-    if (components) {
+export function use(...args: any[]) {
+    if (args) {
         //
     }
     return (/*target: object*/) => {

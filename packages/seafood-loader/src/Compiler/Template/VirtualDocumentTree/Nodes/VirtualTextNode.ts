@@ -12,6 +12,11 @@ export class VirtualTextNode extends SingleVirtualNode {
         this.expressionResults = [];
     }
 
+    public render(): void {
+        super.render();
+        this.appendRenderedElement();
+    }
+
     public beforeRender(): void {
         super.beforeRender();
         this.bindReactiveExpressions();

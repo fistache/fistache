@@ -1,6 +1,7 @@
-import {Scope} from "../DataBinding/Scope";
 import {VirtualTagAttributesManager} from "./Attributes/VirtualTagAttributesManager";
-import {VirtualElementInterface} from "./VirtualElementInterface";
+import {VirtualTagNode} from "./Nodes/VirtualTagNode";
+import {VirtualNode} from "./VirtualNode";
+import {VirtualElement} from "./VirtualElement";
 
 /**
  * More details in presentState variable declaration in
@@ -16,13 +17,8 @@ export interface VirtualTagNodeForExpression {
     value: any;
 }
 
-export interface VirtualTagNodeCollectionItem {
-    element: Element;
-    scope: Scope;
-}
-
-export class VirtualTagNodeCollection implements VirtualElementInterface {
-    protected collection: VirtualTagNodeCollectionItem[];
+export class VirtualTagNodeCollection extends VirtualNode {
+    protected collection: VirtualTagNode[];
 
     /**
      * Used for @if conditinal rendering.
@@ -41,6 +37,8 @@ export class VirtualTagNodeCollection implements VirtualElementInterface {
     private hasBeenIfAttributeValueChanged: boolean = false;
 
     public constructor() {
+        super();
+
         this.attributesManager = new VirtualTagAttributesManager(this);
         this.presentState = VirtualTagNodePresentState.Present;
         this.collection = [];
@@ -54,23 +52,26 @@ export class VirtualTagNodeCollection implements VirtualElementInterface {
         this.attributesManager.renderAtShapedAttributes();
 
         if (this.isPresent()) {
+            super.render();
+
             if (this.forOfExpression) {
-                this.renderForOfExpression();
+                // this.renderForOfExpression();
             } else {
                 this.renderSingleTag();
             }
-        }
 
-        this.attributesManager.renderDynamicAndStaticAttributes();
+            this.attributesManager.renderDynamicAndStaticAttributes();
+            this.appendRenderedElement();
+        }
     }
 
     public setForOfExpression(forOfExpression: VirtualTagNodeForExpression): void {
         this.forOfExpression = forOfExpression;
     }
 
-    public useCollection(callback: (element: Element) => void): void {
-        for (const item of this.collection) {
-            callback(item.element);
+    public useCollection(callback: (element: VirtualTagNode) => void): void {
+        for (const virtualTagNode of this.collection) {
+            callback(virtualTagNode);
         }
     }
 
@@ -97,20 +98,25 @@ export class VirtualTagNodeCollection implements VirtualElementInterface {
         return this.presentState;
     }
 
+    public getChildVirtualElements(parentVirtualElement?: VirtualElement): VirtualElement[] {
+        if (parentVirtualElement) {
+            return this.childVirtualElements.map((virtualElement: VirtualElement) => {
+                virtualElement.setParentVirtualElement(parentVirtualElement);
+                return virtualElement;
+            });
+        } else {
+            return this.childVirtualElements;
+        }
+    }
+
+    protected buildNode(): Node | undefined | null {
+        return document.createDocumentFragment();
+    }
+
     protected renderSingleTag(): void {
-        // const buildedNode = this.getBuildedNode();
-        //
-        // if (buildedNode) {
-        //     this.appendRenderedElement();
-        //     this.extendChildVirtualElementsAndRender();
-        //
-        //     const scope = this.createSimilarScope();
-        //
-        //     this.collection.push({
-        //         element: buildedNode,
-        //         scope,
-        //     });
-        // }
+        const virtualTagNode = this.createVirtualTagNode();
+        virtualTagNode.beforeRender();
+        virtualTagNode.render();
     }
 
     protected renderForOfExpression(): void {
@@ -125,21 +131,24 @@ export class VirtualTagNodeCollection implements VirtualElementInterface {
         return this.getPresentState() === VirtualTagNodePresentState.Present;
     }
 
-    // private createSimilarScope(): Scope {
-        // todo: make clone method in Scope class
-        // const scope = this.getScope();
-        // const parentScope = scope.getParentScope();
-        // const componentScope = scope.getComponentScope();
-        // const similarScope = new Scope();
-        //
-        // if (parentScope) {
-        //     similarScope.setParentScope(parentScope);
-        // }
-        //
-        // if (componentScope) {
-        //     similarScope.setComponentScope(componentScope);
-        // }
-        //
-        // return similarScope;
-    // }
+    private createVirtualTagNode(): VirtualTagNode {
+        const virtualTagNode = new VirtualTagNode();
+        const virtualTagNodeScope = virtualTagNode.getScope();
+
+        const collectionScope = this.getScope();
+        const componentScope = collectionScope.getComponentScope();
+
+        virtualTagNode.setParsedNode(this.parsedNode);
+        virtualTagNode.setChildVirtualElements(this.getChildVirtualElements(virtualTagNode));
+        virtualTagNode.setParentVirtualElement(this);
+        virtualTagNodeScope.setParentScope(collectionScope);
+
+        if (componentScope) {
+            virtualTagNodeScope.setComponentScope(componentScope);
+        }
+
+        this.collection.push(virtualTagNode);
+
+        return virtualTagNode;
+    }
 }

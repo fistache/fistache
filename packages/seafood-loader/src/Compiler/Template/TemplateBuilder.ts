@@ -2,11 +2,10 @@ import {ParsedNodeType} from "./ParsedNodeType";
 import {VirtualCommentNode} from "./VirtualDocumentTree/Nodes/VirtualCommentNode";
 import {VirtualComponentNode} from "./VirtualDocumentTree/Nodes/VirtualComponentNode";
 import {VirtualEmbeddedContentNode} from "./VirtualDocumentTree/Nodes/VirtualEmbeddedContentNode";
-import {VirtualTagNodeCollection} from "./VirtualDocumentTree/VirtualTagNodeCollection";
 import {VirtualTextNode} from "./VirtualDocumentTree/Nodes/VirtualTextNode";
 import {VirtualDocumentTree} from "./VirtualDocumentTree/VirtualDocumentTree";
 import {VirtualElement} from "./VirtualDocumentTree/VirtualElement";
-import {VirtualNode} from "./VirtualDocumentTree/VirtualNode";
+import {VirtualTagNodeCollection} from "./VirtualDocumentTree/VirtualTagNodeCollection";
 
 export default class TemplateBuilder {
     public readonly htmlTags: string[] = [
@@ -45,20 +44,22 @@ export default class TemplateBuilder {
     }
 
     public buildVirtualTree() {
-        let stack: any = this.parsedContent;
-        this.setVirtualParentNodeForChildNodes(stack);
+        if (Array.isArray(this.parsedContent)) {
+            let stack: any = this.parsedContent.reverse();
+            this.setVirtualParentNodeForChildNodes(stack);
 
-        while (stack.length) {
-            const element = stack.pop();
-            const childNodes = element.children ? element.children.slice().reverse() : [];
-            const virtualParentNode = this.createVirtualNodeRefferingToElement(element, element.virtualParentNode);
+            while (stack.length) {
+                const element = stack.pop();
+                const childNodes = element.children ? element.children.slice().reverse() : [];
+                const virtualParentNode = this.createVirtualNodeRefferingToElement(element, element.virtualParentNode);
 
-            this.setVirtualParentNodeForChildNodes(childNodes, virtualParentNode);
-            stack = stack.concat(childNodes);
+                this.setVirtualParentNodeForChildNodes(childNodes, virtualParentNode);
+                stack = stack.concat(childNodes);
+            }
         }
     }
 
-    protected createVirtualNodeRefferingToElement(element: any, parentElement?: VirtualElement): VirtualNode {
+    protected createVirtualNodeRefferingToElement(element: any, parentElement?: VirtualElement): VirtualElement {
         let virtualNode = null;
 
         switch (element.type) {
@@ -85,7 +86,7 @@ export default class TemplateBuilder {
     }
 
     protected createVirtualNodeOfType(
-        type: new () => VirtualNode,
+        type: new () => VirtualElement,
         parsedNode: any,
         parentVirtualElement?: VirtualElement,
     ) {
@@ -99,23 +100,26 @@ export default class TemplateBuilder {
         return virtualComponentNode;
     }
 
-    protected createComponentVirtualNode(parsedNode: any, parentVirtualElement?: VirtualElement): VirtualNode {
+    protected createComponentVirtualNode(parsedNode: any, parentVirtualElement?: VirtualElement): VirtualElement {
         return this.createVirtualNodeOfType(VirtualComponentNode, parsedNode, parentVirtualElement);
     }
 
-    protected createTagVirtualNode(parsedNode: any, parentVirtualElement?: VirtualElement): VirtualNode {
+    protected createTagVirtualNode(parsedNode: any, parentVirtualElement?: VirtualElement): VirtualElement {
         return this.createVirtualNodeOfType(VirtualTagNodeCollection, parsedNode, parentVirtualElement);
     }
 
-    protected createTextVirtualNode(parsedNode: any, parentVirtualElement?: VirtualElement): VirtualNode {
+    protected createTextVirtualNode(parsedNode: any, parentVirtualElement?: VirtualElement): VirtualElement {
         return this.createVirtualNodeOfType(VirtualTextNode, parsedNode, parentVirtualElement);
     }
 
-    protected createCommentVirtualNode(parsedNode: any, parentVirtualElement?: VirtualElement): VirtualNode {
+    protected createCommentVirtualNode(parsedNode: any, parentVirtualElement?: VirtualElement): VirtualElement {
         return this.createVirtualNodeOfType(VirtualCommentNode, parsedNode, parentVirtualElement);
     }
 
-    protected createEmbedContentVirtualNode(parsedNode: any, parentVirtualElement?: VirtualElement): VirtualNode {
+    protected createEmbedContentVirtualNode(
+        parsedNode: any,
+        parentVirtualElement?: VirtualElement,
+    ): VirtualElement {
         return this.createVirtualNodeOfType(VirtualEmbeddedContentNode, parsedNode, parentVirtualElement);
     }
 
