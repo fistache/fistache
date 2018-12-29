@@ -31,7 +31,7 @@ export class VirtualTextNode extends SingleVirtualNode {
                 expressionIndex++;
 
                 if (typeof value === "object") {
-                    return value.toString();
+                    return JSON.stringify(value);
                 } else {
                     return value;
                 }
@@ -54,7 +54,6 @@ export class VirtualTextNode extends SingleVirtualNode {
                         this.removeBuildedNode();
                         this.render();
                     });
-                console.log(this.expressionResults[expressionIndex]);
             }
         }
     }

@@ -39,6 +39,10 @@ export class ReactiveProperty {
             dependentFunction.trigger();
         }
 
+        if (this.parent) {
+            this.parent.notify();
+        }
+
         this.notifyAllChildProperties();
     }
 
