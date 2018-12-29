@@ -40,6 +40,8 @@ export class AtShapedAttribute extends NonStaticAttribute {
 
         if (variableName.length && expression.length) {
             const expressionResult = scope.executeExpression(expression, () => {
+                // чтобы работало, нужно раскомментить parent.notify
+                // в app/component
                 // todo: add reactivity
             });
             const forExpression: VirtualTagNodeForExpression = {
@@ -54,41 +56,47 @@ export class AtShapedAttribute extends NonStaticAttribute {
     }
 
     protected appendForInAttribute(): void {
-        // const expressionParts = this.value.split(" in ");
-        // const scopeNewVarName = expressionParts[0];
-        // const expression = expressionParts[1];
-        // const collection = this.getCollection();
-        // const scope = collection.getScope();
-        //
-        // if (scopeNewVarName.length && expression.length) {
-        //     const expressionResult = scope.executeExpression(expression, () => {
-        //         // todo: add reactivity
-        //     });
-        //     const forInData: IForTagExpression = {
-        //         newVariableName: scopeNewVarName,
-        //         value: expressionResult,
-        //     };
-        //
-        //     collection.setForInData(forInData);
-        // } else {
-        //     console.warn("Variable name or expression is not provided in for..of attribute.");
-        // }
+        const expressionParts = this.value.split(" in ", 2);
+        const variableName = expressionParts[0];
+        const expression = expressionParts[1];
+
+        const collection = this.getCollection();
+        const scope = collection.getScope();
+
+        if (variableName.length && expression.length) {
+            const expressionResult = scope.executeExpression(expression, () => {
+                // чтобы работало, нужно раскомменить parent.notify
+                // в app/component
+                // todo: add reactivity
+            });
+            const forExpression: VirtualTagNodeForExpression = {
+                variableName,
+                value: expressionResult,
+            };
+
+            collection.setForInExpression(forExpression);
+        } else {
+            console.warn("Variable name or expression is not provided in @for..in attribute.");
+        }
     }
 
     protected appendForNAttribute(): void {
-        // const collection = this.getCollection();
-        // const scope = collection.getScope();
-        //
-        // if (this.value.length) {
-        //     const expressionResult = scope.executeExpression(this.value, (value: any) => {
-        //         // todo: add reactivity
-        //         collection.updateForNData(value);
-        //     });
-        //
-        //     collection.setForNData(expressionResult);
-        // } else {
-        //     console.warn("Variable name or expression is not provided in @for attribute.");
-        // }
+        const collection = this.getCollection();
+        const scope = collection.getScope();
+
+        if (this.value.length) {
+            const expressionResult = scope.executeExpression(this.value, (value: any) => {
+                // todo: add reactivity
+                // collection.updateForNExpression(value);
+            });
+            const forExpression: VirtualTagNodeForExpression = {
+                value: expressionResult,
+            };
+
+            collection.setForNExpression(forExpression);
+        } else {
+            console.warn("Variable name or expression is not provided in @for attribute.");
+        }
     }
 
     protected appendIfAttribute(): void {

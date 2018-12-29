@@ -94,7 +94,7 @@ export default class TemplateBuilder {
         virtualComponentNode.setParsedNode(parsedNode);
 
         if (parentVirtualElement) {
-            virtualComponentNode.setParentVirtualElement(parentVirtualElement);
+            virtualComponentNode.setParentVirtualElementAndAddThisAsChild(parentVirtualElement);
         }
 
         return virtualComponentNode;

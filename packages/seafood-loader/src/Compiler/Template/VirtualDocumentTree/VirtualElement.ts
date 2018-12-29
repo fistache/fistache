@@ -67,10 +67,14 @@ export abstract class VirtualElement implements VirtualElementInterface {
         this.childVirtualElements.push(node);
     }
 
-    public setParentVirtualElement(parentVirtualElement: VirtualElement, shouldAddChildToParent: boolean = true): void {
+    public setParentVirtualElement(parentVirtualElement: VirtualElement): void {
         this.parentVirtualElement = parentVirtualElement;
+    }
 
-        if (shouldAddChildToParent) {
+    public setParentVirtualElementAndAddThisAsChild(parentVirtualElement: VirtualElement): void {
+        this.setParentVirtualElement(parentVirtualElement);
+
+        if (this.parentVirtualElement) {
             this.parentVirtualElement.addChildVirtualElement(this);
         }
     }
@@ -125,6 +129,7 @@ export abstract class VirtualElement implements VirtualElementInterface {
     }
 
     public clone(): VirtualElement {
+        // todo: add all fields
         // @ts-ignore
         const cloned = new this.constructor();
         const childVirtualElements: VirtualElement[] = [];
@@ -134,6 +139,7 @@ export abstract class VirtualElement implements VirtualElementInterface {
         }
 
         cloned.setParsedNode(this.getParsedNode());
+        cloned.setParentVirtualElement(this.getParentVirtualElement());
         cloned.setChildVirtualElements(childVirtualElements);
 
         return cloned;
