@@ -8,16 +8,49 @@ export class Reactivity {
             if (component.hasOwnProperty(fieldName)) {
                 const isObtainable = !Reflect.hasMetadata(DECORATOR_UNREACTIVE_FLAG, component, fieldName);
                 if (parentReactivity || isObtainable) {
-                    const property = new ReactiveProperty();
-                    Reflect.defineMetadata(REACTIVE_PROPERTY_FLAG, property, component, fieldName);
+                    Reactivity.addReactivityToComponentSpecifiedField(component, fieldName, parentReactivity);
+                }
+            }
+        }
+    }
 
-                    if (parentReactivity) {
-                        property.setParent(parentReactivity);
+    public static addReactivityToComponentSpecifiedField(
+        component: any,
+        fieldName: string,
+        parentReactivity?: ReactiveProperty,
+    ): void {
+        const property = new ReactiveProperty();
+        Reflect.defineMetadata(REACTIVE_PROPERTY_FLAG, property, component, fieldName);
+
+        if (parentReactivity) {
+            property.setParent(parentReactivity);
+        }
+
+        if (typeof component[fieldName] === "object") {
+            this.addReactivityToObtainableComponentFields(component[fieldName], property);
+        }
+    }
+
+    public static merge(from: any, to: any, field: string, reactiveProperty?: ReactiveProperty): void {
+        const fromValue = from[field];
+        const toValue = to[field];
+
+        if (reactiveProperty) {
+            Reflect.defineMetadata(REACTIVE_PROPERTY_FLAG, reactiveProperty, to, field);
+        } else {
+            Reactivity.addReactivityToComponentSpecifiedField(to, field);
+        }
+
+        if (typeof toValue === "object") {
+            for (const fieldName in toValue) {
+                if (toValue.hasOwnProperty(fieldName)) {
+                    let reactiveProp;
+
+                    if (fromValue.hasOwnProperty(fieldName)) {
+                        reactiveProp = Reflect.getMetadata(REACTIVE_PROPERTY_FLAG, fromValue, fieldName);
                     }
 
-                    if (typeof component[fieldName] === "object") {
-                        this.addReactivityToObtainableComponentFields(component[fieldName], property);
-                    }
+                    this.merge(fromValue, toValue, fieldName, reactiveProp);
                 }
             }
         }

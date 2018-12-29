@@ -14,6 +14,7 @@ export enum VirtualTagNodePresentState {
 
 export interface VirtualTagNodeForExpression {
     variableName?: string;
+    expression: string;
     value: any;
 }
 
@@ -169,13 +170,30 @@ export class VirtualTagNodeCollection extends VirtualNode {
 
     protected renderForOfExpression(): void {
         if (this.isPresent() && this.forOfExpression) {
-            for (const value of this.forOfExpression.value) {
-                this.renderSingleTag((virtualTagNode: VirtualTagNode) => {
-                    if (this.forOfExpression && this.forOfExpression.variableName) {
-                        const scope = virtualTagNode.getScope();
-                        scope.setVariable(this.forOfExpression.variableName, value);
-                    }
-                });
+            for (const valueIndex in this.forOfExpression.value) {
+                if (this.forOfExpression.value.hasOwnProperty(valueIndex)) {
+                    this.renderSingleTag((virtualTagNode: VirtualTagNode) => {
+                        if (this.forOfExpression && this.forOfExpression.variableName) {
+                            const scope = virtualTagNode.getScope();
+                            if (typeof this.forOfExpression.value[valueIndex] === "object") {
+                                scope.setVariable(this.forOfExpression.variableName, new Proxy({}, {
+                                    get: (_target: object, propertyKey: PropertyKey): any => {
+                                        if (this.forOfExpression) {
+                                            return scope.executeExpressionWithoutTracking(
+                                                this.forOfExpression.expression,
+                                            )[valueIndex][propertyKey];
+                                        }
+                                    },
+                                }));
+                            } else {
+                                scope.setVariable(
+                                    this.forOfExpression.variableName,
+                                    this.forOfExpression.value[valueIndex],
+                                );
+                            }
+                        }
+                    });
+                }
             }
         }
     }

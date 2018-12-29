@@ -1,5 +1,5 @@
-import {NonStaticAttribute} from "./NonStaticAttribute";
 import {VirtualTagNodeForExpression} from "../VirtualTagNodeCollection";
+import {NonStaticAttribute} from "./NonStaticAttribute";
 
 export class AtShapedAttribute extends NonStaticAttribute {
     public append(): void {
@@ -39,13 +39,10 @@ export class AtShapedAttribute extends NonStaticAttribute {
         const scope = collection.getScope();
 
         if (variableName.length && expression.length) {
-            const expressionResult = scope.executeExpression(expression, () => {
-                // чтобы работало, нужно раскомментить parent.notify
-                // в app/component
-                // todo: add reactivity
-            });
+            const expressionResult = scope.executeExpression(expression);
             const forExpression: VirtualTagNodeForExpression = {
                 variableName,
+                expression,
                 value: expressionResult,
             };
 
@@ -71,6 +68,7 @@ export class AtShapedAttribute extends NonStaticAttribute {
             });
             const forExpression: VirtualTagNodeForExpression = {
                 variableName,
+                expression,
                 value: expressionResult,
             };
 
@@ -85,11 +83,12 @@ export class AtShapedAttribute extends NonStaticAttribute {
         const scope = collection.getScope();
 
         if (this.value.length) {
-            const expressionResult = scope.executeExpression(this.value, (value: any) => {
+            const expressionResult = scope.executeExpression(this.value, () => {
                 // todo: add reactivity
                 // collection.updateForNExpression(value);
             });
             const forExpression: VirtualTagNodeForExpression = {
+                expression: this.value,
                 value: expressionResult,
             };
 

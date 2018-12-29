@@ -1,4 +1,4 @@
-import {REACTIVE_PROPERTY_FLAG} from "@seafood/app";
+import {REACTIVE_PROPERTY_FLAG, ReactiveProperty, Reactivity} from "@seafood/app";
 import "reflect-metadata";
 import {ComponentScope} from "./ComponentScope";
 
@@ -76,10 +76,16 @@ export class Scope {
         return this.executionVariables;
     }
 
-    public executeExpression(expression: string, rerenderFunction: (updatedExpressionValue: any) => void): any {
+    public executeExpression(expression: string, rerenderFunction?: (updatedExpressionValue: any) => void): any {
         const extendedVariables = this.getExtendedVariables();
         const componentScope = this.getComponentScope();
         const expressionFunction = this.makeExpressionFunction(expression, Object.keys(extendedVariables));
+
+        if (!rerenderFunction) {
+            rerenderFunction = () => {
+                // empty function
+            };
+        }
 
         if (componentScope) {
             componentScope.enableExpressionGonnaBeExecuted();
@@ -88,15 +94,24 @@ export class Scope {
             componentScope.setExecutionVariables(extendedVariables);
         }
 
-        const expressionValue = this.bindExecuteFunctionContext(expressionFunction)(
-            ...Object.values(extendedVariables),
+        const expressionResult = this.bindExecuteFunctionContext(expressionFunction)(
+            ...this.convertVariablesToParameters(extendedVariables),
         );
 
         if (componentScope) {
             componentScope.disableExpressionGonnaBeExecuted();
         }
 
-        return expressionValue;
+        return expressionResult;
+    }
+
+    public executeExpressionWithoutTracking(expression: string): any {
+        const extendedVariables = this.getExtendedVariables();
+        const expressionFunction = this.makeExpressionFunction(expression, Object.keys(extendedVariables));
+
+        return this.bindExecuteFunctionContext(expressionFunction)(
+            ...this.convertVariablesToParameters(extendedVariables),
+        );
     }
 
     public getExtendedVariables(): any[] {
@@ -145,6 +160,7 @@ export class Scope {
         for (const fieldName in inputValue) {
             if (inputValue.hasOwnProperty(fieldName)) {
                 const isReactive = Reflect.hasMetadata(REACTIVE_PROPERTY_FLAG, inputValue, fieldName);
+                // console.log(isReactive, inputValue, fieldName);
 
                 if (isReactive) {
                     this.addComponentFieldReactivity(fieldName, inputValue);
@@ -175,7 +191,7 @@ export class Scope {
             name: fieldName,
             value: parentObject[fieldName],
         };
-        const reactivity = Reflect.getMetadata(
+        const reactivity: ReactiveProperty = Reflect.getMetadata(
             REACTIVE_PROPERTY_FLAG,
             parentObject,
             fieldName,
@@ -195,7 +211,7 @@ export class Scope {
                         reactivity.depend(() => {
                             rerenderFunction(
                                 scopeContext.bindExecuteFunctionContext(executeFunction)(
-                                    ...Object.values(executionVariables),
+                                    ...scopeContext.convertVariablesToParameters(executionVariables),
                                 ),
                             );
                         }, scopeContext.executeFunction);
@@ -205,9 +221,31 @@ export class Scope {
                 return property.value;
             },
             set(value: any): void {
-                property.value = value;
+                Reflect.defineMetadata(REACTIVE_PROPERTY_FLAG, value, reactivity);
+
+                if (typeof value === "object") {
+                    Reactivity.merge(parentObject, {
+                        [property.name]: value,
+                    }, property.name, reactivity);
+                }
+
+                property.value = scopeContext.makeComponentInstanceReactive(value);
                 reactivity.notify();
+
+                console.log(property.name, value);
             },
         });
+    }
+
+    protected convertVariablesToParameters(variables: any): any[] {
+        const parameters: any[] = [];
+
+        for (const index in variables) {
+            if (variables.hasOwnProperty(index)) {
+                parameters.push(variables[index]);
+            }
+        }
+
+        return parameters;
     }
 }
