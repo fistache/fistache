@@ -34,16 +34,18 @@ export class ReactiveProperty {
         }
     }
 
-    public notify() {
+    public notify(shouldNotifyChild: boolean = true) {
         for (const dependentFunction of this.dependentFunctions) {
             dependentFunction.trigger();
         }
 
         if (this.parent) {
-            this.parent.notify();
+            this.parent.notify(false);
         }
 
-        this.notifyAllChildProperties();
+        if (shouldNotifyChild) {
+            this.notifyAllChildProperties();
+        }
     }
 
     public notifyAllChildProperties(): void {
