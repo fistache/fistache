@@ -175,22 +175,13 @@ export class VirtualTagNodeCollection extends VirtualNode {
                     this.renderSingleTag((virtualTagNode: VirtualTagNode) => {
                         if (this.forOfExpression && this.forOfExpression.variableName) {
                             const scope = virtualTagNode.getScope();
-                            if (typeof this.forOfExpression.value[valueIndex] === "object") {
-                                scope.setVariable(this.forOfExpression.variableName, new Proxy({}, {
-                                    get: (_target: object, propertyKey: PropertyKey): any => {
-                                        if (this.forOfExpression) {
-                                            return scope.executeExpressionWithoutTracking(
-                                                this.forOfExpression.expression,
-                                            )[valueIndex][propertyKey];
-                                        }
-                                    },
-                                }));
-                            } else {
-                                scope.setVariable(
-                                    this.forOfExpression.variableName,
-                                    this.forOfExpression.value[valueIndex],
-                                );
-                            }
+                            scope.setVariable(this.forOfExpression.variableName, () => {
+                                if (this.forOfExpression) {
+                                    return scope.executeExpressionWithoutTracking(
+                                        this.forOfExpression.expression,
+                                    )[valueIndex];
+                                }
+                            });
                         }
                     });
                 }

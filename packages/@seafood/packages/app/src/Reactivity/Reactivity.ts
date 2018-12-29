@@ -32,7 +32,7 @@ export class Reactivity {
     }
 
     public static merge(from: any, to: any, field: string, reactiveProperty?: ReactiveProperty): void {
-        const fromValue = from[field];
+        const fromValue = from && from[field];
         const toValue = to[field];
 
         if (reactiveProperty) {
@@ -46,7 +46,7 @@ export class Reactivity {
                 if (toValue.hasOwnProperty(fieldName)) {
                     let reactiveProp;
 
-                    if (fromValue.hasOwnProperty(fieldName)) {
+                    if (fromValue && fromValue.hasOwnProperty(fieldName)) {
                         reactiveProp = Reflect.getMetadata(REACTIVE_PROPERTY_FLAG, fromValue, fieldName);
                     }
 

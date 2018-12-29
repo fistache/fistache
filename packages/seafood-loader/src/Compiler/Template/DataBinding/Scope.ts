@@ -143,7 +143,26 @@ export class Scope {
     }
 
     protected makeExpressionFunction(expression: string, args: any[]): (...args: any[]) => void {
-        return new Function(...args, `return ${expression};`) as (...args: any[]) => void;
+        let variables = ``;
+
+        for (const variableName of args) {
+            variables += `
+            ${variableName}Function = ${variableName};
+            ${variableName} = new Proxy({}, {
+                get(_, propertyKey) {
+                    const value = ${variableName}Function()
+
+                    if (propertyKey === Symbol.toPrimitive ||
+                        propertyKey === Symbol.toStringTag) {
+                        return value;
+                    }
+
+                    return value[propertyKey];
+                }
+            }) \n`;
+        }
+
+        return new Function(...args, `${variables} \n return ${expression};`) as (...args: any[]) => void;
     }
 
     protected bindExecuteFunctionContext(executeFunction: () => void): (...args: any) => void {
@@ -160,7 +179,6 @@ export class Scope {
         for (const fieldName in inputValue) {
             if (inputValue.hasOwnProperty(fieldName)) {
                 const isReactive = Reflect.hasMetadata(REACTIVE_PROPERTY_FLAG, inputValue, fieldName);
-                // console.log(isReactive, inputValue, fieldName);
 
                 if (isReactive) {
                     this.addComponentFieldReactivity(fieldName, inputValue);
@@ -218,21 +236,19 @@ export class Scope {
                     }
                 }
 
+                console.log("get", property.name);
                 return property.value;
             },
             set(value: any): void {
-                Reflect.defineMetadata(REACTIVE_PROPERTY_FLAG, value, reactivity);
-
                 if (typeof value === "object") {
-                    Reactivity.merge(parentObject, {
-                        [property.name]: value,
-                    }, property.name, reactivity);
+                    Reactivity.merge(parentObject, {[property.name]: value}, property.name, reactivity);
+                    property.value = scopeContext.makeComponentInstanceReactive(value);
+                } else {
+                    property.value = value;
                 }
+                console.log("set", property.name, property.value);
 
-                property.value = scopeContext.makeComponentInstanceReactive(value);
                 reactivity.notify();
-
-                console.log(property.name, value);
             },
         });
     }
