@@ -177,9 +177,7 @@ export class VirtualTagNodeCollection extends VirtualNode {
                             const scope = virtualTagNode.getScope();
                             scope.setVariable(this.forOfExpression.variableName, () => {
                                 if (this.forOfExpression) {
-                                    return scope.executeExpressionWithoutTracking(
-                                        this.forOfExpression.expression,
-                                    )[valueIndex];
+                                    return this.forOfExpression.value[valueIndex];
                                 }
                             });
                         }

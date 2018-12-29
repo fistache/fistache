@@ -54,6 +54,7 @@ export class VirtualTextNode extends SingleVirtualNode {
                         this.removeBuildedNode();
                         this.render();
                     });
+                console.log(this.expressionResults[expressionIndex]);
             }
         }
     }

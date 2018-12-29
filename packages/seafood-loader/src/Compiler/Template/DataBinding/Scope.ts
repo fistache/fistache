@@ -146,20 +146,7 @@ export class Scope {
         let variables = ``;
 
         for (const variableName of args) {
-            variables += `
-            ${variableName}Function = ${variableName};
-            ${variableName} = new Proxy({}, {
-                get(_, propertyKey) {
-                    const value = ${variableName}Function()
-
-                    if (propertyKey === Symbol.toPrimitive ||
-                        propertyKey === Symbol.toStringTag) {
-                        return value;
-                    }
-
-                    return value[propertyKey];
-                }
-            }) \n`;
+            variables += `${variableName} = ${variableName}() \n`;
         }
 
         return new Function(...args, `${variables} \n return ${expression};`) as (...args: any[]) => void;
@@ -236,7 +223,6 @@ export class Scope {
                     }
                 }
 
-                console.log("get", property.name);
                 return property.value;
             },
             set(value: any): void {
@@ -246,7 +232,6 @@ export class Scope {
                 } else {
                     property.value = value;
                 }
-                console.log("set", property.name, property.value);
 
                 reactivity.notify();
             },
