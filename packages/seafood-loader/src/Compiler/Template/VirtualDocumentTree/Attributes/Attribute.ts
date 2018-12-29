@@ -7,8 +7,8 @@ export abstract class Attribute {
 
     protected value: string;
 
-    public constructor(virtualTagNode: VirtualTagNodeCollection, name: string, value: string) {
-        this.collection = virtualTagNode;
+    public constructor(virtualTagNodeCollection: VirtualTagNodeCollection, name: string, value: string) {
+        this.collection = virtualTagNodeCollection;
         this.name = name;
         this.value = value.trim();
     }

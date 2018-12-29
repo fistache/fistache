@@ -35,7 +35,8 @@ export class ReactiveProperty {
         }
 
         if (this.parent) {
-            this.parent.notify();
+            // todo: test is this feature coasts
+            // this.parent.notify();
         }
     }
 

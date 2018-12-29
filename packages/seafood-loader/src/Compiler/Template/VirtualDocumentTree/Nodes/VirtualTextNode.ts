@@ -14,7 +14,7 @@ export class VirtualTextNode extends SingleVirtualNode {
 
     public render(): void {
         super.render();
-        this.appendRenderedElement();
+        this.attachBuildedNode();
     }
 
     public beforeRender(): void {
@@ -47,7 +47,7 @@ export class VirtualTextNode extends SingleVirtualNode {
                 this.expressionResults[expressionIndex] =
                     scope.executeExpression(expression, (value: any) => {
                         this.expressionResults[expressionIndex] = value;
-                        this.removeBuildedNodeFromDom();
+                        this.removeBuildedNode();
                         this.render();
                     });
             }

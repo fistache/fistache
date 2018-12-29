@@ -17,8 +17,16 @@ export class VirtualDocumentTree extends VirtualNode {
     public render(): void {
         this.componentScope.bindNormalizedProperties();
         super.render();
-        this.appendRenderedElement();
+        this.attachBuildedNode();
         this.extendChildVirtualElementsAndRender();
+    }
+
+    public attachBuildedNode(): void {
+        const buildedNode = this.getBuildedNode();
+
+        if (this.parentNode && buildedNode) {
+            this.parentNode.appendChild(buildedNode);
+        }
     }
 
     protected buildNode(): Node {
@@ -26,13 +34,5 @@ export class VirtualDocumentTree extends VirtualNode {
         node.setAttribute("id", "app-tree");
 
         return node;
-    }
-
-    protected appendRenderedElement(): void {
-        const buildedNode = this.getBuildedNode();
-
-        if (this.parentNode && buildedNode) {
-            this.parentNode.appendChild(buildedNode);
-        }
     }
 }

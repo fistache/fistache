@@ -32,7 +32,7 @@ export abstract class VirtualNode extends VirtualElement {
         return nextSiblingNode;
     }
 
-    protected appendRenderedElement(): void {
+    public attachBuildedNode(): void {
         if (this.parentVirtualElement) {
             const parentBuildedNode = this.parentVirtualElement.getBuildedNode();
             const buildedNode = this.getBuildedNode();

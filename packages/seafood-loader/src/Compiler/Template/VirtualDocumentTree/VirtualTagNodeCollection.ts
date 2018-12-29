@@ -55,13 +55,13 @@ export class VirtualTagNodeCollection extends VirtualNode {
             super.render();
 
             if (this.forOfExpression) {
-                // this.renderForOfExpression();
+                this.renderForOfExpression();
             } else {
                 this.renderSingleTag();
             }
 
             this.attributesManager.renderDynamicAndStaticAttributes();
-            this.appendRenderedElement();
+            this.attachBuildedNode();
         }
     }
 
@@ -75,14 +75,8 @@ export class VirtualTagNodeCollection extends VirtualNode {
         }
     }
 
-    public removeBuildedNodeFromDom(): void {
-        for (const virtualTagNode of this.collection) {
-            const buildedNode = virtualTagNode.getBuildedNode();
-
-            if (buildedNode && buildedNode.parentNode) {
-                buildedNode.parentNode.removeChild(buildedNode);
-            }
-        }
+    public removeBuildedNode(): void {
+        this.detachCollection();
 
         this.buildedNode = null;
         this.collection = [];
@@ -102,9 +96,9 @@ export class VirtualTagNodeCollection extends VirtualNode {
             this.setPresentState(presentState);
 
             if (this.isPresent()) {
-                this.attachBuildedNode();
+                this.attachCollection();
             } else {
-                this.detachBuildedNode();
+                this.detachCollection();
             }
         }
     }
@@ -119,12 +113,30 @@ export class VirtualTagNodeCollection extends VirtualNode {
 
     public getChildVirtualElements(parentVirtualElement?: VirtualElement): VirtualElement[] {
         if (parentVirtualElement) {
-            return this.childVirtualElements.map((virtualElement: VirtualElement) => {
-                virtualElement.setParentVirtualElement(parentVirtualElement);
-                return virtualElement;
-            });
+            const childVirtualElements: VirtualElement[] = [];
+
+            for (const childVirtualElement of this.childVirtualElements) {
+                const clonedChildVirtualElement = childVirtualElement.clone();
+                clonedChildVirtualElement.setParentVirtualElement(parentVirtualElement);
+                childVirtualElements.push(clonedChildVirtualElement);
+            }
+
+            return childVirtualElements;
         } else {
             return this.childVirtualElements;
+        }
+    }
+
+    public attachCollection(): void {
+        for (const virtualTagNode of this.collection) {
+            virtualTagNode.attachBuildedNode();
+        }
+        this.attachBuildedNode();
+    }
+
+    public detachCollection(): void {
+        for (const virtualTagNode of this.collection) {
+            virtualTagNode.detachBuildedNode();
         }
     }
 
@@ -132,27 +144,28 @@ export class VirtualTagNodeCollection extends VirtualNode {
         return document.createDocumentFragment();
     }
 
-    protected renderSingleTag(): void {
+    protected renderSingleTag(afterCreate?: (virtualTagNode: VirtualTagNode) => void): void {
         const virtualTagNode = this.createVirtualTagNode();
+
+        if (afterCreate) {
+            afterCreate(virtualTagNode);
+        }
+
         virtualTagNode.beforeRender();
         virtualTagNode.render();
     }
 
     protected renderForOfExpression(): void {
         if (this.isPresent() && this.forOfExpression) {
-            // for (const value of this.forOfExpression.value) {
-            //     this.renderSingleTag();
-            // }
+            for (const value of this.forOfExpression.value) {
+                this.renderSingleTag((virtualTagNode: VirtualTagNode) => {
+                    if (this.forOfExpression) {
+                        const scope = virtualTagNode.getScope();
+                        scope.setVariable(this.forOfExpression.variableName, value);
+                    }
+                });
+            }
         }
-    }
-
-    protected attachBuildedNode(): void {
-        // если ребенок будет тоже коллекцией?
-        // надо будет аттачить/детатчить и ребенка тоже
-    }
-
-    protected detachBuildedNode(): void {
-        //
     }
 
     private isPresent(): boolean {
@@ -161,14 +174,15 @@ export class VirtualTagNodeCollection extends VirtualNode {
 
     private createVirtualTagNode(): VirtualTagNode {
         const virtualTagNode = new VirtualTagNode();
+
         const virtualTagNodeScope = virtualTagNode.getScope();
 
         const collectionScope = this.getScope();
         const componentScope = collectionScope.getComponentScope();
 
         virtualTagNode.setParsedNode(this.parsedNode);
+        virtualTagNode.setParentVirtualElement(this, false);
         virtualTagNode.setChildVirtualElements(this.getChildVirtualElements(virtualTagNode));
-        virtualTagNode.setParentVirtualElement(this);
         virtualTagNodeScope.setParentScope(collectionScope);
 
         if (componentScope) {

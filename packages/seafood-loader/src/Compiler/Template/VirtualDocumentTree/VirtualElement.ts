@@ -39,6 +39,8 @@ export abstract class VirtualElement implements VirtualElementInterface {
 
     public abstract render(): void;
 
+    public abstract attachBuildedNode(): void;
+
     public setParsedNode(parsedNode: any): void {
         this.parsedNode = parsedNode;
     }
@@ -65,9 +67,12 @@ export abstract class VirtualElement implements VirtualElementInterface {
         this.childVirtualElements.push(node);
     }
 
-    public setParentVirtualElement(parentVirtualElement: VirtualElement): void {
+    public setParentVirtualElement(parentVirtualElement: VirtualElement, shouldAddChildToParent: boolean = true): void {
         this.parentVirtualElement = parentVirtualElement;
-        this.parentVirtualElement.addChildVirtualElement(this);
+
+        if (shouldAddChildToParent) {
+            this.parentVirtualElement.addChildVirtualElement(this);
+        }
     }
 
     public setChildVirtualElements(childVirtualElements: VirtualElement[]): void {
@@ -106,14 +111,32 @@ export abstract class VirtualElement implements VirtualElementInterface {
         return this.scope;
     }
 
-    public removeBuildedNodeFromDom(): void {
+    public removeBuildedNode(): void {
+        this.detachBuildedNode();
+        this.buildedNode = null;
+    }
+
+    public detachBuildedNode(): void {
         const buildedNode = this.getBuildedNode() as Element;
 
         if (buildedNode && buildedNode.parentNode) {
             buildedNode.parentNode.removeChild(buildedNode);
         }
+    }
 
-        this.buildedNode = null;
+    public clone(): VirtualElement {
+        // @ts-ignore
+        const cloned = new this.constructor();
+        const childVirtualElements: VirtualElement[] = [];
+
+        for (const childVirtualElement of this.getChildVirtualElements()) {
+            childVirtualElements.push(childVirtualElement.clone());
+        }
+
+        cloned.setParsedNode(this.getParsedNode());
+        cloned.setChildVirtualElements(childVirtualElements);
+
+        return cloned;
     }
 
     protected extendChildVirtualElementsAndRender(): void {
@@ -136,6 +159,4 @@ export abstract class VirtualElement implements VirtualElementInterface {
             position++;
         }
     }
-
-    protected abstract appendRenderedElement(): void;
 }

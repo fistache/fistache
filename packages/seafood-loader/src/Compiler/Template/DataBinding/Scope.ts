@@ -99,7 +99,7 @@ export class Scope {
         return expressionValue;
     }
 
-    protected getExtendedVariables(): any[] {
+    public getExtendedVariables(): any[] {
         const extendedVariables: any = {};
         let scope: Scope | undefined = this;
 

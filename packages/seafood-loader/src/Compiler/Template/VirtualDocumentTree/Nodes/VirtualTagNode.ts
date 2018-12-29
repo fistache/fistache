@@ -3,7 +3,7 @@ import {VirtualNode} from "../VirtualNode";
 export class VirtualTagNode extends VirtualNode {
     public render(): void {
         super.render();
-        this.appendRenderedElement();
+        this.attachBuildedNode();
         this.extendChildVirtualElementsAndRender();
     }
 

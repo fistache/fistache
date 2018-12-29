@@ -3,7 +3,7 @@ import {VirtualNode} from "../VirtualNode";
 export class VirtualEmbeddedContentNode extends VirtualNode {
     public render(): void {
         super.render();
-        // this.appendRenderedElement();
+        // this.attachBuildedNode();
     }
 
     protected buildNode(): Node | undefined {
