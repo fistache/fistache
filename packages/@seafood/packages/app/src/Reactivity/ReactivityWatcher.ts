@@ -30,8 +30,6 @@ export class ReactivityWatcher {
     public bindContext(executingFunction: (...args: any[]) => void): (...args: any[]) => void {
         const context = this.getContext() || {};
 
-        console.log(context);
-
         return executingFunction.bind(context);
     }
 

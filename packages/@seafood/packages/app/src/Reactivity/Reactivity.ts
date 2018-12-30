@@ -23,21 +23,32 @@ export class Reactivity {
     }
 
     public static applyObject(obj: any, propertyKey: string, parentReactiveProperty?: ReactiveProperty): void {
+        const propertyValue = obj[propertyKey];
         const reactiveProperty = new ReactiveProperty();
 
         if (parentReactiveProperty) {
             reactiveProperty.setParentReactiveProperty(parentReactiveProperty);
         }
 
-        this.defineObject(obj, reactiveProperty);
+        this.defineObjectProperty(obj, propertyKey, reactiveProperty);
 
-        if (typeof obj[propertyKey] === "object") {
-            obj[propertyKey] = new Proxy(obj, {
+        if (typeof propertyValue === "object") {
+            obj[propertyKey] = new Proxy(propertyValue, {
                 set: (target: any, targetPropertyKey: PropertyKey, value: any): boolean => {
-                    reactiveProperty.notify();
-                    this.applyObjectProperties(value, reactiveProperty);
+                    const isArray = Array.isArray(target);
+
+                    if (isArray && targetPropertyKey.toString() !== "length"
+                        || !isArray && target.hasOwnProperty(targetPropertyKey.toString())) {
+                        this.merge(
+                            target[targetPropertyKey],
+                            {[targetPropertyKey]: value},
+                            targetPropertyKey.toString(),
+                            parentReactiveProperty,
+                        );
+                    }
 
                     target[targetPropertyKey] = value;
+                    reactiveProperty.notify();
 
                     return true;
                 },
@@ -77,6 +88,9 @@ export class Reactivity {
     public static watch(obj: any, propertyKey: string): void {
         const reactiveProperty = this.getObjectProperty(obj, propertyKey);
         const reactivityWatcher = ReactivityWatcher.getInstance();
+        const property: any = {
+            value: obj[propertyKey],
+        };
 
         Object.defineProperty(obj, propertyKey, {
             get(): any {
@@ -96,6 +110,11 @@ export class Reactivity {
                         });
                     }
                 }
+
+                return property.value;
+            },
+            set(value: any): void {
+                property.value = value;
             },
         });
     }
