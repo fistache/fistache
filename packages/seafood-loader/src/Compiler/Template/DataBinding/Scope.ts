@@ -14,7 +14,7 @@ export class Scope {
     protected componentScope?: ComponentScope;
     protected parentScope?: Scope;
 
-    protected rerenderFunction?: (updatedExpressionValue: any) => void;
+    protected rerenderFunction?: (updatedExpressionValue: any, deep?: number) => void;
     protected executeFunction?: () => void;
     protected expressionGonnaBeExecuted: boolean = false;
     protected executionVariables: any;
@@ -48,7 +48,7 @@ export class Scope {
         this.variables[name] = value;
     }
 
-    public setRerenderFunction(rerenderFunction: (updatedExpressionValue: any) => void) {
+    public setRerenderFunction(rerenderFunction: (updatedExpressionValue: any, deep?: number) => void) {
         this.rerenderFunction = rerenderFunction;
     }
 
@@ -213,11 +213,12 @@ export class Scope {
                         const rerenderFunction = scopeContext.rerenderFunction;
                         const executeFunction = scopeContext.executeFunction;
                         const executionVariables = scopeContext.getExecutionVariables();
-                        reactivity.depend(() => {
+                        reactivity.depend((deep?: number) => {
                             rerenderFunction(
                                 scopeContext.bindExecuteFunctionContext(executeFunction)(
                                     ...scopeContext.convertVariablesToParameters(executionVariables),
                                 ),
+                                deep,
                             );
                         }, scopeContext.executeFunction);
                     }

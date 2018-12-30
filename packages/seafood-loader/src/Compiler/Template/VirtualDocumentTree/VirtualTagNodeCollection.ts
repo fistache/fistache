@@ -193,12 +193,14 @@ export class VirtualTagNodeCollection extends VirtualNode {
                 this.forNExpression = this.forInExpression;
                 this.renderForNExpression();
             } else {
-                for (const value in this.forInExpression.value) {
-                    if (this.forInExpression.value.hasOwnProperty(value)) {
+                for (const valueIndex in this.forInExpression.value) {
+                    if (this.forInExpression.value.hasOwnProperty(valueIndex)) {
                         this.renderSingleTag((virtualTagNode: VirtualTagNode) => {
                             if (this.forInExpression && this.forInExpression.variableName) {
                                 const scope = virtualTagNode.getScope();
-                                scope.setVariable(this.forInExpression.variableName, value);
+                                scope.setVariable(this.forInExpression.variableName, () => {
+                                    return valueIndex;
+                                });
                             }
                         });
                     }
@@ -218,7 +220,9 @@ export class VirtualTagNodeCollection extends VirtualNode {
                     this.renderSingleTag((virtualTagNode: VirtualTagNode) => {
                         if (this.forNExpression && this.forNExpression.variableName) {
                             const scope = virtualTagNode.getScope();
-                            scope.setVariable(this.forNExpression.variableName, i);
+                            scope.setVariable(this.forNExpression.variableName, () => {
+                                return i;
+                            });
                         }
                     });
                 } else {

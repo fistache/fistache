@@ -2,7 +2,7 @@ export const REACTIVE_PROPERTY_FLAG = "reactiveProperty";
 
 interface DependentFunction {
     depend: () => void;
-    trigger: () => void;
+    trigger: (deep?: number) => void;
 }
 
 export class ReactiveProperty {
@@ -34,13 +34,13 @@ export class ReactiveProperty {
         }
     }
 
-    public notify(shouldNotifyChild: boolean = true) {
+    public notify(deep: number = 0, shouldNotifyChild: boolean = true) {
         for (const dependentFunction of this.dependentFunctions) {
-            dependentFunction.trigger();
+            dependentFunction.trigger(deep);
         }
 
         if (this.parent) {
-            this.parent.notify(false);
+            this.parent.notify(++deep, false);
         }
 
         if (shouldNotifyChild) {
