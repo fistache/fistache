@@ -6,17 +6,16 @@ export enum Event {
     Destroyed,
 }
 
-export interface IComponent {
+export interface ComponentInterface {
     getAttributes(): ComponentAttribute[];
 }
 
-export interface IComponentEvent {
+export interface ComponentEventInterface {
     bindEvent(eventName: Event, callback: () => void): void;
-
     fireEvent(eventName: Event): void;
 }
 
-export class Component implements IComponent, IComponentEvent {
+export class Component implements ComponentInterface, ComponentEventInterface {
     @unreactive()
     private attributes: ComponentAttribute[] = [];
 

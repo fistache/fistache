@@ -1,102 +1,122 @@
 import {DECORATOR_UNREACTIVE_FLAG} from "@seafood/component";
 import "reflect-metadata";
 import {REACTIVE_PROPERTY_FLAG, ReactiveProperty} from "./ReactiveProperty";
+import {ReactivityWatcher} from "./ReactivityWatcher";
 
 export class Reactivity {
-    public static addReactivityToObtainableComponentFields(component: any, parentReactivity?: ReactiveProperty) {
-        for (const fieldName in component) {
-            if (component.hasOwnProperty(fieldName)) {
-                const isObtainable = !Reflect.hasMetadata(DECORATOR_UNREACTIVE_FLAG, component, fieldName);
-                if (parentReactivity || isObtainable) {
-                    Reactivity.addReactivityToComponentSpecifiedField(component, fieldName, parentReactivity);
-                }
+    public static applyComponent(component: any): void {
+        for (const propertyKey in component) {
+            if (component.hasOwnProperty(propertyKey)
+                && !Reflect.hasMetadata(DECORATOR_UNREACTIVE_FLAG, component, propertyKey)
+            ) {
+                this.applyObject(component, propertyKey);
             }
         }
     }
 
-    public static addReactivityToComponentSpecifiedField(
-        component: any,
-        fieldName: string,
-        parentReactivity?: ReactiveProperty,
-    ): void {
-        const property = new ReactiveProperty();
-        const componentValue = component[fieldName];
-        Reflect.defineMetadata(REACTIVE_PROPERTY_FLAG, property, component, fieldName);
+    public static applyObjectProperties(obj: any, parentReactiveProperty: ReactiveProperty): void {
+        for (const propertyKey in obj) {
+            if (obj.hasOwnProperty(propertyKey)) {
+                this.applyObject(obj, propertyKey, parentReactiveProperty);
+            }
+        }
+    }
 
-        if (parentReactivity) {
-            property.setParent(parentReactivity);
+    public static applyObject(obj: any, propertyKey: string, parentReactiveProperty?: ReactiveProperty): void {
+        const reactiveProperty = new ReactiveProperty();
+
+        if (parentReactiveProperty) {
+            reactiveProperty.setParentReactiveProperty(parentReactiveProperty);
         }
 
-        if (typeof componentValue === "object") {
-            component[fieldName] = new Proxy(componentValue, {
-                set(target: any, p: PropertyKey, value: any): boolean {
-                    console.log(p, value);
-                    // make prop reactive
-                    // property.notify();
-                    target[p] = value;
+        this.defineObject(obj, reactiveProperty);
+
+        if (typeof obj[propertyKey] === "object") {
+            obj[propertyKey] = new Proxy(obj, {
+                set: (target: any, targetPropertyKey: PropertyKey, value: any): boolean => {
+                    reactiveProperty.notify();
+                    this.applyObjectProperties(value, reactiveProperty);
+
+                    target[targetPropertyKey] = value;
+
                     return true;
                 },
             });
 
-            this.addReactivityToObtainableComponentFields(component[fieldName], property);
+            this.applyObjectProperties(obj[propertyKey], reactiveProperty);
         }
+
+        this.watch(obj, propertyKey);
     }
 
-    public static merge(from: any, to: any, field: string, reactiveProperty?: ReactiveProperty): void {
-        const fromValue = from && from[field];
-        const toValue = to[field];
+    public static merge(from: any, to: any, propertyKey: string, reactiveProperty?: ReactiveProperty): void {
+        const fromValue = from && from[propertyKey];
+        const toValue = to[propertyKey];
 
         if (reactiveProperty) {
-            Reflect.defineMetadata(REACTIVE_PROPERTY_FLAG, reactiveProperty, to, field);
+            this.defineObjectProperty(to, propertyKey, reactiveProperty);
         } else {
-            Reactivity.addReactivityToComponentSpecifiedField(to, field);
+            this.applyObject(to, propertyKey);
         }
 
         if (typeof toValue === "object") {
-            for (const fieldName in toValue) {
-                if (toValue.hasOwnProperty(fieldName)) {
-                    let reactiveProp;
+            for (const toValuePropertyKey in toValue) {
+                if (toValue.hasOwnProperty(toValuePropertyKey)) {
+                    let toValueReactiveProperty;
 
-                    if (fromValue && fromValue.hasOwnProperty(fieldName)) {
-                        reactiveProp = Reflect.getMetadata(REACTIVE_PROPERTY_FLAG, fromValue, fieldName);
+                    if (fromValue && fromValue.hasOwnProperty(toValuePropertyKey)) {
+                        toValueReactiveProperty = this.getObjectProperty(fromValue, toValuePropertyKey);
                     }
 
-                    this.merge(fromValue, toValue, fieldName, reactiveProp);
+                    this.merge(fromValue, toValue, toValuePropertyKey, toValueReactiveProperty);
                 }
             }
         }
     }
 
-    public static updateReactivityOnArrayItems(arr: any[], parentReactiveProperty?: ReactiveProperty): void {
-        for (const fieldName in arr) {
-            if (arr.hasOwnProperty(fieldName)) {
-                const isReactive = Reflect.hasMetadata(REACTIVE_PROPERTY_FLAG, arr, fieldName);
-                if (!isReactive) {
-                    Reactivity.addReactivityToComponentSpecifiedField(arr, fieldName, parentReactiveProperty);
+    public static watch(obj: any, propertyKey: string): void {
+        const reactiveProperty = this.getObjectProperty(obj, propertyKey);
+        const reactivityWatcher = ReactivityWatcher.getInstance();
+
+        Object.defineProperty(obj, propertyKey, {
+            get(): any {
+                if (reactivityWatcher.isRecording() && reactiveProperty) {
+                    const updatingFunction = reactivityWatcher.getUpdatingFunction();
+                    const executingFunction = reactivityWatcher.getExecutingFunction();
+                    const variables = reactivityWatcher.getVariables();
+
+                    if (updatingFunction && executingFunction && variables) {
+                        reactiveProperty.depend((depth?: number) => {
+                            updatingFunction(
+                                reactivityWatcher.bindContext(executingFunction)(
+                                    ...Object.values(variables),
+                                ),
+                                depth,
+                            );
+                        });
+                    }
                 }
-            }
-        }
+            },
+        });
     }
 
-    public static watchArrayChanges(
-        callback: (arr: any[]) => void,
-        arr: any[],
-        reactiveProperty: ReactiveProperty,
-    ): void {
-        // const methods: any[] = [
-        //     "push", "pop", "shift", "unshift", "splice", "reverse", "fill", "sort",
-        // ];
+    public static getObject(obj: any): ReactiveProperty {
+        return Reflect.getMetadata(REACTIVE_PROPERTY_FLAG, obj);
+    }
 
-        // for (const method of methods) {
-        //     Object.defineProperty(arr, method, {
-        //         value() {
-        //             const result: any[] = Array.prototype[method].apply(this, arguments);
-        //             callback(this);
-        //             reactiveProperty.notify();
-        //
-        //             return result;
-        //         },
-        //     });
-        // }
+    public static getObjectProperty(obj: any, propertyKey: string): ReactiveProperty {
+        return Reflect.getMetadata(REACTIVE_PROPERTY_FLAG, obj, propertyKey);
+    }
+
+    public static defineObject(obj: any, reactiveProperty: ReactiveProperty): void {
+        Reflect.defineMetadata(REACTIVE_PROPERTY_FLAG, reactiveProperty, obj);
+    }
+
+    public static defineObjectProperty(obj: any, propertyKey: string, reactiveProperty: ReactiveProperty): void {
+        Reflect.defineMetadata(REACTIVE_PROPERTY_FLAG, reactiveProperty, obj, propertyKey);
+    }
+
+    public static isReactive(value: any): boolean {
+        return Reflect.hasMetadata(REACTIVE_PROPERTY_FLAG, value);
     }
 }

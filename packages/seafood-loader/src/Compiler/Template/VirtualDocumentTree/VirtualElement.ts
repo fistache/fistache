@@ -147,16 +147,12 @@ export abstract class VirtualElement implements VirtualElementInterface {
 
     protected extendChildVirtualElementsAndRender(): void {
         const scope = this.getScope();
-        const componentScope = scope.getComponentScope();
         let position = 0;
 
         for (const virtualElement of this.childVirtualElements) {
             const childVirtualElementScope = virtualElement.getScope();
             childVirtualElementScope.setParentScope(scope);
-
-            if (componentScope) {
-                childVirtualElementScope.setComponentScope(componentScope);
-            }
+            childVirtualElementScope.setContext(scope.getContext());
 
             virtualElement.setPosition(position);
             virtualElement.beforeRender();

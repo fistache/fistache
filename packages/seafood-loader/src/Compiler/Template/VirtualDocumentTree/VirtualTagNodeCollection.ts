@@ -302,21 +302,15 @@ export class VirtualTagNodeCollection extends VirtualNode {
 
     private createVirtualTagNode(position: number): VirtualTagNode {
         const virtualTagNode = new VirtualTagNode();
-
         const virtualTagNodeScope = virtualTagNode.getScope();
-
         const collectionScope = this.getScope();
-        const componentScope = collectionScope.getComponentScope();
 
         virtualTagNode.setParsedNode(this.parsedNode);
         virtualTagNode.setPosition(position);
         virtualTagNode.setParentVirtualElement(this);
         virtualTagNode.setChildVirtualElements(this.getChildVirtualElements(virtualTagNode));
         virtualTagNodeScope.setParentScope(collectionScope);
-
-        if (componentScope) {
-            virtualTagNodeScope.setComponentScope(componentScope);
-        }
+        virtualTagNodeScope.setContext(collectionScope.getContext());
 
         this.collection[position] = virtualTagNode;
 

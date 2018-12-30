@@ -2,26 +2,26 @@ export const REACTIVE_PROPERTY_FLAG = "reactiveProperty";
 
 interface DependentFunction {
     depend: () => void;
-    trigger: (deep?: number) => void;
+    trigger: (depth?: number) => void;
 }
 
 export class ReactiveProperty {
     private readonly dependentFunctions: DependentFunction[];
-    private parent?: ReactiveProperty;
-    private readonly childProperties: ReactiveProperty[];
+    private parentReactiveProperty?: ReactiveProperty;
+    private readonly childReactiveProperties: ReactiveProperty[];
 
     constructor() {
-        this.childProperties = [];
+        this.childReactiveProperties = [];
         this.dependentFunctions = [];
     }
 
-    public setParent(parent: ReactiveProperty): void {
-        this.parent = parent;
-        this.parent.addChild(this);
+    public setParentReactiveProperty(parent: ReactiveProperty): void {
+        this.parentReactiveProperty = parent;
+        this.parentReactiveProperty.addChildReactiveProperty(this);
     }
 
-    public addChild(child: ReactiveProperty): void {
-        this.childProperties.push(child);
+    public addChildReactiveProperty(child: ReactiveProperty): void {
+        this.childReactiveProperties.push(child);
     }
 
     public depend(trigger: () => void, depend?: () => void) {
@@ -34,22 +34,22 @@ export class ReactiveProperty {
         }
     }
 
-    public notify(deep: number = 0, shouldNotifyChild: boolean = true) {
+    public notify(depth: number = 0, shouldNotifyChild: boolean = true) {
         for (const dependentFunction of this.dependentFunctions) {
-            dependentFunction.trigger(deep);
+            dependentFunction.trigger(depth);
         }
 
-        if (this.parent) {
-            this.parent.notify(++deep, false);
+        if (this.parentReactiveProperty) {
+            this.parentReactiveProperty.notify(++depth, false);
         }
 
         if (shouldNotifyChild) {
-            this.notifyAllChildProperties();
+            this.notifyChildReactiveProperties();
         }
     }
 
-    public notifyAllChildProperties(): void {
-        const functionsToTrigger = this.getChildPropertiesFunctionsToTrigger();
+    public notifyChildReactiveProperties(): void {
+        const functionsToTrigger = this.getChildReactivePropertyTriggerFunctions();
         const uniqueFunctionsToTrigger: DependentFunction[] = functionsToTrigger.reduce(
             (x: DependentFunction[], y: DependentFunction) =>
                 x.findIndex((e: DependentFunction) => e.depend === y.depend) < 0 ? [...x, y] : x, [],
@@ -73,19 +73,19 @@ export class ReactiveProperty {
         return this.dependentFunctions;
     }
 
-    public getChildProperties(): ReactiveProperty[] {
-        return this.childProperties;
+    public getChildReactiveProperties(): ReactiveProperty[] {
+        return this.childReactiveProperties;
     }
 
-    public getChildPropertiesFunctionsToTrigger(): DependentFunction[] {
+    public getChildReactivePropertyTriggerFunctions(): DependentFunction[] {
         const functionsToTrigger: DependentFunction[] = [];
 
-        for (const childProperty of this.getChildProperties()) {
+        for (const childProperty of this.getChildReactiveProperties()) {
             const childDependentFunctions = childProperty.getDependentFunctions();
             for (const dependentFunction of childDependentFunctions) {
                 functionsToTrigger.push(dependentFunction);
             }
-            functionsToTrigger.push(...childProperty.getChildPropertiesFunctionsToTrigger());
+            functionsToTrigger.push(...childProperty.getChildReactivePropertyTriggerFunctions());
         }
 
         return functionsToTrigger;

@@ -1,6 +1,4 @@
-import {REACTIVE_PROPERTY_FLAG, ReactiveProperty, Reactivity} from "@seafood/app";
-import "reflect-metadata";
-import {ComponentScope} from "./ComponentScope";
+import {ReactivityWatcher} from "@seafood/app";
 
 export class Scope {
     /**
@@ -9,27 +7,27 @@ export class Scope {
      */
     protected variables: any;
 
-    protected properties: any;
-
-    protected componentScope?: ComponentScope;
+    protected context?: any;
     protected parentScope?: Scope;
-
-    protected rerenderFunction?: (updatedExpressionValue: any, deep?: number) => void;
-    protected executeFunction?: () => void;
-    protected expressionGonnaBeExecuted: boolean = false;
-    protected executionVariables: any;
 
     constructor() {
         this.variables = {};
-        this.properties = [];
     }
 
-    public setComponentScope(componentScope: ComponentScope): void {
-        this.componentScope = componentScope;
+    public setContext(context: any): void {
+        this.context = context;
+    }
+
+    public getContext(): any {
+        return this.context;
     }
 
     public getVariables(): any {
         return this.variables;
+    }
+
+    public setVariable(name: string, value: any): void {
+        this.variables[name] = value;
     }
 
     public setParentScope(scope: Scope): void {
@@ -40,78 +38,28 @@ export class Scope {
         return this.parentScope;
     }
 
-    public getComponentScope(): ComponentScope | undefined {
-        return this.componentScope;
-    }
+    public executeExpression(expression: string, updatingFunction?: (value: any) => void): any {
+        const reactivityWatcher = ReactivityWatcher.getInstance();
+        const variables = this.getExtendedVariables();
+        const executingFunction = this.makeExpressionFunction(expression, Object.keys(variables));
 
-    public setVariable(name: string, value: any): void {
-        this.variables[name] = value;
-    }
+        reactivityWatcher.enableRecording();
+        reactivityWatcher.setUpdatingFunction(updatingFunction);
+        reactivityWatcher.setExecutingFunction(executingFunction);
+        reactivityWatcher.setVariables(variables);
+        reactivityWatcher.setContext(this.getContext());
 
-    public setRerenderFunction(rerenderFunction: (updatedExpressionValue: any, deep?: number) => void) {
-        this.rerenderFunction = rerenderFunction;
-    }
-
-    public setExecuteFunction(rerenderFunction: () => void) {
-        this.executeFunction = rerenderFunction;
-    }
-
-    public enableExpressionGonnaBeExecuted(): void {
-        this.expressionGonnaBeExecuted = true;
-    }
-
-    public disableExpressionGonnaBeExecuted(): void {
-        this.expressionGonnaBeExecuted = false;
-    }
-
-    public isExpressionGonnaBeExecuted(): boolean {
-        return this.expressionGonnaBeExecuted;
-    }
-
-    public setExecutionVariables(executionVariables: any): void {
-        this.executionVariables = executionVariables;
-    }
-
-    public getExecutionVariables(): any {
-        return this.executionVariables;
-    }
-
-    public executeExpression(expression: string, rerenderFunction?: (updatedExpressionValue: any) => void): any {
-        const extendedVariables = this.getExtendedVariables();
-        const componentScope = this.getComponentScope();
-        const expressionFunction = this.makeExpressionFunction(expression, Object.keys(extendedVariables));
-
-        if (!rerenderFunction) {
-            rerenderFunction = () => {
-                // empty function
-            };
-        }
-
-        if (componentScope) {
-            componentScope.enableExpressionGonnaBeExecuted();
-            componentScope.setRerenderFunction(rerenderFunction);
-            componentScope.setExecuteFunction(expressionFunction);
-            componentScope.setExecutionVariables(extendedVariables);
-        }
-
-        const expressionResult = this.bindExecuteFunctionContext(expressionFunction)(
-            ...this.convertVariablesToParameters(extendedVariables),
+        const expressionResult = reactivityWatcher.bindContext(executingFunction)(
+            ...Object.values(variables),
         );
 
-        if (componentScope) {
-            componentScope.disableExpressionGonnaBeExecuted();
-        }
+        reactivityWatcher.disableRecording();
+        reactivityWatcher.removeUpdatingFunction();
+        reactivityWatcher.removeExecutingFunction();
+        reactivityWatcher.removeVariables();
+        reactivityWatcher.removeContext();
 
         return expressionResult;
-    }
-
-    public executeExpressionWithoutTracking(expression: string): any {
-        const extendedVariables = this.getExtendedVariables();
-        const expressionFunction = this.makeExpressionFunction(expression, Object.keys(extendedVariables));
-
-        return this.bindExecuteFunctionContext(expressionFunction)(
-            ...this.convertVariablesToParameters(extendedVariables),
-        );
     }
 
     public getExtendedVariables(): any[] {
@@ -150,112 +98,5 @@ export class Scope {
         }
 
         return new Function(...args, `${variables} \n return ${expression};`) as (...args: any[]) => void;
-    }
-
-    protected bindExecuteFunctionContext(executeFunction: () => void): (...args: any) => void {
-        let context = {};
-
-        if (this.componentScope) {
-            context = this.componentScope.getNormalizedProperties();
-        }
-
-        return executeFunction.bind(context);
-    }
-
-    protected makeComponentInstanceReactive(inputValue: any): any {
-        for (const fieldName in inputValue) {
-            if (inputValue.hasOwnProperty(fieldName)) {
-                const isReactive = Reflect.hasMetadata(REACTIVE_PROPERTY_FLAG, inputValue, fieldName);
-
-                if (isReactive) {
-                    this.addComponentFieldReactivity(fieldName, inputValue);
-                }
-            }
-        }
-
-        return inputValue;
-    }
-
-    protected addComponentFieldReactivity(fieldName: string, parentObject: any) {
-        const fieldValue = parentObject[fieldName];
-
-        if (typeof fieldValue === "object") {
-            for (const fieldValueFieldName in fieldValue) {
-                if (fieldValue.hasOwnProperty(fieldValueFieldName)) {
-                    this.addComponentFieldReactivity(fieldValueFieldName, fieldValue);
-                }
-            }
-        }
-
-        this.defineFieldReactivity(fieldName, parentObject);
-    }
-
-    protected defineFieldReactivity(fieldName: string, parentObject: any) {
-        const scopeContext = this;
-        const property = {
-            name: fieldName,
-            value: parentObject[fieldName],
-        };
-        const reactivity: ReactiveProperty = Reflect.getMetadata(
-            REACTIVE_PROPERTY_FLAG,
-            parentObject,
-            fieldName,
-        );
-        // console.log(property.name, property.value);
-
-        Object.defineProperty(parentObject, fieldName, {
-            get(): any {
-                if (scopeContext.isExpressionGonnaBeExecuted()) {
-                    if (reactivity &&
-                        scopeContext.rerenderFunction &&
-                        scopeContext.executeFunction &&
-                        !reactivity.hasFunction(scopeContext.executeFunction)
-                    ) {
-                        const rerenderFunction = scopeContext.rerenderFunction;
-                        const executeFunction = scopeContext.executeFunction;
-                        const executionVariables = scopeContext.getExecutionVariables();
-                        reactivity.depend((deep?: number) => {
-                            rerenderFunction(
-                                scopeContext.bindExecuteFunctionContext(executeFunction)(
-                                    ...scopeContext.convertVariablesToParameters(executionVariables),
-                                ),
-                                deep,
-                            );
-                        }, scopeContext.executeFunction);
-                    }
-                }
-
-                return property.value;
-            },
-            set(value: any): void {
-                // console.log(property.name);
-                if (typeof value === "object") {
-                    Reactivity.merge(parentObject, {[property.name]: value}, property.name, reactivity);
-                    scopeContext.makeComponentInstanceReactive(value);
-                }
-
-                property.value = value;
-                reactivity.notify();
-            },
-        });
-
-        if (Array.isArray(property.value)) {
-            Reactivity.watchArrayChanges((arr: any[]) => {
-                Reactivity.updateReactivityOnArrayItems(arr, reactivity);
-                scopeContext.makeComponentInstanceReactive(arr);
-            }, property.value, reactivity);
-        }
-    }
-
-    protected convertVariablesToParameters(variables: any): any[] {
-        const parameters: any[] = [];
-
-        for (const index in variables) {
-            if (variables.hasOwnProperty(index)) {
-                parameters.push(variables[index]);
-            }
-        }
-
-        return parameters;
     }
 }

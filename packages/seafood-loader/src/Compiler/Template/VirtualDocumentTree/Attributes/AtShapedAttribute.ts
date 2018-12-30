@@ -46,6 +46,7 @@ export class AtShapedAttribute extends NonStaticAttribute {
                     collection.updateForOfExpression(updatedExpressionValue);
                 }
             });
+            console.log(expressionResult);
             const forExpression: VirtualTagNodeForExpression = {
                 variableName,
                 expression,

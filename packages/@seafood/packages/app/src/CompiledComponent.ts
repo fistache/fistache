@@ -9,7 +9,7 @@ export class CompiledComponent {
     public templateRenderer: any;
 
     constructor(component: Component, templateRenderer: any) {
-        Reactivity.addReactivityToObtainableComponentFields(component);
+        Reactivity.applyComponent(component);
 
         this.hmrOptions = {
             events: [],

@@ -39,7 +39,7 @@ export default class TemplateBuilder {
 
     public renderTree(parentNode: any, initialScope: any) {
         this.virtualDocumentTree.setParentNode(parentNode);
-        this.virtualDocumentTree.getComponentScope().setComponentInstance(initialScope);
+        this.virtualDocumentTree.getScope().setContext(initialScope);
         this.virtualDocumentTree.render();
     }
 
