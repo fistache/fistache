@@ -153,12 +153,62 @@ export class VirtualTagNodeCollection extends VirtualNode {
         }
     }
 
+    public updateForOfExpression(updatedExpressionValue: any): void {
+        const typeOfUpdatedExpressionValue = typeof updatedExpressionValue;
+        const typeOfExpressionValue = typeof this.collection;
+        let isTypeOfExpressionNotChanged = typeOfUpdatedExpressionValue === typeOfExpressionValue;
+
+        if (isTypeOfExpressionNotChanged && typeOfExpressionValue === "object") {
+            isTypeOfExpressionNotChanged =
+                Array.isArray(updatedExpressionValue) === Array.isArray(this.collection);
+        }
+
+        if (isTypeOfExpressionNotChanged && this.forOfExpression) {
+            if (Array.isArray(updatedExpressionValue)) {
+                const rudenantIndecies: any[] = [];
+
+                for (const valueIndex in this.collection) {
+                    if (this.collection.hasOwnProperty(valueIndex)) {
+                        if (!updatedExpressionValue.hasOwnProperty(valueIndex)) {
+                            rudenantIndecies.push(valueIndex);
+                        }
+                    }
+                }
+
+                for (const updatedValueIndex in updatedExpressionValue) {
+                    if (updatedExpressionValue.hasOwnProperty(updatedValueIndex)) {
+                        if (!this.collection.hasOwnProperty(updatedValueIndex)) {
+                            this.forOfExpression.value[updatedValueIndex] = updatedExpressionValue[updatedValueIndex];
+                        }
+                    }
+                }
+
+                this.cleanCollection(rudenantIndecies, (index: number) => {
+                    if (this.forOfExpression) {
+                        delete this.forOfExpression.value[index];
+                    }
+                });
+
+                this.renderForOfExpression();
+            }
+        } else {
+            // tmp
+            console.log("changed");
+
+            // notify on new element
+        }
+    }
+
     protected buildNode(): Node | undefined | null {
         return document.createDocumentFragment();
     }
 
-    protected renderSingleTag(afterCreate?: (virtualTagNode: VirtualTagNode) => void): void {
-        const virtualTagNode = this.createVirtualTagNode();
+    protected renderSingleTag(position?: number, afterCreate?: (virtualTagNode: VirtualTagNode) => void): void {
+        if (!position) {
+            position = this.collection.length;
+        }
+
+        const virtualTagNode = this.createVirtualTagNode(position);
 
         if (afterCreate) {
             afterCreate(virtualTagNode);
@@ -168,11 +218,25 @@ export class VirtualTagNodeCollection extends VirtualNode {
         virtualTagNode.render();
     }
 
+    protected cleanCollection(rudenantIndecies: number[], callback: (index: number) => void): void {
+        for (const index of rudenantIndecies) {
+            if (this.collection.hasOwnProperty(index)) {
+                const virtualTagNode = this.collection[index];
+                virtualTagNode.removeBuildedNode();
+                delete this.collection[index];
+                callback(index);
+            }
+        }
+    }
+
     protected renderForOfExpression(): void {
         if (this.isPresent() && this.forOfExpression) {
             for (const valueIndex in this.forOfExpression.value) {
-                if (this.forOfExpression.value.hasOwnProperty(valueIndex)) {
-                    this.renderSingleTag((virtualTagNode: VirtualTagNode) => {
+                if (this.forOfExpression.value.hasOwnProperty(valueIndex) &&
+                    !this.collection.hasOwnProperty(valueIndex)
+                ) {
+                    // console.log(`render in ${valueIndex} index`);
+                    this.renderSingleTag(+valueIndex, (virtualTagNode: VirtualTagNode) => {
                         if (this.forOfExpression && this.forOfExpression.variableName) {
                             const scope = virtualTagNode.getScope();
                             scope.setVariable(this.forOfExpression.variableName, () => {
@@ -195,7 +259,7 @@ export class VirtualTagNodeCollection extends VirtualNode {
             } else {
                 for (const valueIndex in this.forInExpression.value) {
                     if (this.forInExpression.value.hasOwnProperty(valueIndex)) {
-                        this.renderSingleTag((virtualTagNode: VirtualTagNode) => {
+                        this.renderSingleTag(undefined, (virtualTagNode: VirtualTagNode) => {
                             if (this.forInExpression && this.forInExpression.variableName) {
                                 const scope = virtualTagNode.getScope();
                                 scope.setVariable(this.forInExpression.variableName, () => {
@@ -217,7 +281,7 @@ export class VirtualTagNodeCollection extends VirtualNode {
         ) {
             for (let i = 0; i < this.forNExpression.value; i++) {
                 if (this.forNExpression.variableName) {
-                    this.renderSingleTag((virtualTagNode: VirtualTagNode) => {
+                    this.renderSingleTag(undefined, (virtualTagNode: VirtualTagNode) => {
                         if (this.forNExpression && this.forNExpression.variableName) {
                             const scope = virtualTagNode.getScope();
                             scope.setVariable(this.forNExpression.variableName, () => {
@@ -236,7 +300,7 @@ export class VirtualTagNodeCollection extends VirtualNode {
         return this.getPresentState() === VirtualTagNodePresentState.Present;
     }
 
-    private createVirtualTagNode(): VirtualTagNode {
+    private createVirtualTagNode(position: number): VirtualTagNode {
         const virtualTagNode = new VirtualTagNode();
 
         const virtualTagNodeScope = virtualTagNode.getScope();
@@ -245,6 +309,7 @@ export class VirtualTagNodeCollection extends VirtualNode {
         const componentScope = collectionScope.getComponentScope();
 
         virtualTagNode.setParsedNode(this.parsedNode);
+        virtualTagNode.setPosition(position);
         virtualTagNode.setParentVirtualElement(this);
         virtualTagNode.setChildVirtualElements(this.getChildVirtualElements(virtualTagNode));
         virtualTagNodeScope.setParentScope(collectionScope);
@@ -253,7 +318,7 @@ export class VirtualTagNodeCollection extends VirtualNode {
             virtualTagNodeScope.setComponentScope(componentScope);
         }
 
-        this.collection.push(virtualTagNode);
+        this.collection[position] = virtualTagNode;
 
         return virtualTagNode;
     }

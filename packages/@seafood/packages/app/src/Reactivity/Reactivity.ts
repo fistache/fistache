@@ -20,14 +20,29 @@ export class Reactivity {
         parentReactivity?: ReactiveProperty,
     ): void {
         const property = new ReactiveProperty();
+        let componentValue = component[fieldName];
         Reflect.defineMetadata(REACTIVE_PROPERTY_FLAG, property, component, fieldName);
 
         if (parentReactivity) {
             property.setParent(parentReactivity);
         }
 
-        if (typeof component[fieldName] === "object") {
-            this.addReactivityToObtainableComponentFields(component[fieldName], property);
+        if (typeof componentValue === "object") {
+            // console.log(component, fieldName);
+            componentValue = new Proxy(componentValue, {
+                get(target: any, p: PropertyKey): any {
+                    // console.log(p);
+
+                    return target[p];
+                },
+                set(target: any, p: PropertyKey, value: any): boolean {
+                    console.log(p, value);
+                    target[p] = value;
+                    return true;
+                },
+            });
+
+            this.addReactivityToObtainableComponentFields(componentValue, property);
         }
     }
 
@@ -54,5 +69,38 @@ export class Reactivity {
                 }
             }
         }
+    }
+
+    public static updateReactivityOnArrayItems(arr: any[], parentReactiveProperty?: ReactiveProperty): void {
+        for (const fieldName in arr) {
+            if (arr.hasOwnProperty(fieldName)) {
+                const isReactive = Reflect.hasMetadata(REACTIVE_PROPERTY_FLAG, arr, fieldName);
+                if (!isReactive) {
+                    Reactivity.addReactivityToComponentSpecifiedField(arr, fieldName, parentReactiveProperty);
+                }
+            }
+        }
+    }
+
+    public static watchArrayChanges(
+        callback: (arr: any[]) => void,
+        arr: any[],
+        reactiveProperty: ReactiveProperty,
+    ): void {
+        // const methods: any[] = [
+        //     "push", "pop", "shift", "unshift", "splice", "reverse", "fill", "sort",
+        // ];
+
+        // for (const method of methods) {
+        //     Object.defineProperty(arr, method, {
+        //         value() {
+        //             const result: any[] = Array.prototype[method].apply(this, arguments);
+        //             callback(this);
+        //             reactiveProperty.notify();
+        //
+        //             return result;
+        //         },
+        //     });
+        // }
     }
 }

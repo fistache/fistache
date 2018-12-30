@@ -201,6 +201,7 @@ export class Scope {
             parentObject,
             fieldName,
         );
+        // console.log(property.name, property.value);
 
         Object.defineProperty(parentObject, fieldName, {
             get(): any {
@@ -227,16 +228,23 @@ export class Scope {
                 return property.value;
             },
             set(value: any): void {
+                // console.log(property.name);
                 if (typeof value === "object") {
                     Reactivity.merge(parentObject, {[property.name]: value}, property.name, reactivity);
-                    property.value = scopeContext.makeComponentInstanceReactive(value);
-                } else {
-                    property.value = value;
+                    scopeContext.makeComponentInstanceReactive(value);
                 }
 
+                property.value = value;
                 reactivity.notify();
             },
         });
+
+        if (Array.isArray(property.value)) {
+            Reactivity.watchArrayChanges((arr: any[]) => {
+                Reactivity.updateReactivityOnArrayItems(arr, reactivity);
+                scopeContext.makeComponentInstanceReactive(arr);
+            }, property.value, reactivity);
+        }
     }
 
     protected convertVariablesToParameters(variables: any): any[] {
