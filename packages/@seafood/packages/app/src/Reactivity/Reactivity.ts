@@ -20,7 +20,7 @@ export class Reactivity {
         parentReactivity?: ReactiveProperty,
     ): void {
         const property = new ReactiveProperty();
-        let componentValue = component[fieldName];
+        const componentValue = component[fieldName];
         Reflect.defineMetadata(REACTIVE_PROPERTY_FLAG, property, component, fieldName);
 
         if (parentReactivity) {
@@ -28,21 +28,17 @@ export class Reactivity {
         }
 
         if (typeof componentValue === "object") {
-            // console.log(component, fieldName);
-            componentValue = new Proxy(componentValue, {
-                get(target: any, p: PropertyKey): any {
-                    // console.log(p);
-
-                    return target[p];
-                },
+            component[fieldName] = new Proxy(componentValue, {
                 set(target: any, p: PropertyKey, value: any): boolean {
                     console.log(p, value);
+                    // make prop reactive
+                    // property.notify();
                     target[p] = value;
                     return true;
                 },
             });
 
-            this.addReactivityToObtainableComponentFields(componentValue, property);
+            this.addReactivityToObtainableComponentFields(component[fieldName], property);
         }
     }
 
