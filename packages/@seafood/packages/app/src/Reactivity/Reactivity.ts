@@ -21,12 +21,19 @@ export class Reactivity {
         };
 
         Object.defineProperty(obj, propertyKey, {
-            get(): any {
+            get: (): any => {
+                this.watch(reactiveProperty);
+
                 return property.value;
             },
-            set(value: any): void {
-                console.log(propertyKey, value);
-                property.value = value;
+            set: (value: any): void => {
+                const reactiveValue = {
+                    [propertyKey]: value,
+                };
+
+                this.merge(obj, reactiveValue, propertyKey, reactiveProperty);
+
+                property.value = reactiveValue[propertyKey];
                 reactiveProperty.notify();
             },
         });
@@ -52,7 +59,6 @@ export class Reactivity {
         }
 
         this.defineObjectProperty(obj, propertyKey, reactiveProperty);
-        this.watch(obj, propertyKey);
 
         return reactiveProperty;
     }
@@ -70,7 +76,7 @@ export class Reactivity {
             this.applyObjectProperties(obj[propertyKey], reactiveProperty);
 
             if (!isComlete) {
-                obj[propertyKey] = this.makeProxyObject(obj[propertyKey], reactiveProperty, parentReactiveProperty);
+                obj[propertyKey] = this.makeProxyObject(obj[propertyKey], reactiveProperty);
             }
         }
 
@@ -88,36 +94,40 @@ export class Reactivity {
     public static makeProxyObject(
         obj: any,
         reactiveProperty: ReactiveProperty,
-        parentReactiveProperty?: ReactiveProperty,
     ): any {
         return new Proxy(obj, {
-            set: (target: any, targetPropertyKey: PropertyKey, value: any): boolean => {
-                console.log(targetPropertyKey);
+            get: (target: any, targetPropertyKey: PropertyKey) => {
+                this.watch(reactiveProperty);
 
+                return target[targetPropertyKey];
+            },
+            set: (target: any, targetPropertyKey: PropertyKey, value: any): boolean => {
                 if (target.hasOwnProperty(targetPropertyKey)) {
                     if (Array.isArray(target) && targetPropertyKey === "length") {
                         target[targetPropertyKey] = value;
+                        reactiveProperty.notify(0, false);
                     } else {
-                        // const to = {[targetPropertyKey.toString()]: value};
-                        // console.log(target,
-                        //     to,
-                        //     targetPropertyKey.toString());
-                        // todo: удалить из parentReactiveProperty дочерние
-                        // reactiveProperty, которые не нужны
+                        // const reactiveValue = {[targetPropertyKey.toString()]: value};
                         // this.merge(
                         //     target,
-                        //     to,
+                        //     reactiveValue,
                         //     targetPropertyKey.toString(),
                         //     parentReactiveProperty,
                         // );
                         target[targetPropertyKey] = value;
+
+                        const targetReactiveProperty = this.getObjectProperty(target, targetPropertyKey.toString());
+                        if (targetReactiveProperty) {
+                            targetReactiveProperty.notify();
+                        }
                     }
                 } else {
+                    // console.log(targetPropertyKey, reactiveProperty);
                     target[targetPropertyKey] = value;
-                    this.completeObject(obj, parentReactiveProperty);
+                    // this.completeObject(obj, parentReactiveProperty);
+                    this.applyObjectProperty(obj, targetPropertyKey.toString(), reactiveProperty, true);
+                    reactiveProperty.notify(0, false);
                 }
-
-                reactiveProperty.notify();
 
                 return true;
             },
@@ -149,38 +159,25 @@ export class Reactivity {
         }
     }
 
-    public static watch(obj: any, propertyKey: string): void {
-        const reactiveProperty = this.getObjectProperty(obj, propertyKey);
+    public static watch(reactiveProperty: ReactiveProperty): void {
         const reactivityWatcher = ReactivityWatcher.getInstance();
-        const property: any = {
-            value: obj[propertyKey],
-        };
 
-        Object.defineProperty(obj, propertyKey, {
-            get(): any {
-                if (reactivityWatcher.isRecording() && reactiveProperty) {
-                    const updatingFunction = reactivityWatcher.getUpdatingFunction();
-                    const executingFunction = reactivityWatcher.getExecutingFunction();
-                    const variables = reactivityWatcher.getVariables();
+        if (reactivityWatcher.isRecording() && reactiveProperty) {
+            const updatingFunction = reactivityWatcher.getUpdatingFunction();
+            const executingFunction = reactivityWatcher.getExecutingFunction();
+            const variables = reactivityWatcher.getVariables();
 
-                    if (updatingFunction && executingFunction && variables) {
-                        const updatingFunctionWithContext = reactivityWatcher.bindContext(executingFunction);
-                        const variableValues = Object.values(variables);
+            if (updatingFunction && executingFunction && variables) {
+                const executingFunctionWithContext = reactivityWatcher.bindContext(executingFunction);
+                const variableValues = Object.values(variables);
 
-                        reactiveProperty.depend((depth?: number) => {
-                            updatingFunction(updatingFunctionWithContext(
-                                ...variableValues,
-                            ), depth);
-                        });
-                    }
-                }
-
-                return property.value;
-            },
-            set(value: any): void {
-                property.value = value;
-            },
-        });
+                reactiveProperty.depend((depth?: number) => {
+                    updatingFunction(executingFunctionWithContext(
+                        ...variableValues,
+                    ), depth);
+                });
+            }
+        }
     }
 
     public static getObject(obj: any): ReactiveProperty {

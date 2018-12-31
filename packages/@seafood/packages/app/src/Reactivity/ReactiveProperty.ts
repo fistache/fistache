@@ -7,7 +7,7 @@ interface DependentFunction {
 
 export class ReactiveProperty {
     private readonly dependentFunctions: DependentFunction[];
-    private parentReactiveProperty?: ReactiveProperty;
+    private parentReactiveProperty?: ReactiveProperty | null;
     private readonly childReactiveProperties: ReactiveProperty[];
 
     constructor() {
