@@ -9,21 +9,42 @@ export class Reactivity {
             if (component.hasOwnProperty(propertyKey)
                 && !Reflect.hasMetadata(DECORATOR_UNREACTIVE_FLAG, component, propertyKey)
             ) {
-                this.applyObject(component, propertyKey);
+                const reactiveProperty = this.applyObjectProperty(component, propertyKey);
+                this.applyComponentProperty(component, propertyKey, reactiveProperty);
             }
         }
+    }
+
+    public static applyComponentProperty(obj: any, propertyKey: string, reactiveProperty: ReactiveProperty) {
+        const property = {
+            value: obj[propertyKey],
+        };
+
+        Object.defineProperty(obj, propertyKey, {
+            get(): any {
+                return property.value;
+            },
+            set(value: any): void {
+                console.log(propertyKey, value);
+                property.value = value;
+                reactiveProperty.notify();
+            },
+        });
     }
 
     public static applyObjectProperties(obj: any, parentReactiveProperty: ReactiveProperty): void {
         for (const propertyKey in obj) {
             if (obj.hasOwnProperty(propertyKey)) {
-                this.applyObject(obj, propertyKey, parentReactiveProperty);
+                this.applyObjectProperty(obj, propertyKey, parentReactiveProperty);
             }
         }
     }
 
-    public static applyObject(obj: any, propertyKey: string, parentReactiveProperty?: ReactiveProperty): void {
-        const propertyValue = obj[propertyKey];
+    public static applyObject(
+        obj: any,
+        propertyKey: string,
+        parentReactiveProperty?: ReactiveProperty,
+    ): ReactiveProperty {
         const reactiveProperty = new ReactiveProperty();
 
         if (parentReactiveProperty) {
@@ -31,33 +52,76 @@ export class Reactivity {
         }
 
         this.defineObjectProperty(obj, propertyKey, reactiveProperty);
+        this.watch(obj, propertyKey);
+
+        return reactiveProperty;
+    }
+
+    public static applyObjectProperty(
+        obj: any,
+        propertyKey: string,
+        parentReactiveProperty?: ReactiveProperty,
+        isComlete?: boolean,
+    ): ReactiveProperty {
+        const propertyValue = obj[propertyKey];
+        const reactiveProperty = this.applyObject(obj, propertyKey, parentReactiveProperty);
 
         if (typeof propertyValue === "object") {
-            obj[propertyKey] = new Proxy(propertyValue, {
-                set: (target: any, targetPropertyKey: PropertyKey, value: any): boolean => {
-                    const isArray = Array.isArray(target);
-
-                    if (isArray && targetPropertyKey.toString() !== "length"
-                        || !isArray && target.hasOwnProperty(targetPropertyKey.toString())) {
-                        this.merge(
-                            target[targetPropertyKey],
-                            {[targetPropertyKey]: value},
-                            targetPropertyKey.toString(),
-                            parentReactiveProperty,
-                        );
-                    }
-
-                    target[targetPropertyKey] = value;
-                    reactiveProperty.notify();
-
-                    return true;
-                },
-            });
-
             this.applyObjectProperties(obj[propertyKey], reactiveProperty);
+
+            if (!isComlete) {
+                obj[propertyKey] = this.makeProxyObject(obj[propertyKey], reactiveProperty, parentReactiveProperty);
+            }
         }
 
-        this.watch(obj, propertyKey);
+        return reactiveProperty;
+    }
+
+    public static completeObject(obj: any, parentReactiveProperty?: ReactiveProperty): void {
+        for (const propertyKey in obj) {
+            if (obj.hasOwnProperty(propertyKey) && !this.isReactiveProperty(obj, propertyKey)) {
+                this.applyObjectProperty(obj, propertyKey, parentReactiveProperty, true);
+            }
+        }
+    }
+
+    public static makeProxyObject(
+        obj: any,
+        reactiveProperty: ReactiveProperty,
+        parentReactiveProperty?: ReactiveProperty,
+    ): any {
+        return new Proxy(obj, {
+            set: (target: any, targetPropertyKey: PropertyKey, value: any): boolean => {
+                console.log(targetPropertyKey);
+
+                if (target.hasOwnProperty(targetPropertyKey)) {
+                    if (Array.isArray(target) && targetPropertyKey === "length") {
+                        target[targetPropertyKey] = value;
+                    } else {
+                        // const to = {[targetPropertyKey.toString()]: value};
+                        // console.log(target,
+                        //     to,
+                        //     targetPropertyKey.toString());
+                        // todo: удалить из parentReactiveProperty дочерние
+                        // reactiveProperty, которые не нужны
+                        // this.merge(
+                        //     target,
+                        //     to,
+                        //     targetPropertyKey.toString(),
+                        //     parentReactiveProperty,
+                        // );
+                        target[targetPropertyKey] = value;
+                    }
+                } else {
+                    target[targetPropertyKey] = value;
+                    this.completeObject(obj, parentReactiveProperty);
+                }
+
+                reactiveProperty.notify();
+
+                return true;
+            },
+        });
     }
 
     public static merge(from: any, to: any, propertyKey: string, reactiveProperty?: ReactiveProperty): void {
@@ -67,7 +131,7 @@ export class Reactivity {
         if (reactiveProperty) {
             this.defineObjectProperty(to, propertyKey, reactiveProperty);
         } else {
-            this.applyObject(to, propertyKey);
+            this.applyObjectProperty(to, propertyKey);
         }
 
         if (typeof toValue === "object") {
@@ -100,13 +164,13 @@ export class Reactivity {
                     const variables = reactivityWatcher.getVariables();
 
                     if (updatingFunction && executingFunction && variables) {
+                        const updatingFunctionWithContext = reactivityWatcher.bindContext(executingFunction);
+                        const variableValues = Object.values(variables);
+
                         reactiveProperty.depend((depth?: number) => {
-                            updatingFunction(
-                                reactivityWatcher.bindContext(executingFunction)(
-                                    ...Object.values(variables),
-                                ),
-                                depth,
-                            );
+                            updatingFunction(updatingFunctionWithContext(
+                                ...variableValues,
+                            ), depth);
                         });
                     }
                 }
@@ -135,7 +199,11 @@ export class Reactivity {
         Reflect.defineMetadata(REACTIVE_PROPERTY_FLAG, reactiveProperty, obj, propertyKey);
     }
 
-    public static isReactive(value: any): boolean {
-        return Reflect.hasMetadata(REACTIVE_PROPERTY_FLAG, value);
+    public static isReactive(obj: any): boolean {
+        return Reflect.hasMetadata(REACTIVE_PROPERTY_FLAG, obj);
+    }
+
+    public static isReactiveProperty(obj: any, propertyKey: string): boolean {
+        return Reflect.hasMetadata(REACTIVE_PROPERTY_FLAG, obj, propertyKey);
     }
 }

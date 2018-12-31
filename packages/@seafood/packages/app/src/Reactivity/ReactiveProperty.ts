@@ -35,17 +35,17 @@ export class ReactiveProperty {
     }
 
     public notify(depth: number = 0, shouldNotifyChild: boolean = true) {
-        for (const dependentFunction of this.dependentFunctions) {
-            dependentFunction.trigger(depth);
-        }
+            for (const dependentFunction of this.dependentFunctions) {
+                dependentFunction.trigger(depth);
+            }
 
-        if (this.parentReactiveProperty) {
-            this.parentReactiveProperty.notify(++depth, false);
-        }
+            if (this.parentReactiveProperty) {
+                this.parentReactiveProperty.notify(++depth, false);
+            }
 
-        if (shouldNotifyChild) {
-            this.notifyChildReactiveProperties();
-        }
+            if (shouldNotifyChild) {
+                this.notifyChildReactiveProperties();
+            }
     }
 
     public notifyChildReactiveProperties(): void {
