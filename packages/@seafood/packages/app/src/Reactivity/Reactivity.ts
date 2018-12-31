@@ -107,13 +107,7 @@ export class Reactivity {
                         target[targetPropertyKey] = value;
                         reactiveProperty.notify(0, false);
                     } else {
-                        // const reactiveValue = {[targetPropertyKey.toString()]: value};
-                        // this.merge(
-                        //     target,
-                        //     reactiveValue,
-                        //     targetPropertyKey.toString(),
-                        //     parentReactiveProperty,
-                        // );
+                        // todo: merge
                         target[targetPropertyKey] = value;
 
                         const targetReactiveProperty = this.getObjectProperty(target, targetPropertyKey.toString());
@@ -122,9 +116,7 @@ export class Reactivity {
                         }
                     }
                 } else {
-                    // console.log(targetPropertyKey, reactiveProperty);
                     target[targetPropertyKey] = value;
-                    // this.completeObject(obj, parentReactiveProperty);
                     this.applyObjectProperty(obj, targetPropertyKey.toString(), reactiveProperty, true);
                     reactiveProperty.notify(0, false);
                 }
