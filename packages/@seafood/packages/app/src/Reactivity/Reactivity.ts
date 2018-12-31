@@ -117,7 +117,7 @@ export class Reactivity {
                     }
                 } else {
                     target[targetPropertyKey] = value;
-                    this.applyObjectProperty(obj, targetPropertyKey.toString(), reactiveProperty, true);
+                    this.applyObjectProperty(obj, targetPropertyKey.toString(), reactiveProperty);
                     reactiveProperty.notify(0, false);
                 }
 
