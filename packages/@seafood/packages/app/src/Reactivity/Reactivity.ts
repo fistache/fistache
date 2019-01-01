@@ -3,6 +3,8 @@ import "reflect-metadata";
 import {REACTIVE_PROPERTY_FLAG, ReactiveProperty} from "./ReactiveProperty";
 import {ReactivityWatcher} from "./ReactivityWatcher";
 
+export const PROXY_TARGET_SYMBOL = Symbol("ProxyTarget");
+
 export class Reactivity {
     public static applyComponent(component: any): void {
         for (const propertyKey in component) {
@@ -51,8 +53,11 @@ export class Reactivity {
         obj: any,
         propertyKey: string,
         parentReactiveProperty?: ReactiveProperty,
+        reactiveProperty?: ReactiveProperty,
     ): ReactiveProperty {
-        const reactiveProperty = new ReactiveProperty();
+        if (!reactiveProperty) {
+            reactiveProperty = new ReactiveProperty();
+        }
 
         if (parentReactiveProperty) {
             reactiveProperty.setParentReactiveProperty(parentReactiveProperty);
@@ -97,6 +102,10 @@ export class Reactivity {
     ): any {
         return new Proxy(obj, {
             get: (target: any, targetPropertyKey: PropertyKey) => {
+                if (targetPropertyKey === PROXY_TARGET_SYMBOL) {
+                    return target;
+                }
+
                 this.watch(reactiveProperty);
 
                 return target[targetPropertyKey];
@@ -107,10 +116,15 @@ export class Reactivity {
                         target[targetPropertyKey] = value;
                         reactiveProperty.notify(0, false);
                     } else {
-                        // todo: merge
-                        target[targetPropertyKey] = value;
+                        const reactiveValue = {
+                            [targetPropertyKey]: value,
+                        };
 
-                        const targetReactiveProperty = this.getObjectProperty(target, targetPropertyKey.toString());
+                        this.merge(target, reactiveValue, targetPropertyKey as string, reactiveProperty);
+
+                        target[targetPropertyKey] = reactiveValue[targetPropertyKey as string];
+
+                        const targetReactiveProperty = this.getObjectProperty(target, targetPropertyKey as string);
                         if (targetReactiveProperty) {
                             targetReactiveProperty.notify();
                         }
@@ -126,15 +140,17 @@ export class Reactivity {
         });
     }
 
-    public static merge(from: any, to: any, propertyKey: string, reactiveProperty?: ReactiveProperty): void {
+    public static merge(
+        from: any,
+        to: any,
+        propertyKey: string,
+        reactiveProperty?: ReactiveProperty,
+        parentReactiveProperty?: ReactiveProperty,
+    ): void {
         const fromValue = from && from[propertyKey];
         const toValue = to[propertyKey];
 
-        if (reactiveProperty) {
-            this.defineObjectProperty(to, propertyKey, reactiveProperty);
-        } else {
-            this.applyObjectProperty(to, propertyKey);
-        }
+        reactiveProperty = this.applyObject(to, propertyKey, parentReactiveProperty, reactiveProperty);
 
         if (typeof toValue === "object") {
             for (const toValuePropertyKey in toValue) {
@@ -143,11 +159,14 @@ export class Reactivity {
 
                     if (fromValue && fromValue.hasOwnProperty(toValuePropertyKey)) {
                         toValueReactiveProperty = this.getObjectProperty(fromValue, toValuePropertyKey);
+                    } else {
+                        toValueReactiveProperty = this.applyObject(toValue, toValuePropertyKey, reactiveProperty);
                     }
 
-                    this.merge(fromValue, toValue, toValuePropertyKey, toValueReactiveProperty);
+                    this.merge(fromValue, toValue, toValuePropertyKey, toValueReactiveProperty, reactiveProperty);
                 }
             }
+            to[propertyKey] = this.makeProxyObject(to[propertyKey], reactiveProperty);
         }
     }
 
@@ -176,11 +195,19 @@ export class Reactivity {
         return Reflect.getMetadata(REACTIVE_PROPERTY_FLAG, obj);
     }
 
-    public static getObjectProperty(obj: any, propertyKey: string): ReactiveProperty {
+    public static getObjectProperty(obj: any, propertyKey: string | symbol): ReactiveProperty {
+        if (obj[PROXY_TARGET_SYMBOL]) {
+            obj = obj[PROXY_TARGET_SYMBOL];
+        }
+
         return Reflect.getMetadata(REACTIVE_PROPERTY_FLAG, obj, propertyKey);
     }
 
     public static defineObject(obj: any, reactiveProperty: ReactiveProperty): void {
+        if (obj[PROXY_TARGET_SYMBOL]) {
+            obj = obj[PROXY_TARGET_SYMBOL];
+        }
+
         Reflect.defineMetadata(REACTIVE_PROPERTY_FLAG, reactiveProperty, obj);
     }
 
