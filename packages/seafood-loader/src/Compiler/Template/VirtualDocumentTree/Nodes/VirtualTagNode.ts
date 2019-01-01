@@ -8,38 +8,14 @@ export class VirtualTagNode extends VirtualNode {
         this.extendChildVirtualElementsAndRender();
     }
 
-    public getNextSiblingNode(): Node | null {
+    public getNextSiblingNode(position?: number): Node | null {
         const parentVirtualElement = this.getParentVirtualElement() as VirtualTagNodeCollection;
-        const position = this.getPosition();
-        let nextSiblingNode: Node | null = null;
 
-        if (position && parentVirtualElement) {
-            let childVirtualElements: VirtualTagNode[];
-
-            if (parentVirtualElement.isBuildedNodeAttached()) {
-                childVirtualElements = parentVirtualElement.getCollectionInReversedOrder();
-            } else {
-                childVirtualElements = [];
-            }
-
-            for (const index in childVirtualElements) {
-                if (childVirtualElements.hasOwnProperty(index) && childVirtualElements[index] !== this) {
-                    const childVirtualElement = childVirtualElements[index];
-                    const childBuildedNode = childVirtualElement.getBuildedNode();
-                    const childPosition = childVirtualElement.getPosition();
-
-                    if (childBuildedNode && childPosition) {
-                        if (position < childPosition) {
-                            nextSiblingNode = childBuildedNode;
-                        } else {
-                            break;
-                        }
-                    }
-                }
-            }
+        if (!parentVirtualElement.isBuildedNodeAttached()) {
+            return null;
         }
 
-        return nextSiblingNode;
+        return super.getNextSiblingNode(position, "getCollectionInReversedOrder");
     }
 
     public attachBuildedNode(): void {
@@ -47,13 +23,14 @@ export class VirtualTagNode extends VirtualNode {
 
         if (parentVirtualElement) {
             let parentBuildedNode;
+            let nextSiblingNode = this.getNextSiblingNode();
 
             if (parentVirtualElement.isBuildedNodeAttached()) {
-                const parentOfParentVirtualTagNode = parentVirtualElement.getParentVirtualElement();
+                const parentOfParentVirtualTagNode = parentVirtualElement.getParentVirtualElement() as VirtualNode;
+                const parentVirtualElementPosition = parentVirtualElement.getPosition();
 
-                if (parentOfParentVirtualTagNode) {
-                    parentBuildedNode = parentOfParentVirtualTagNode.getBuildedNode();
-                }
+                parentBuildedNode = parentOfParentVirtualTagNode.getBuildedNode();
+                nextSiblingNode = parentVirtualElement.getNextSiblingNode(parentVirtualElementPosition);
             } else {
                 parentBuildedNode = parentVirtualElement.getBuildedNode();
             }
@@ -61,7 +38,7 @@ export class VirtualTagNode extends VirtualNode {
             const buildedNode = this.getBuildedNode();
 
             if (parentBuildedNode && buildedNode) {
-                parentBuildedNode.insertBefore(buildedNode, this.getNextSiblingNode());
+                parentBuildedNode.insertBefore(buildedNode, nextSiblingNode);
             }
         }
     }

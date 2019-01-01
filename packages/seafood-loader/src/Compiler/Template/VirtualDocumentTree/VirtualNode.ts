@@ -5,13 +5,17 @@ export abstract class VirtualNode extends VirtualElement {
         this.buildedNode = this.buildNode();
     }
 
-    public getNextSiblingNode(): Node | null {
+    public getNextSiblingNode(position?: number, method?: string): Node | null {
+        if (typeof position === "undefined") {
+            position = this.getPosition();
+        }
+
         const parentVirtualElement = this.getParentVirtualElement();
-        const position = this.getPosition();
         let nextSiblingNode: Node | null = null;
 
-        if (position && parentVirtualElement) {
-            const childVirtualElements = parentVirtualElement.getChildVirtualElementsReversed();
+        if (typeof position !== "undefined" && parentVirtualElement) {
+            // @ts-ignore
+            const childVirtualElements = parentVirtualElement[method || "getChildVirtualElementsReversed"]();
 
             for (const childVirtualElement of childVirtualElements) {
                 if (childVirtualElement !== this) {
