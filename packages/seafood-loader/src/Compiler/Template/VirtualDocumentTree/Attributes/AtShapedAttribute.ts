@@ -42,9 +42,8 @@ export class AtShapedAttribute extends NonStaticAttribute {
             const expressionResult = scope.executeExpression(
                 expression,
                 (value: any, depth?: number) => {
-                console.log(value, depth);
                 if (!depth || depth <= 1) {
-                    // collection.updateForOfExpression(value);
+                    collection.updateForOfExpression(value);
                 }
             });
             console.log(expressionResult);

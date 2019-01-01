@@ -83,8 +83,10 @@ export class VirtualTagNodeCollection extends VirtualNode {
     }
 
     public useCollection(callback: (element: VirtualTagNode) => void): void {
-        for (const virtualTagNode of this.collection) {
-            callback(virtualTagNode);
+        for (const index in this.collection) {
+            if (this.collection.hasOwnProperty(index)) {
+                callback(this.collection[index]);
+            }
         }
     }
 
@@ -175,14 +177,6 @@ export class VirtualTagNodeCollection extends VirtualNode {
                     }
                 }
 
-                for (const updatedValueIndex in updatedExpressionValue) {
-                    if (updatedExpressionValue.hasOwnProperty(updatedValueIndex)) {
-                        if (!this.collection.hasOwnProperty(updatedValueIndex)) {
-                            this.forOfExpression.value[updatedValueIndex] = updatedExpressionValue[updatedValueIndex];
-                        }
-                    }
-                }
-
                 this.cleanCollection(rudenantIndecies, (index: number) => {
                     if (this.forOfExpression) {
                         delete this.forOfExpression.value[index];
@@ -190,10 +184,11 @@ export class VirtualTagNodeCollection extends VirtualNode {
                 });
 
                 this.renderForOfExpression();
+                console.log("type not changed");
             }
         } else {
             // tmp
-            console.log("changed");
+            console.log("type changed");
 
             // notify on new element
         }
@@ -235,7 +230,7 @@ export class VirtualTagNodeCollection extends VirtualNode {
                 if (this.forOfExpression.value.hasOwnProperty(valueIndex) &&
                     !this.collection.hasOwnProperty(valueIndex)
                 ) {
-                    // console.log(`render in ${valueIndex} index`);
+                    console.log(`render in ${valueIndex} index`);
                     this.renderSingleTag(+valueIndex, (virtualTagNode: VirtualTagNode) => {
                         if (this.forOfExpression && this.forOfExpression.variableName) {
                             const scope = virtualTagNode.getScope();
