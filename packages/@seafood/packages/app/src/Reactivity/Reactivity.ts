@@ -34,7 +34,6 @@ export class Reactivity {
                 };
 
                 this.merge(obj, reactiveValue, propertyKey, reactiveProperty);
-
                 property.value = reactiveValue[propertyKey];
                 reactiveProperty.notify();
             },

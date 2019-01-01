@@ -40,9 +40,8 @@ export class AtShapedAttribute extends NonStaticAttribute {
 
         if (variableName.length && expression.length) {
             const expressionResult = scope.executeExpression(expression, (value: any, depth?: number) => {
-                console.log("update", depth);
                 if (!depth || depth <= 1) {
-                    // collection.updateForOfExpression(value);
+                    collection.updateForOfExpression(value);
                 }
             });
             const forExpression: VirtualTagNodeForExpression = {

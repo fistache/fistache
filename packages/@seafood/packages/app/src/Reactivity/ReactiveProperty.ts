@@ -21,7 +21,11 @@ export class ReactiveProperty {
     }
 
     public addChildReactiveProperty(child: ReactiveProperty): void {
-        this.childReactiveProperties.push(child);
+        // todo: find a reason why includes method devides count of
+        // childs on a half 14 -> 7
+        if (!this.childReactiveProperties.includes(child)) {
+            this.childReactiveProperties.push(child);
+        }
     }
 
     public depend(trigger: () => void, depend?: () => void) {

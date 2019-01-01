@@ -37,12 +37,15 @@ export class VirtualTagNodeCollection extends VirtualNode {
 
     private hasBeenIfAttributeValueChanged: boolean = false;
 
+    private isBuildedNodeAttachedMarker: boolean;
+
     public constructor() {
         super();
 
         this.attributesManager = new VirtualTagAttributesManager(this);
         this.presentState = VirtualTagNodePresentState.Present;
         this.collection = [];
+        this.isBuildedNodeAttachedMarker = false;
     }
 
     public beforeRender(): void {
@@ -70,6 +73,16 @@ export class VirtualTagNodeCollection extends VirtualNode {
         }
     }
 
+    public attachBuildedNode(): void {
+        super.attachBuildedNode();
+
+        this.isBuildedNodeAttachedMarker = true;
+    }
+
+    public isBuildedNodeAttached(): boolean {
+        return this.isBuildedNodeAttachedMarker;
+    }
+
     public setForOfExpression(forOfExpression: VirtualTagNodeForExpression): void {
         this.forOfExpression = forOfExpression;
     }
@@ -80,6 +93,22 @@ export class VirtualTagNodeCollection extends VirtualNode {
 
     public setForNExpression(forNExpression: VirtualTagNodeForExpression): void {
         this.forNExpression = forNExpression;
+    }
+
+    public getCollection(): VirtualTagNode[] {
+        return this.collection;
+    }
+
+    public getCollectionInReversedOrder(): VirtualTagNode[] {
+        const virtualTagNodes: VirtualTagNode[] = [];
+
+        for (const index in this.collection) {
+            if (this.collection.hasOwnProperty(index)) {
+                virtualTagNodes.push(this.collection[index]);
+            }
+        }
+
+        return virtualTagNodes.reverse();
     }
 
     public useCollection(callback: (element: VirtualTagNode) => void): void {
@@ -165,6 +194,10 @@ export class VirtualTagNodeCollection extends VirtualNode {
                 Array.isArray(updatedExpressionValue) === Array.isArray(this.collection);
         }
 
+        if (this.forOfExpression) {
+            this.forOfExpression.value = updatedExpressionValue;
+        }
+
         if (isTypeOfExpressionNotChanged && this.forOfExpression) {
             if (Array.isArray(updatedExpressionValue)) {
                 const rudenantIndecies: any[] = [];
@@ -184,13 +217,7 @@ export class VirtualTagNodeCollection extends VirtualNode {
                 });
 
                 this.renderForOfExpression();
-                console.log("type not changed");
             }
-        } else {
-            // tmp
-            console.log("type changed");
-
-            // notify on new element
         }
     }
 
@@ -230,12 +257,10 @@ export class VirtualTagNodeCollection extends VirtualNode {
                 if (this.forOfExpression.value.hasOwnProperty(valueIndex) &&
                     !this.collection.hasOwnProperty(valueIndex)
                 ) {
-                    console.log(`render in ${valueIndex} index`);
                     this.renderSingleTag(+valueIndex, (virtualTagNode: VirtualTagNode) => {
                         if (this.forOfExpression && this.forOfExpression.variableName) {
                             const scope = virtualTagNode.getScope();
                             scope.setVariable(this.forOfExpression.variableName, () => {
-                                console.log(valueIndex);
                                 if (this.forOfExpression) {
                                     return this.forOfExpression.value[valueIndex];
                                 }
