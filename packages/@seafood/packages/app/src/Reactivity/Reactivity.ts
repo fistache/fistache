@@ -106,7 +106,7 @@ export class Reactivity {
                     return target;
                 }
 
-                this.watch(reactiveProperty);
+                this.watch(this.getObjectProperty(target, targetPropertyKey as string));
 
                 return target[targetPropertyKey];
             },
@@ -114,7 +114,7 @@ export class Reactivity {
                 if (target.hasOwnProperty(targetPropertyKey)) {
                     if (Array.isArray(target) && targetPropertyKey === "length") {
                         target[targetPropertyKey] = value;
-                        reactiveProperty.notify(0, false);
+                        reactiveProperty.notifyParentVirtualNodes();
                     } else {
                         const reactiveValue = {
                             [targetPropertyKey]: value,
@@ -132,7 +132,7 @@ export class Reactivity {
                 } else {
                     target[targetPropertyKey] = value;
                     this.applyObjectProperty(obj, targetPropertyKey.toString(), reactiveProperty);
-                    reactiveProperty.notify(0, false);
+                    reactiveProperty.notifyParentVirtualNodes();
                 }
 
                 return true;
@@ -173,7 +173,7 @@ export class Reactivity {
     public static watch(reactiveProperty: ReactiveProperty): void {
         const reactivityWatcher = ReactivityWatcher.getInstance();
 
-        if (reactivityWatcher.isRecording() && reactiveProperty) {
+        if (reactiveProperty && reactivityWatcher.isRecording()) {
             const updatingFunction = reactivityWatcher.getUpdatingFunction();
             const executingFunction = reactivityWatcher.getExecutingFunction();
             const variables = reactivityWatcher.getVariables();

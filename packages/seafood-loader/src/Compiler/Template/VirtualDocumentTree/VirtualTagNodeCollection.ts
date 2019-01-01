@@ -218,8 +218,8 @@ export class VirtualTagNodeCollection extends VirtualNode {
             if (this.collection.hasOwnProperty(index)) {
                 const virtualTagNode = this.collection[index];
                 virtualTagNode.removeBuildedNode();
-                delete this.collection[index];
                 callback(index);
+                delete this.collection[index];
             }
         }
     }
@@ -235,6 +235,7 @@ export class VirtualTagNodeCollection extends VirtualNode {
                         if (this.forOfExpression && this.forOfExpression.variableName) {
                             const scope = virtualTagNode.getScope();
                             scope.setVariable(this.forOfExpression.variableName, () => {
+                                console.log(valueIndex);
                                 if (this.forOfExpression) {
                                     return this.forOfExpression.value[valueIndex];
                                 }
