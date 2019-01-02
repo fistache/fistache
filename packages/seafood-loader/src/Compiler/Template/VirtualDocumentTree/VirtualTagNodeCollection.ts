@@ -209,6 +209,8 @@ export class VirtualTagNodeCollection extends VirtualNode {
                 });
 
                 callback();
+            } else {
+                // todo: implement object @for rendering
             }
         }
     }
