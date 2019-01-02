@@ -1,3 +1,4 @@
+import {VirtualTagAttributesManager} from "../Attributes/VirtualTagAttributesManager";
 import {VirtualNode} from "../VirtualNode";
 import {VirtualTagNodeCollection, VirtualTagNodePresentState} from "../VirtualTagNodeCollection";
 
@@ -13,16 +14,27 @@ export class VirtualTagNode extends VirtualNode {
 
     private hasBeenIfAttributeValueChanged: boolean = false;
 
+    private readonly attributesManager: VirtualTagAttributesManager;
+
     constructor() {
         super();
+
+        this.attributesManager = new VirtualTagAttributesManager(this);
         this.presentState = VirtualTagNodePresentState.Present;
     }
 
+    public getAttributesManager(): VirtualTagAttributesManager {
+        return this.attributesManager;
+    }
+
     public render(): void {
+        this.attributesManager.renderAtShapedAttributes();
+
         if (this.isPresent()) {
             super.render();
             this.attachBuildedNode();
             this.extendChildVirtualElementsAndRender();
+            this.attributesManager.renderDynamicAndStaticAttributes();
         }
     }
 

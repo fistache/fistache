@@ -48,6 +48,8 @@ export class Scope {
         for (const dependent of this.dependent) {
             dependent.reactiveProperty.removeDepedent(dependent.functions);
         }
+
+        this.dependent = [];
     }
 
     public setContext(context: any): void {

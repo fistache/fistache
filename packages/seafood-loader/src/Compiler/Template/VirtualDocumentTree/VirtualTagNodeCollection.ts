@@ -26,7 +26,7 @@ export class VirtualTagNodeCollection extends VirtualNode {
     protected forInExpression?: VirtualTagNodeForExpression;
     protected forNExpression?: VirtualTagNodeForExpression;
 
-    private attributesManager: VirtualTagAttributesManager;
+    private readonly attributesManager: VirtualTagAttributesManager;
 
     private isBuildedNodeAttachedMarker: boolean;
 
@@ -43,7 +43,7 @@ export class VirtualTagNodeCollection extends VirtualNode {
     }
 
     public render(): void {
-        this.attributesManager.renderAtShapedAttributes();
+        this.attributesManager.renderAtShapedCollectionAttributes();
 
         super.render();
 
@@ -57,7 +57,6 @@ export class VirtualTagNodeCollection extends VirtualNode {
             this.renderSingleTag();
         }
 
-        this.attributesManager.renderDynamicAndStaticAttributes();
         this.attachBuildedNode();
     }
 
@@ -230,8 +229,6 @@ export class VirtualTagNodeCollection extends VirtualNode {
             afterCreate(virtualTagNode);
         }
 
-        this.attributesManager.renderAtShapedIfAttributesOnVirtualTagNode(virtualTagNode);
-
         virtualTagNode.beforeRender();
         virtualTagNode.render();
     }
@@ -240,8 +237,7 @@ export class VirtualTagNodeCollection extends VirtualNode {
         const collection = this.collection.slice();
 
         for (const index of rudenantIndecies) {
-            const virtualTagNode = this.collection[index];
-            virtualTagNode.removeBuildedNodeAndDependencies();
+            this.collection[index].removeBuildedNodeAndDependencies();
             collection.splice(index, 1);
 
             if (callback) {
@@ -255,8 +251,7 @@ export class VirtualTagNodeCollection extends VirtualNode {
     protected cleanCollectionWholly(callback?: (index: number) => void): void {
         for (const index in this.collection) {
             if (this.collection.hasOwnProperty(index)) {
-                const virtualTagNode = this.collection[index];
-                virtualTagNode.removeBuildedNodeAndDependencies();
+                this.collection[index].removeBuildedNodeAndDependencies();
                 this.collection.splice(+index, 1);
 
                 if (callback) {
@@ -344,6 +339,7 @@ export class VirtualTagNodeCollection extends VirtualNode {
         virtualTagNode.setPosition(position);
         virtualTagNode.setParentVirtualElement(this);
         virtualTagNode.setChildVirtualElements(this.getChildVirtualElements(virtualTagNode));
+        virtualTagNode.getAttributesManager().extend(this.attributesManager);
         virtualTagNodeScope.setParentScope(collectionScope);
         virtualTagNodeScope.setContext(collectionScope.getContext());
 

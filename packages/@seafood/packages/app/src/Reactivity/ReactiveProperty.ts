@@ -8,7 +8,7 @@ interface DependentFunction {
 export class ReactiveProperty {
     private readonly dependentFunctions: DependentFunction[];
     private parentReactiveProperty?: ReactiveProperty | null;
-    private readonly childReactiveProperties: ReactiveProperty[];
+    private childReactiveProperties: ReactiveProperty[];
 
     constructor() {
         this.childReactiveProperties = [];
@@ -37,6 +37,18 @@ export class ReactiveProperty {
                     break;
                 }
             }
+        }
+
+        if (!this.dependentFunctions.length && this.parentReactiveProperty) {
+            this.parentReactiveProperty.removeChildReactiveProperty(this);
+        }
+    }
+
+    public removeChildReactiveProperty(reactiveProperty: ReactiveProperty): void {
+        if (!this.childReactiveProperties.includes(reactiveProperty)) {
+            this.childReactiveProperties.splice(
+                this.childReactiveProperties.indexOf(reactiveProperty), 1,
+            );
         }
     }
 
