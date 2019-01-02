@@ -2,6 +2,7 @@ import {VirtualTagAttributesManager} from "./Attributes/VirtualTagAttributesMana
 import {VirtualTagNode} from "./Nodes/VirtualTagNode";
 import {VirtualElement} from "./VirtualElement";
 import {VirtualNode} from "./VirtualNode";
+import {PROXY_TARGET_SYMBOL} from "@seafood/app";
 
 /**
  * More details in presentState variable declaration in
@@ -155,9 +156,23 @@ export class VirtualTagNodeCollection extends VirtualNode {
     }
 
     public updateForNExpression(updatedExpressionValue: any): void {
-        this.updateForExpression(updatedExpressionValue, () => {
+        if (this.forNExpression && Number.isInteger(this.forNExpression.value) && this.forNExpression.value >= 0) {
+            const previousValue = this.collection.length;
+            const difference = updatedExpressionValue - previousValue;
+            this.forNExpression.value = updatedExpressionValue;
+
+            if (difference < 0) {
+                const rudenantIndecies: any[] = [];
+
+                for (let i = updatedExpressionValue; i < previousValue; i++) {
+                    rudenantIndecies.push(i);
+                }
+
+                this.cleanCollection(rudenantIndecies);
+            }
+
             this.renderForNExpression();
-        }, this.forNExpression);
+        }
     }
 
     public updateForExpression(
@@ -165,20 +180,9 @@ export class VirtualTagNodeCollection extends VirtualNode {
         callback: () => void,
         forExpression?: VirtualTagNodeForExpression,
     ): void {
-        const typeOfUpdatedExpressionValue = typeof updatedExpressionValue;
-        const typeOfExpressionValue = typeof this.collection;
-        let isTypeOfExpressionNotChanged = typeOfUpdatedExpressionValue === typeOfExpressionValue;
-
-        if (isTypeOfExpressionNotChanged && typeOfExpressionValue === "object") {
-            isTypeOfExpressionNotChanged =
-                Array.isArray(updatedExpressionValue) === Array.isArray(this.collection);
-        }
-
         if (forExpression) {
             forExpression.value = updatedExpressionValue;
-        }
 
-        if (isTypeOfExpressionNotChanged && forExpression) {
             if (Array.isArray(updatedExpressionValue)) {
                 const rudenantIndecies: any[] = [];
 
@@ -192,11 +196,18 @@ export class VirtualTagNodeCollection extends VirtualNode {
 
                 this.cleanCollection(rudenantIndecies, (index: number) => {
                     if (forExpression) {
-                        forExpression.value.splice(index, 1);
+                        let value = forExpression.value;
+
+                        // get original object cause we use value.splice
+                        // and we don't want to trigger rerender one more time
+                        if (value[PROXY_TARGET_SYMBOL]) {
+                            value = value[PROXY_TARGET_SYMBOL];
+                        }
+
+                        value.splice(index, 1);
                     }
                 });
 
-                console.log("rerender for");
                 callback();
             }
         }
@@ -223,13 +234,32 @@ export class VirtualTagNodeCollection extends VirtualNode {
         virtualTagNode.render();
     }
 
-    protected cleanCollection(rudenantIndecies: number[], callback: (index: number) => void): void {
+    protected cleanCollection(rudenantIndecies: number[], callback?: (index: number) => void): void {
+        const collection = this.collection.slice();
+
         for (const index of rudenantIndecies) {
+            const virtualTagNode = this.collection[index];
+            virtualTagNode.removeBuildedNodeAndDependencies();
+            collection.splice(index, 1);
+
+            if (callback) {
+                callback(index);
+            }
+        }
+
+        this.collection = collection;
+    }
+
+    protected cleanCollectionWholly(callback?: (index: number) => void): void {
+        for (const index in this.collection) {
             if (this.collection.hasOwnProperty(index)) {
                 const virtualTagNode = this.collection[index];
-                virtualTagNode.removeBuildedNode();
-                this.collection.splice(index, 1);
-                callback(index);
+                virtualTagNode.removeBuildedNodeAndDependencies();
+                this.collection.splice(+index, 1);
+
+                if (callback) {
+                    callback(+index);
+                }
             }
         }
     }
@@ -284,7 +314,7 @@ export class VirtualTagNodeCollection extends VirtualNode {
             Number.isInteger(this.forNExpression.value) &&
             this.forNExpression.value >= 0
         ) {
-            for (let i = 0; i < this.forNExpression.value; i++) {
+            for (let i = this.collection.length; i < this.forNExpression.value; i++) {
                 if (this.forNExpression.variableName) {
                     this.renderSingleTag(+i, (virtualTagNode: VirtualTagNode) => {
                         if (this.forNExpression && this.forNExpression.variableName) {
@@ -295,9 +325,11 @@ export class VirtualTagNodeCollection extends VirtualNode {
                         }
                     });
                 } else {
-                    this.renderSingleTag();
+                    this.renderSingleTag(+i);
                 }
             }
+        } else {
+            this.cleanCollectionWholly();
         }
     }
 

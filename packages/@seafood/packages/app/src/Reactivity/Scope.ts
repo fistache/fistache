@@ -45,7 +45,6 @@ export class Scope {
     }
 
     public removeDependents(): void {
-        console.log("remove dependents");
         for (const dependent of this.dependent) {
             dependent.reactiveProperty.removeDepedent(dependent.functions);
         }

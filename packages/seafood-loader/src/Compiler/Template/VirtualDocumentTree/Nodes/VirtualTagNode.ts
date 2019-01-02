@@ -61,12 +61,12 @@ export class VirtualTagNode extends VirtualNode {
         }
     }
 
-    public removeBuildedNode(): void {
+    public removeBuildedNodeAndDependencies(): void {
         for (const childVirtualElement of this.childVirtualElements) {
             childVirtualElement.getScope().removeDependents();
         }
 
-        super.removeBuildedNode();
+        super.removeBuildedNodeAndDependencies();
     }
 
     public getBuildedNode(): Element | undefined | null {

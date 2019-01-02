@@ -116,9 +116,13 @@ export abstract class VirtualElement implements VirtualElementInterface {
     }
 
     public removeBuildedNode(): void {
-        this.getScope().removeDependents();
         this.detachBuildedNode();
         this.buildedNode = null;
+    }
+
+    public removeBuildedNodeAndDependencies(): void {
+        this.getScope().removeDependents();
+        this.removeBuildedNode();
     }
 
     public detachBuildedNode(): void {

@@ -29,7 +29,6 @@ export class Reactivity {
                 return property.value;
             },
             set: (value: any): void => {
-                console.log("set", propertyKey);
                 const reactiveValue = {
                     [propertyKey]: value,
                 };

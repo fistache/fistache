@@ -74,7 +74,11 @@ export class AtShapedAttribute extends NonStaticAttribute {
         if (variableName.length && expression.length) {
             const expressionResult = scope.executeExpression(expression, (value: any, depth?: number) => {
                 if (!depth || depth <= 1) {
-                    collection.updateForInExpression(value);
+                    if (Number.isInteger(value) && value >= 0) {
+                        collection.updateForNExpression(value);
+                    } else {
+                        collection.updateForInExpression(value);
+                    }
                 }
             });
             const forExpression: VirtualTagNodeForExpression = {
@@ -96,6 +100,7 @@ export class AtShapedAttribute extends NonStaticAttribute {
         if (this.value.length) {
             const expressionResult = scope.executeExpression(this.value, (value: any, depth?: number) => {
                 if (!depth || depth <= 1) {
+                    console.log("update for..n");
                     collection.updateForNExpression(value);
                 }
             });
