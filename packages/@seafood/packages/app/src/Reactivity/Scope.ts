@@ -1,4 +1,10 @@
-import {ReactivityWatcher} from "@seafood/app";
+import {ReactiveProperty} from "./ReactiveProperty";
+import {ReactivityWatcher} from "./ReactivityWatcher";
+
+interface DependentReactive {
+    reactiveProperty: ReactiveProperty;
+    functions: Array<() => void>;
+}
 
 export class Scope {
     /**
@@ -7,11 +13,42 @@ export class Scope {
      */
     protected variables: any;
 
-    protected context?: any;
+    protected context: any;
     protected parentScope?: Scope;
+
+    private dependent: DependentReactive[];
 
     constructor() {
         this.variables = {};
+        this.context = {};
+        this.dependent = [];
+    }
+
+    public addDependent(reactiveProperty: ReactiveProperty, func: () => void): void {
+        let dep = null;
+
+        for (const dependent of this.dependent) {
+            if (dependent.reactiveProperty === reactiveProperty) {
+                dep = dependent;
+                break;
+            }
+        }
+
+        if (dep && !dep.functions.includes(func)) {
+            dep.functions.push(func);
+        } else {
+            this.dependent.push({
+                reactiveProperty,
+                functions: [func],
+            });
+        }
+    }
+
+    public removeDependents(): void {
+        console.log("remove dependents");
+        for (const dependent of this.dependent) {
+            dependent.reactiveProperty.removeDepedent(dependent.functions);
+        }
     }
 
     public setContext(context: any): void {
@@ -47,7 +84,7 @@ export class Scope {
         reactivityWatcher.setUpdatingFunction(updatingFunction);
         reactivityWatcher.setExecutingFunction(executingFunction);
         reactivityWatcher.setVariables(variables);
-        reactivityWatcher.setContext(this.getContext());
+        reactivityWatcher.setScope(this);
 
         const expressionResult = reactivityWatcher.bindContext(executingFunction)(
             ...Object.values(variables),
@@ -57,7 +94,7 @@ export class Scope {
         reactivityWatcher.removeUpdatingFunction();
         reactivityWatcher.removeExecutingFunction();
         reactivityWatcher.removeVariables();
-        reactivityWatcher.removeContext();
+        reactivityWatcher.removeScope();
 
         return expressionResult;
     }

@@ -1,4 +1,4 @@
-import {Scope} from "../DataBinding/Scope";
+import {Scope} from "@seafood/app";
 import {VirtualElementInterface} from "./VirtualElementInterface";
 
 export abstract class VirtualElement implements VirtualElementInterface {
@@ -116,6 +116,7 @@ export abstract class VirtualElement implements VirtualElementInterface {
     }
 
     public removeBuildedNode(): void {
+        this.getScope().removeDependents();
         this.detachBuildedNode();
         this.buildedNode = null;
     }

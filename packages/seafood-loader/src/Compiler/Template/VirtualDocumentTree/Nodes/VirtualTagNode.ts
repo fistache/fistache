@@ -1,11 +1,29 @@
 import {VirtualNode} from "../VirtualNode";
-import {VirtualTagNodeCollection} from "../VirtualTagNodeCollection";
+import {VirtualTagNodeCollection, VirtualTagNodePresentState} from "../VirtualTagNodeCollection";
 
 export class VirtualTagNode extends VirtualNode {
+
+    /**
+     * Used for @if conditinal rendering.
+     *
+     * A virtual element should not to be rendered if state
+     * is missing.
+     */
+    protected presentState: VirtualTagNodePresentState;
+
+    private hasBeenIfAttributeValueChanged: boolean = false;
+
+    constructor() {
+        super();
+        this.presentState = VirtualTagNodePresentState.Present;
+    }
+
     public render(): void {
-        super.render();
-        this.attachBuildedNode();
-        this.extendChildVirtualElementsAndRender();
+        if (this.isPresent()) {
+            super.render();
+            this.attachBuildedNode();
+            this.extendChildVirtualElementsAndRender();
+        }
     }
 
     public getNextSiblingNode(position?: number): Node | null {
@@ -43,11 +61,54 @@ export class VirtualTagNode extends VirtualNode {
         }
     }
 
+    public removeBuildedNode(): void {
+        for (const childVirtualElement of this.childVirtualElements) {
+            childVirtualElement.getScope().removeDependents();
+        }
+
+        super.removeBuildedNode();
+    }
+
     public getBuildedNode(): Element | undefined | null {
         return super.getBuildedNode() as Element;
     }
 
+    public updateIfAttributeValue(expressionValue: any) {
+        let presentState;
+
+        if (expressionValue) {
+            presentState = VirtualTagNodePresentState.Present;
+        } else {
+            presentState = VirtualTagNodePresentState.Missing;
+        }
+
+        this.hasBeenIfAttributeValueChanged = presentState !== this.getPresentState();
+        if (this.hasBeenIfAttributeValueChanged) {
+            this.setPresentState(presentState);
+
+            if (this.getBuildedNode()) {
+                if (this.isPresent()) {
+                    this.attachBuildedNode();
+                } else {
+                    this.removeBuildedNode();
+                }
+            }
+        }
+    }
+
+    public setPresentState(presentState: VirtualTagNodePresentState): void {
+        this.presentState = presentState;
+    }
+
+    public getPresentState(): VirtualTagNodePresentState {
+        return this.presentState;
+    }
+
     protected buildNode(): Element | undefined | null {
         return document.createElement(this.parsedNode.name);
+    }
+
+    private isPresent(): boolean {
+        return this.getPresentState() === VirtualTagNodePresentState.Present;
     }
 }

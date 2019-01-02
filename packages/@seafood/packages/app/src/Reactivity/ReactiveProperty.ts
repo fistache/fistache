@@ -22,9 +22,21 @@ export class ReactiveProperty {
 
     public addChildReactiveProperty(child: ReactiveProperty): void {
         // todo: find a reason why includes method devides count of
-        // childs on a half 14 -> 7
+        // childs by half 14 -> 7
         if (!this.childReactiveProperties.includes(child)) {
             this.childReactiveProperties.push(child);
+        }
+    }
+
+    public removeDepedent(functions: Array<() => void>): void {
+        // todo: optimize
+        for (const func of functions) {
+            for (const index in this.dependentFunctions) {
+                if (this.dependentFunctions[index].depend === func) {
+                    this.dependentFunctions.splice(+index, 1);
+                    break;
+                }
+            }
         }
     }
 

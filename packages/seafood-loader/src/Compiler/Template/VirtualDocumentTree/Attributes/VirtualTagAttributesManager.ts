@@ -4,6 +4,7 @@ import {AtShapedDynamicAttribute} from "./AtShapedDynamicAttribute";
 import {Attribute} from "./Attribute";
 import {DynamicAttribute} from "./DynamicAttribute";
 import {StaticAttribute} from "./StaticAttribute";
+import {VirtualTagNode} from "../Nodes/VirtualTagNode";
 
 export class VirtualTagAttributesManager {
     private readonly virtualTagNode: VirtualTagNodeCollection;
@@ -28,6 +29,12 @@ export class VirtualTagAttributesManager {
         this.appendAttributes(this.atShapedAttributes);
     }
 
+    public renderAtShapedIfAttributesOnVirtualTagNode(virtualTagNode: VirtualTagNode) {
+        for (const attribute of this.atShapedAttributes) {
+            attribute.appendIfAttributesOnVirtualTagNode(virtualTagNode);
+        }
+    }
+
     public renderDynamicAndStaticAttributes() {
         this.appendAttributes(this.dynamicAttributes);
         this.appendAttributes(this.staticAttributes);
@@ -46,9 +53,13 @@ export class VirtualTagAttributesManager {
                         new DynamicAttribute(this.virtualTagNode, attributeName, attributeValue),
                     );
                 } else if (this.testIsThisAtShapedAttribute(attributeName)) {
-                    this.atShapedAttributes.push(
-                        new AtShapedAttribute(this.virtualTagNode, attributeName, attributeValue),
-                    );
+                    const attribute = new AtShapedAttribute(this.virtualTagNode, attributeName, attributeValue);
+
+                    if (attributeName === "@for") {
+                        this.atShapedAttributes.unshift(attribute);
+                    } else {
+                        this.atShapedAttributes.push(attribute);
+                    }
                 } else if (this.testIsThisAtShapedDynamicAttribute(attributeName)) {
                     this.atShapedDynamicAttributes.push(
                         new AtShapedDynamicAttribute(this.virtualTagNode, attributeName, attributeValue),

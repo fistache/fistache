@@ -1,3 +1,4 @@
+import {VirtualTagNode} from "../Nodes/VirtualTagNode";
 import {VirtualTagNodeForExpression} from "../VirtualTagNodeCollection";
 import {NonStaticAttribute} from "./NonStaticAttribute";
 
@@ -6,13 +7,19 @@ export class AtShapedAttribute extends NonStaticAttribute {
         this.resolveAttributeByName(this.getName());
     }
 
+    public appendIfAttributesOnVirtualTagNode(virtualTagNode: VirtualTagNode): void {
+        if (this.getName() === "if") {
+            this.appendIfAttribute(virtualTagNode);
+        }
+    }
+
     protected resolveAttributeByName(name: string): void {
         switch (name) {
-            case("if"):
-                this.appendIfAttribute();
-                break;
             case("for"):
                 this.resolveForAttribute();
+                break;
+            case("if"):
+                this.appendIfAttribute();
                 break;
             default:
                 console.warn(`Attribute ${this.name} is unknown.`);
@@ -65,10 +72,10 @@ export class AtShapedAttribute extends NonStaticAttribute {
         const scope = collection.getScope();
 
         if (variableName.length && expression.length) {
-            const expressionResult = scope.executeExpression(expression, () => {
-                // чтобы работало, нужно раскомменить parent.notify
-                // в app/component
-                // todo: add reactivity
+            const expressionResult = scope.executeExpression(expression, (value: any, depth?: number) => {
+                if (!depth || depth <= 1) {
+                    collection.updateForInExpression(value);
+                }
             });
             const forExpression: VirtualTagNodeForExpression = {
                 variableName,
@@ -87,9 +94,10 @@ export class AtShapedAttribute extends NonStaticAttribute {
         const scope = collection.getScope();
 
         if (this.value.length) {
-            const expressionResult = scope.executeExpression(this.value, () => {
-                // todo: add reactivity
-                // collection.updateForNExpression(value);
+            const expressionResult = scope.executeExpression(this.value, (value: any, depth?: number) => {
+                if (!depth || depth <= 1) {
+                    collection.updateForNExpression(value);
+                }
             });
             const forExpression: VirtualTagNodeForExpression = {
                 expression: this.value,
@@ -102,13 +110,14 @@ export class AtShapedAttribute extends NonStaticAttribute {
         }
     }
 
-    protected appendIfAttribute(): void {
-        const collection = this.getCollection();
-        const scope = collection.getScope();
-        const expressionValue = scope.executeExpression(this.value, (updatedExpressionValue: any) => {
-            collection.updateIfAttributeValue(updatedExpressionValue);
-        });
+    protected appendIfAttribute(virtualTagNode?: VirtualTagNode): void {
+        if (virtualTagNode) {
+            const scope = virtualTagNode.getScope();
+            const expressionResult = scope.executeExpression(this.value, (value: any) => {
+                virtualTagNode.updateIfAttributeValue(value);
+            });
 
-        collection.updateIfAttributeValue(expressionValue);
+            virtualTagNode.updateIfAttributeValue(expressionResult);
+        }
     }
 }

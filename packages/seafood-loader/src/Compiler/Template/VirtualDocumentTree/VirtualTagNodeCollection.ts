@@ -21,21 +21,11 @@ export interface VirtualTagNodeForExpression {
 export class VirtualTagNodeCollection extends VirtualNode {
     protected collection: VirtualTagNode[];
 
-    /**
-     * Used for @if conditinal rendering.
-     *
-     * A virtual element should not to be rendered if state
-     * is missing.
-     */
-    protected presentState: VirtualTagNodePresentState;
-
     protected forOfExpression?: VirtualTagNodeForExpression;
     protected forInExpression?: VirtualTagNodeForExpression;
     protected forNExpression?: VirtualTagNodeForExpression;
 
     private attributesManager: VirtualTagAttributesManager;
-
-    private hasBeenIfAttributeValueChanged: boolean = false;
 
     private isBuildedNodeAttachedMarker: boolean;
 
@@ -43,7 +33,6 @@ export class VirtualTagNodeCollection extends VirtualNode {
         super();
 
         this.attributesManager = new VirtualTagAttributesManager(this);
-        this.presentState = VirtualTagNodePresentState.Present;
         this.collection = [];
         this.isBuildedNodeAttachedMarker = false;
     }
@@ -55,22 +44,20 @@ export class VirtualTagNodeCollection extends VirtualNode {
     public render(): void {
         this.attributesManager.renderAtShapedAttributes();
 
-        if (this.isPresent()) {
-            super.render();
+        super.render();
 
-            if (this.forOfExpression) {
-                this.renderForOfExpression();
-            } else if (this.forInExpression) {
-                this.renderForInExpression();
-            } else if (this.forNExpression) {
-                this.renderForNExpression();
-            } else {
-                this.renderSingleTag();
-            }
-
-            this.attributesManager.renderDynamicAndStaticAttributes();
-            this.attachBuildedNode();
+        if (this.forOfExpression) {
+            this.renderForOfExpression();
+        } else if (this.forInExpression) {
+            this.renderForInExpression();
+        } else if (this.forNExpression) {
+            this.renderForNExpression();
+        } else {
+            this.renderSingleTag();
         }
+
+        this.attributesManager.renderDynamicAndStaticAttributes();
+        this.attachBuildedNode();
     }
 
     public attachBuildedNode(): void {
@@ -126,35 +113,6 @@ export class VirtualTagNodeCollection extends VirtualNode {
         this.collection = [];
     }
 
-    public updateIfAttributeValue(expressionValue: any) {
-        let presentState;
-
-        if (expressionValue) {
-            presentState = VirtualTagNodePresentState.Present;
-        } else {
-            presentState = VirtualTagNodePresentState.Missing;
-        }
-
-        this.hasBeenIfAttributeValueChanged = presentState !== this.getPresentState();
-        if (this.hasBeenIfAttributeValueChanged) {
-            this.setPresentState(presentState);
-
-            if (this.isPresent()) {
-                this.attachCollection();
-            } else {
-                this.detachCollection();
-            }
-        }
-    }
-
-    public setPresentState(presentState: VirtualTagNodePresentState): void {
-        this.presentState = presentState;
-    }
-
-    public getPresentState(): VirtualTagNodePresentState {
-        return this.presentState;
-    }
-
     public getChildVirtualElements(parentVirtualElement?: VirtualElement): VirtualElement[] {
         if (parentVirtualElement) {
             const childVirtualElements: VirtualElement[] = [];
@@ -185,6 +143,28 @@ export class VirtualTagNodeCollection extends VirtualNode {
     }
 
     public updateForOfExpression(updatedExpressionValue: any): void {
+        this.updateForExpression(updatedExpressionValue, () => {
+            this.renderForOfExpression();
+        }, this.forOfExpression);
+    }
+
+    public updateForInExpression(updatedExpressionValue: any): void {
+        this.updateForExpression(updatedExpressionValue, () => {
+            this.renderForInExpression();
+        }, this.forInExpression);
+    }
+
+    public updateForNExpression(updatedExpressionValue: any): void {
+        this.updateForExpression(updatedExpressionValue, () => {
+            this.renderForNExpression();
+        }, this.forNExpression);
+    }
+
+    public updateForExpression(
+        updatedExpressionValue: any,
+        callback: () => void,
+        forExpression?: VirtualTagNodeForExpression,
+    ): void {
         const typeOfUpdatedExpressionValue = typeof updatedExpressionValue;
         const typeOfExpressionValue = typeof this.collection;
         let isTypeOfExpressionNotChanged = typeOfUpdatedExpressionValue === typeOfExpressionValue;
@@ -194,11 +174,11 @@ export class VirtualTagNodeCollection extends VirtualNode {
                 Array.isArray(updatedExpressionValue) === Array.isArray(this.collection);
         }
 
-        if (this.forOfExpression) {
-            this.forOfExpression.value = updatedExpressionValue;
+        if (forExpression) {
+            forExpression.value = updatedExpressionValue;
         }
 
-        if (isTypeOfExpressionNotChanged && this.forOfExpression) {
+        if (isTypeOfExpressionNotChanged && forExpression) {
             if (Array.isArray(updatedExpressionValue)) {
                 const rudenantIndecies: any[] = [];
 
@@ -211,12 +191,13 @@ export class VirtualTagNodeCollection extends VirtualNode {
                 }
 
                 this.cleanCollection(rudenantIndecies, (index: number) => {
-                    if (this.forOfExpression) {
-                        delete this.forOfExpression.value[index];
+                    if (forExpression) {
+                        forExpression.value.splice(index, 1);
                     }
                 });
 
-                this.renderForOfExpression();
+                console.log("rerender for");
+                callback();
             }
         }
     }
@@ -236,6 +217,8 @@ export class VirtualTagNodeCollection extends VirtualNode {
             afterCreate(virtualTagNode);
         }
 
+        this.attributesManager.renderAtShapedIfAttributesOnVirtualTagNode(virtualTagNode);
+
         virtualTagNode.beforeRender();
         virtualTagNode.render();
     }
@@ -245,14 +228,14 @@ export class VirtualTagNodeCollection extends VirtualNode {
             if (this.collection.hasOwnProperty(index)) {
                 const virtualTagNode = this.collection[index];
                 virtualTagNode.removeBuildedNode();
+                this.collection.splice(index, 1);
                 callback(index);
-                delete this.collection[index];
             }
         }
     }
 
     protected renderForOfExpression(): void {
-        if (this.isPresent() && this.forOfExpression) {
+        if (this.forOfExpression) {
             for (const valueIndex in this.forOfExpression.value) {
                 if (this.forOfExpression.value.hasOwnProperty(valueIndex) &&
                     !this.collection.hasOwnProperty(valueIndex)
@@ -273,14 +256,16 @@ export class VirtualTagNodeCollection extends VirtualNode {
     }
 
     protected renderForInExpression(): void {
-        if (this.isPresent() && this.forInExpression) {
+        if (this.forInExpression) {
             if (Number.isInteger(this.forInExpression.value) && this.forInExpression.value >= 0) {
                 this.forNExpression = this.forInExpression;
                 this.renderForNExpression();
             } else {
                 for (const valueIndex in this.forInExpression.value) {
-                    if (this.forInExpression.value.hasOwnProperty(valueIndex)) {
-                        this.renderSingleTag(undefined, (virtualTagNode: VirtualTagNode) => {
+                    if (this.forInExpression.value.hasOwnProperty(valueIndex) &&
+                        !this.collection.hasOwnProperty(valueIndex)
+                    ) {
+                        this.renderSingleTag(+valueIndex, (virtualTagNode: VirtualTagNode) => {
                             if (this.forInExpression && this.forInExpression.variableName) {
                                 const scope = virtualTagNode.getScope();
                                 scope.setVariable(this.forInExpression.variableName, () => {
@@ -295,14 +280,13 @@ export class VirtualTagNodeCollection extends VirtualNode {
     }
 
     protected renderForNExpression(): void {
-        if (this.isPresent() &&
-            this.forNExpression &&
+        if (this.forNExpression &&
             Number.isInteger(this.forNExpression.value) &&
             this.forNExpression.value >= 0
         ) {
             for (let i = 0; i < this.forNExpression.value; i++) {
                 if (this.forNExpression.variableName) {
-                    this.renderSingleTag(undefined, (virtualTagNode: VirtualTagNode) => {
+                    this.renderSingleTag(+i, (virtualTagNode: VirtualTagNode) => {
                         if (this.forNExpression && this.forNExpression.variableName) {
                             const scope = virtualTagNode.getScope();
                             scope.setVariable(this.forNExpression.variableName, () => {
@@ -315,10 +299,6 @@ export class VirtualTagNodeCollection extends VirtualNode {
                 }
             }
         }
-    }
-
-    private isPresent(): boolean {
-        return this.getPresentState() === VirtualTagNodePresentState.Present;
     }
 
     private createVirtualTagNode(position: number): VirtualTagNode {

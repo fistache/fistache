@@ -1,3 +1,5 @@
+import {Scope} from "./Scope";
+
 export class ReactivityWatcher {
     public static getInstance(): ReactivityWatcher {
         if (!this.instance) {
@@ -12,29 +14,30 @@ export class ReactivityWatcher {
     private updatingFunction: ((value: any, depth?: number) => void);
     private executingFunction?: ((...args: any[]) => void) | null;
     private variables?: any[] | null;
-    private context?: any | null;
+    private scope?: Scope | null;
 
     private constructor() {
         this.updatingFunction = () => {};
         this.recording = false;
     }
 
-    public setContext(context: any): void {
-        this.context = context;
+    public setScope(scope: Scope): void {
+        this.scope = scope;
     }
 
-    public getContext(): any | null | undefined {
-        return this.context;
+    public getScope(): Scope | null | undefined {
+        return this.scope;
     }
 
     public bindContext(executingFunction: (...args: any[]) => void): (...args: any[]) => void {
-        const context = this.getContext() || {};
+        const scope = this.getScope();
+        const context = scope && scope.getContext() || {};
 
         return executingFunction.bind(context);
     }
 
-    public removeContext(): void {
-        this.context = null;
+    public removeScope(): void {
+        this.scope = null;
     }
 
     public setVariables(variables: any[]): void {

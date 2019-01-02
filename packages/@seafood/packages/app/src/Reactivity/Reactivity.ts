@@ -29,6 +29,7 @@ export class Reactivity {
                 return property.value;
             },
             set: (value: any): void => {
+                console.log("set", propertyKey);
                 const reactiveValue = {
                     [propertyKey]: value,
                 };
@@ -99,6 +100,8 @@ export class Reactivity {
         obj: any,
         reactiveProperty: ReactiveProperty,
     ): any {
+        let ignoreNextLengthSetNotify = false;
+
         return new Proxy(obj, {
             get: (target: any, targetPropertyKey: PropertyKey) => {
                 if (targetPropertyKey === PROXY_TARGET_SYMBOL) {
@@ -113,7 +116,10 @@ export class Reactivity {
                 if (target.hasOwnProperty(targetPropertyKey)) {
                     if (Array.isArray(target) && targetPropertyKey === "length") {
                         target[targetPropertyKey] = value;
-                        reactiveProperty.notifyParentVirtualNodes();
+                        if (!ignoreNextLengthSetNotify) {
+                            reactiveProperty.notifyParentVirtualNodes();
+                        }
+                        ignoreNextLengthSetNotify = false;
                     } else {
                         const reactiveValue = {
                             [targetPropertyKey]: value,
@@ -129,6 +135,7 @@ export class Reactivity {
                         }
                     }
                 } else {
+                    ignoreNextLengthSetNotify = true;
                     target[targetPropertyKey] = value;
                     this.applyObjectProperty(obj, targetPropertyKey.toString(), reactiveProperty);
                     reactiveProperty.notifyParentVirtualNodes();
@@ -177,15 +184,22 @@ export class Reactivity {
             const executingFunction = reactivityWatcher.getExecutingFunction();
             const variables = reactivityWatcher.getVariables();
 
-            if (updatingFunction && executingFunction && variables) {
+            if (updatingFunction && executingFunction && variables
+                && !reactiveProperty.hasFunction(executingFunction)
+            ) {
                 const executingFunctionWithContext = reactivityWatcher.bindContext(executingFunction);
                 const variableValues = Object.values(variables);
+                const scope = reactivityWatcher.getScope();
+
+                if (scope) {
+                    scope.addDependent(reactiveProperty, executingFunction);
+                }
 
                 reactiveProperty.depend((depth?: number) => {
                     updatingFunction(executingFunctionWithContext(
                         ...variableValues,
                     ), depth);
-                });
+                }, executingFunction);
             }
         }
     }
