@@ -1,4 +1,4 @@
-import { Compiler } from '../Compiler'
+import { Compiler } from '../../Compiler'
 import { Parser } from './Parser'
 
 export class TemplateCompiler extends Compiler {

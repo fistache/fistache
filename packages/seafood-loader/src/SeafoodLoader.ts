@@ -3,7 +3,7 @@ import path from 'path'
 import { CompactRequestQuery } from './CompactRequestQuery'
 import { CompilationFlag } from './CompilationFlag'
 import { ScriptCompiler } from './Compiler/Script/ScriptCompiler'
-import { TemplateCompiler } from './Compiler/Template/TemplateCompiler'
+import { TemplateCompiler } from './Compiler/Template/Parser/TemplateCompiler'
 import { HmrPlugin } from './Hmr/HmrPlugin'
 import { RequestGenerator } from './RequestGenerator'
 
@@ -128,7 +128,7 @@ export class SeafoodLoader {
                 const scriptRequest = this.getScriptCompilationRequest()
                 const templateRequest = RequestGenerator.generate(
                     this.loader,
-                    path.resolve(__dirname, '../src/Compiler/Template/TemplateBuilder.ts'),
+                    path.resolve(__dirname, '../src/Compiler/Template/Renderer/Renderer.ts'),
                 )
                 const hmrRequest = RequestGenerator.generate(
                     this.loader,
