@@ -21,31 +21,31 @@ export default class Renderer {
         }
     }
 
-    protected createVirtualNodeRefferingToElement(element: any, parentElement?: VirtualElement): VirtualElement {
-        // let virtualNode = null
-        //
-        // switch (element.type) {
-        //     case(ParsedNodeType.Text):
-        //         virtualNode = this.createTextVirtualNode(element, parentElement)
-        //         break
-        //     case(ParsedNodeType.Comment):
-        //         virtualNode = this.createCommentVirtualNode(element, parentElement)
-        //         break
-        //     case(ParsedNodeType.Tag):
-        //         if (this.isItHtmlTag(element)) {
-        //             virtualNode = this.createTagVirtualNode(element, parentElement)
-        //         } else if (this.isItEmbedContentTag(element)) {
-        //             virtualNode = this.createEmbedContentVirtualNode(element, parentElement)
-        //         } else {
-        //             virtualNode = this.createComponentVirtualNode(element, parentElement)
-        //         }
-        //         break
-        //     default:
-        //         virtualNode = this.createComponentVirtualNode(element, parentElement)
-        // }
-        //
-        // return virtualNode
-    }
+    // protected createVirtualNodeRefferingToElement(element: any, parentElement?: VirtualElement): VirtualElement {
+    //     let virtualNode = null
+    //
+    //     switch (element.type) {
+    //         case(ParsedNodeType.Text):
+    //             virtualNode = this.createTextVirtualNode(element, parentElement)
+    //             break
+    //         case(ParsedNodeType.Comment):
+    //             virtualNode = this.createCommentVirtualNode(element, parentElement)
+    //             break
+    //         case(ParsedNodeType.Tag):
+    //             if (this.isItHtmlTag(element)) {
+    //                 virtualNode = this.createTagVirtualNode(element, parentElement)
+    //             } else if (this.isItEmbedContentTag(element)) {
+    //                 virtualNode = this.createEmbedContentVirtualNode(element, parentElement)
+    //             } else {
+    //                 virtualNode = this.createComponentVirtualNode(element, parentElement)
+    //             }
+    //             break
+    //         default:
+    //             virtualNode = this.createComponentVirtualNode(element, parentElement)
+    //     }
+    //
+    //     return virtualNode
+    // }
     //
     // protected createVirtualNodeOfType(
     //     type: new () => VirtualElement,
