@@ -1,8 +1,8 @@
-import {VirtualNode} from "./VirtualNode";
+import { VirtualNode } from './VirtualNode'
 
 export abstract class SingleVirtualNode extends VirtualNode {
     public render(): void {
-        super.render();
-        this.attachBuildedNode();
+        super.render()
+        this.attachBuildedNode()
     }
 }

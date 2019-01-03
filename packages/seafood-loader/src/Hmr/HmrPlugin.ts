@@ -1,15 +1,15 @@
-import {SeafoodLoader} from "../SeafoodLoader";
+import { SeafoodLoader } from '../SeafoodLoader'
 
 export class HmrPlugin {
-    private readonly requestId: string;
-    private componentRequest?: string;
+    private readonly requestId: string
+    private componentRequest?: string
 
     constructor(requestId: string) {
-        this.requestId = requestId;
+        this.requestId = requestId
     }
 
     public setTemplateRequest(request: string) {
-        this.componentRequest = request;
+        this.componentRequest = request
     }
 
     public generateCode(): string {
@@ -32,12 +32,12 @@ export class HmrPlugin {
 
             ${this.generateComponentUpdateCode()}
         }
-        `;
+        `
     }
 
     private generateComponentUpdateCode(): string {
         if (!this.componentRequest) {
-            return "";
+            return ''
         }
 
         return `
@@ -49,6 +49,6 @@ export class HmrPlugin {
                 }
             )
         })
-        `;
+        `
     }
 }

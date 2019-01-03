@@ -1,9 +1,9 @@
-import {DECORATOR_UNREACTIVE_FLAG} from "@seafood/component";
-import "reflect-metadata";
-import {REACTIVE_PROPERTY_FLAG, ReactiveProperty} from "./ReactiveProperty";
-import {ReactivityWatcher} from "./ReactivityWatcher";
+import { DECORATOR_UNREACTIVE_FLAG } from '@seafood/component'
+import 'reflect-metadata'
+import { REACTIVE_PROPERTY_FLAG, ReactiveProperty } from './ReactiveProperty'
+import { ReactivityWatcher } from './ReactivityWatcher'
 
-export const PROXY_TARGET_SYMBOL = Symbol("ProxyTarget");
+export const PROXY_TARGET_SYMBOL = Symbol('ProxyTarget')
 
 export class Reactivity {
     public static applyComponent(component: any): void {
@@ -11,8 +11,8 @@ export class Reactivity {
             if (component.hasOwnProperty(propertyKey)
                 && !Reflect.hasMetadata(DECORATOR_UNREACTIVE_FLAG, component, propertyKey)
             ) {
-                const reactiveProperty = this.applyObjectProperty(component, propertyKey);
-                this.applyComponentProperty(component, propertyKey, reactiveProperty);
+                const reactiveProperty = this.applyObjectProperty(component, propertyKey)
+                this.applyComponentProperty(component, propertyKey, reactiveProperty)
             }
         }
     }
@@ -20,34 +20,34 @@ export class Reactivity {
     public static applyComponentProperty(obj: any, propertyKey: string, reactiveProperty: ReactiveProperty) {
         const property = {
             value: obj[propertyKey],
-        };
+        }
 
         Object.defineProperty(obj, propertyKey, {
             get: (): any => {
-                this.watch(reactiveProperty);
+                this.watch(reactiveProperty)
 
-                return property.value;
+                return property.value
             },
             set: (value: any): void => {
                 const reactiveValue = {
                     [propertyKey]: value,
-                };
+                }
 
-                this.merge(obj, reactiveValue, propertyKey, reactiveProperty);
-                property.value = reactiveValue[propertyKey];
-                reactiveProperty.notify();
+                this.merge(obj, reactiveValue, propertyKey, reactiveProperty)
+                property.value = reactiveValue[propertyKey]
+                reactiveProperty.notify()
             },
-        });
+        })
 
-        if (propertyKey === "objects") {
-            console.log(reactiveProperty);
+        if (propertyKey === 'objects') {
+            console.log(reactiveProperty)
         }
     }
 
     public static applyObjectProperties(obj: any, parentReactiveProperty: ReactiveProperty): void {
         for (const propertyKey in obj) {
             if (obj.hasOwnProperty(propertyKey)) {
-                this.applyObjectProperty(obj, propertyKey, parentReactiveProperty);
+                this.applyObjectProperty(obj, propertyKey, parentReactiveProperty)
             }
         }
     }
@@ -59,16 +59,16 @@ export class Reactivity {
         reactiveProperty?: ReactiveProperty,
     ): ReactiveProperty {
         if (!reactiveProperty) {
-            reactiveProperty = new ReactiveProperty();
+            reactiveProperty = new ReactiveProperty()
         }
 
         if (parentReactiveProperty) {
-            reactiveProperty.setParentReactiveProperty(parentReactiveProperty);
+            reactiveProperty.setParentReactiveProperty(parentReactiveProperty)
         }
 
-        this.defineObjectProperty(obj, propertyKey, reactiveProperty);
+        this.defineObjectProperty(obj, propertyKey, reactiveProperty)
 
-        return reactiveProperty;
+        return reactiveProperty
     }
 
     public static applyObjectProperty(
@@ -77,69 +77,69 @@ export class Reactivity {
         parentReactiveProperty?: ReactiveProperty,
         isComlete?: boolean,
     ): ReactiveProperty {
-        const propertyValue = obj[propertyKey];
-        const reactiveProperty = this.applyObject(obj, propertyKey, parentReactiveProperty);
+        const propertyValue = obj[propertyKey]
+        const reactiveProperty = this.applyObject(obj, propertyKey, parentReactiveProperty)
 
-        if (typeof propertyValue === "object") {
-            this.applyObjectProperties(obj[propertyKey], reactiveProperty);
+        if (typeof propertyValue === 'object') {
+            this.applyObjectProperties(obj[propertyKey], reactiveProperty)
 
             if (!isComlete) {
-                obj[propertyKey] = this.makeProxyObject(obj[propertyKey], reactiveProperty);
+                obj[propertyKey] = this.makeProxyObject(obj[propertyKey], reactiveProperty)
             }
         }
 
-        return reactiveProperty;
+        return reactiveProperty
     }
 
     public static makeProxyObject(
         obj: any,
         reactiveProperty: ReactiveProperty,
     ): any {
-        let ignoreNextLengthSetNotify = false;
+        let ignoreNextLengthSetNotify = false
 
         return new Proxy(obj, {
             get: (target: any, targetPropertyKey: PropertyKey) => {
                 if (targetPropertyKey === PROXY_TARGET_SYMBOL) {
-                    return target;
+                    return target
                 }
 
-                this.watch(this.getObjectProperty(target, targetPropertyKey as string));
+                this.watch(this.getObjectProperty(target, targetPropertyKey as string))
 
-                return target[targetPropertyKey];
+                return target[targetPropertyKey]
             },
             set: (target: any, targetPropertyKey: PropertyKey, value: any): boolean => {
                 if (target.hasOwnProperty(targetPropertyKey)) {
-                    if (Array.isArray(target) && targetPropertyKey === "length") {
-                        target[targetPropertyKey] = value;
+                    if (Array.isArray(target) && targetPropertyKey === 'length') {
+                        target[targetPropertyKey] = value
 
                         if (!ignoreNextLengthSetNotify) {
-                            reactiveProperty.notifyParentVirtualNodes();
+                            reactiveProperty.notifyParentVirtualNodes()
                         }
-                        ignoreNextLengthSetNotify = false;
+                        ignoreNextLengthSetNotify = false
                     } else {
                         const reactiveValue = {
                             [targetPropertyKey]: value,
-                        };
+                        }
 
-                        this.merge(target, reactiveValue, targetPropertyKey as string, reactiveProperty);
+                        this.merge(target, reactiveValue, targetPropertyKey as string, reactiveProperty)
 
-                        target[targetPropertyKey] = reactiveValue[targetPropertyKey as string];
+                        target[targetPropertyKey] = reactiveValue[targetPropertyKey as string]
 
-                        const targetReactiveProperty = this.getObjectProperty(target, targetPropertyKey as string);
+                        const targetReactiveProperty = this.getObjectProperty(target, targetPropertyKey as string)
                         if (targetReactiveProperty) {
-                            targetReactiveProperty.notify();
+                            targetReactiveProperty.notify()
                         }
                     }
                 } else {
-                    ignoreNextLengthSetNotify = true;
-                    target[targetPropertyKey] = value;
-                    this.applyObjectProperty(obj, targetPropertyKey.toString(), reactiveProperty);
-                    reactiveProperty.notifyParentVirtualNodes();
+                    ignoreNextLengthSetNotify = true
+                    target[targetPropertyKey] = value
+                    this.applyObjectProperty(obj, targetPropertyKey.toString(), reactiveProperty)
+                    reactiveProperty.notifyParentVirtualNodes()
                 }
 
-                return true;
+                return true
             },
-        });
+        })
     }
 
     public static merge(
@@ -149,98 +149,98 @@ export class Reactivity {
         reactiveProperty?: ReactiveProperty,
         parentReactiveProperty?: ReactiveProperty,
     ): void {
-        const fromValue = from && from[propertyKey];
-        const toValue = to[propertyKey];
+        const fromValue = from && from[propertyKey]
+        const toValue = to[propertyKey]
 
-        reactiveProperty = this.applyObject(to, propertyKey, parentReactiveProperty, reactiveProperty);
+        reactiveProperty = this.applyObject(to, propertyKey, parentReactiveProperty, reactiveProperty)
 
-        if (typeof toValue === "object") {
+        if (typeof toValue === 'object') {
             for (const toValuePropertyKey in toValue) {
                 if (toValue.hasOwnProperty(toValuePropertyKey)) {
-                    let toValueReactiveProperty;
+                    let toValueReactiveProperty
 
                     if (fromValue && fromValue.hasOwnProperty(toValuePropertyKey)) {
-                        toValueReactiveProperty = this.getObjectProperty(fromValue, toValuePropertyKey);
+                        toValueReactiveProperty = this.getObjectProperty(fromValue, toValuePropertyKey)
                     } else {
-                        toValueReactiveProperty = this.applyObject(toValue, toValuePropertyKey, reactiveProperty);
+                        toValueReactiveProperty = this.applyObject(toValue, toValuePropertyKey, reactiveProperty)
                     }
 
-                    this.merge(fromValue, toValue, toValuePropertyKey, toValueReactiveProperty, reactiveProperty);
+                    this.merge(fromValue, toValue, toValuePropertyKey, toValueReactiveProperty, reactiveProperty)
                 }
             }
-            to[propertyKey] = this.makeProxyObject(to[propertyKey], reactiveProperty);
+            to[propertyKey] = this.makeProxyObject(to[propertyKey], reactiveProperty)
         }
     }
 
     public static watch(reactiveProperty: ReactiveProperty): void {
-        const reactivityWatcher = ReactivityWatcher.getInstance();
+        const reactivityWatcher = ReactivityWatcher.getInstance()
 
         if (reactiveProperty && reactivityWatcher.isRecording()) {
-            const updatingFunction = reactivityWatcher.getUpdatingFunction();
-            const executingFunction = reactivityWatcher.getExecutingFunction();
-            const variables = reactivityWatcher.getVariables();
+            const updatingFunction = reactivityWatcher.getUpdatingFunction()
+            const executingFunction = reactivityWatcher.getExecutingFunction()
+            const variables = reactivityWatcher.getVariables()
 
             if (updatingFunction && executingFunction && variables
                 && !reactiveProperty.hasFunction(executingFunction)
             ) {
-                const executingFunctionWithContext = reactivityWatcher.bindContext(executingFunction);
-                const variableValues = Object.values(variables);
-                const scope = reactivityWatcher.getScope();
+                const executingFunctionWithContext = reactivityWatcher.bindContext(executingFunction)
+                const variableValues = Object.values(variables)
+                const scope = reactivityWatcher.getScope()
 
                 if (scope) {
-                    scope.addDependent(reactiveProperty, executingFunction);
+                    scope.addDependent(reactiveProperty, executingFunction)
                 }
 
                 reactiveProperty.depend((depth?: number) => {
                     updatingFunction(executingFunctionWithContext(
                         ...variableValues,
-                    ), depth);
-                }, executingFunction);
+                    ), depth)
+                }, executingFunction)
             }
         }
     }
 
     public static resetObjectProperties(obj: any, propertyKey: string): void {
-        Reflect.deleteMetadata(REACTIVE_PROPERTY_FLAG, obj, propertyKey);
+        Reflect.deleteMetadata(REACTIVE_PROPERTY_FLAG, obj, propertyKey)
 
-        if (typeof obj[propertyKey] === "object") {
+        if (typeof obj[propertyKey] === 'object') {
             for (const targetPropertyKey in obj[propertyKey]) {
                 if (obj[propertyKey].hasOwnProperty(targetPropertyKey)) {
-                    this.resetObjectProperties(obj[propertyKey], targetPropertyKey);
+                    this.resetObjectProperties(obj[propertyKey], targetPropertyKey)
                 }
             }
         }
     }
 
     public static getObject(obj: any): ReactiveProperty {
-        return Reflect.getMetadata(REACTIVE_PROPERTY_FLAG, obj);
+        return Reflect.getMetadata(REACTIVE_PROPERTY_FLAG, obj)
     }
 
     public static getObjectProperty(obj: any, propertyKey: string | symbol): ReactiveProperty {
         if (obj[PROXY_TARGET_SYMBOL]) {
-            obj = obj[PROXY_TARGET_SYMBOL];
+            obj = obj[PROXY_TARGET_SYMBOL]
         }
 
-        return Reflect.getMetadata(REACTIVE_PROPERTY_FLAG, obj, propertyKey);
+        return Reflect.getMetadata(REACTIVE_PROPERTY_FLAG, obj, propertyKey)
     }
 
     public static defineObject(obj: any, reactiveProperty: ReactiveProperty): void {
         if (obj[PROXY_TARGET_SYMBOL]) {
-            obj = obj[PROXY_TARGET_SYMBOL];
+            obj = obj[PROXY_TARGET_SYMBOL]
         }
 
-        Reflect.defineMetadata(REACTIVE_PROPERTY_FLAG, reactiveProperty, obj);
+        Reflect.defineMetadata(REACTIVE_PROPERTY_FLAG, reactiveProperty, obj)
     }
 
     public static defineObjectProperty(obj: any, propertyKey: string, reactiveProperty: ReactiveProperty): void {
-        Reflect.defineMetadata(REACTIVE_PROPERTY_FLAG, reactiveProperty, obj, propertyKey);
+        Reflect.defineMetadata(REACTIVE_PROPERTY_FLAG, reactiveProperty, obj, propertyKey)
     }
 
     public static isReactive(obj: any): boolean {
-        return Reflect.hasMetadata(REACTIVE_PROPERTY_FLAG, obj);
+        return Reflect.hasMetadata(REACTIVE_PROPERTY_FLAG, obj)
     }
 
     public static isReactiveProperty(obj: any, propertyKey: string): boolean {
-        return Reflect.hasMetadata(REACTIVE_PROPERTY_FLAG, obj, propertyKey);
+        return Reflect.hasMetadata(REACTIVE_PROPERTY_FLAG, obj, propertyKey)
     }
 }

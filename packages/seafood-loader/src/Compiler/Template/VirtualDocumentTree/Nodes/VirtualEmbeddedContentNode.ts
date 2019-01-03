@@ -1,13 +1,13 @@
-import {VirtualNode} from "../VirtualNode";
+import { VirtualNode } from '../VirtualNode'
 
 export class VirtualEmbeddedContentNode extends VirtualNode {
     public render(): void {
-        super.render();
+        super.render()
         // this.attachBuildedNode();
     }
 
     protected buildNode(): Node | undefined {
         // console.log(this);
-        return undefined;
+        return undefined
     }
 }

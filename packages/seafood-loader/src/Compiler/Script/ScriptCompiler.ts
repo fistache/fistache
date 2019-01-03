@@ -1,8 +1,8 @@
-import {Compiler} from "../Compiler";
+import { Compiler } from '../Compiler'
 
 export class ScriptCompiler extends Compiler {
     public compile(): string {
-        return this.content;
+        return this.content
     }
 
     public compileAsync(): void {
@@ -10,6 +10,6 @@ export class ScriptCompiler extends Compiler {
     }
 
     protected init(): void {
-        this.parsingTagName = "script";
+        this.parsingTagName = 'script'
     }
 }

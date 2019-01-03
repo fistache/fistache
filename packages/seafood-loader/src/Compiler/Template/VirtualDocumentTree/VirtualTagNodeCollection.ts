@@ -1,8 +1,8 @@
-import {PROXY_TARGET_SYMBOL} from "@seafood/app";
-import {VirtualTagAttributesManager} from "./Attributes/VirtualTagAttributesManager";
-import {VirtualTagNode} from "./Nodes/VirtualTagNode";
-import {VirtualElement} from "./VirtualElement";
-import {VirtualNode} from "./VirtualNode";
+import { PROXY_TARGET_SYMBOL } from '@seafood/app'
+import { VirtualTagAttributesManager } from './Attributes/VirtualTagAttributesManager'
+import { VirtualTagNode } from './Nodes/VirtualTagNode'
+import { VirtualElement } from './VirtualElement'
+import { VirtualNode } from './VirtualNode'
 
 /**
  * More details in presentState variable declaration in
@@ -20,157 +20,157 @@ export interface VirtualTagNodeForExpression {
 }
 
 export class VirtualTagNodeCollection extends VirtualNode {
-    protected collection: VirtualTagNode[];
+    protected collection: VirtualTagNode[]
 
-    protected forOfExpression?: VirtualTagNodeForExpression;
-    protected forInExpression?: VirtualTagNodeForExpression;
-    protected forNExpression?: VirtualTagNodeForExpression;
+    protected forOfExpression?: VirtualTagNodeForExpression
+    protected forInExpression?: VirtualTagNodeForExpression
+    protected forNExpression?: VirtualTagNodeForExpression
 
-    private readonly attributesManager: VirtualTagAttributesManager;
+    private readonly attributesManager: VirtualTagAttributesManager
 
-    private isBuildedNodeAttachedMarker: boolean;
+    private isBuildedNodeAttachedMarker: boolean
 
     public constructor() {
-        super();
+        super()
 
-        this.attributesManager = new VirtualTagAttributesManager(this);
-        this.collection = [];
-        this.isBuildedNodeAttachedMarker = false;
+        this.attributesManager = new VirtualTagAttributesManager(this)
+        this.collection = []
+        this.isBuildedNodeAttachedMarker = false
     }
 
     public beforeRender(): void {
-        this.attributesManager.initialize();
+        this.attributesManager.initialize()
     }
 
     public render(): void {
-        this.attributesManager.renderAtShapedCollectionAttributes();
+        this.attributesManager.renderAtShapedCollectionAttributes()
 
-        super.render();
+        super.render()
 
         if (this.forOfExpression) {
-            this.renderForOfExpression();
+            this.renderForOfExpression()
         } else if (this.forInExpression) {
-            this.renderForInExpression();
+            this.renderForInExpression()
         } else if (this.forNExpression) {
-            this.renderForNExpression();
+            this.renderForNExpression()
         } else {
-            this.renderSingleTag();
+            this.renderSingleTag()
         }
 
-        this.attachBuildedNode();
+        this.attachBuildedNode()
     }
 
     public attachBuildedNode(): void {
-        super.attachBuildedNode();
+        super.attachBuildedNode()
 
-        this.isBuildedNodeAttachedMarker = true;
+        this.isBuildedNodeAttachedMarker = true
     }
 
     public isBuildedNodeAttached(): boolean {
-        return this.isBuildedNodeAttachedMarker;
+        return this.isBuildedNodeAttachedMarker
     }
 
     public setForOfExpression(forOfExpression: VirtualTagNodeForExpression): void {
-        this.forOfExpression = forOfExpression;
+        this.forOfExpression = forOfExpression
     }
 
     public setForInExpression(forInExpression: VirtualTagNodeForExpression): void {
-        this.forInExpression = forInExpression;
+        this.forInExpression = forInExpression
     }
 
     public setForNExpression(forNExpression: VirtualTagNodeForExpression): void {
-        this.forNExpression = forNExpression;
+        this.forNExpression = forNExpression
     }
 
     public getCollection(): VirtualTagNode[] {
-        return this.collection;
+        return this.collection
     }
 
     public getCollectionInReversedOrder(): VirtualTagNode[] {
-        const virtualTagNodes: VirtualTagNode[] = [];
+        const virtualTagNodes: VirtualTagNode[] = []
 
         for (const index in this.collection) {
             if (this.collection.hasOwnProperty(index)) {
-                virtualTagNodes.push(this.collection[index]);
+                virtualTagNodes.push(this.collection[index])
             }
         }
 
-        return virtualTagNodes.reverse();
+        return virtualTagNodes.reverse()
     }
 
     public useCollection(callback: (element: VirtualTagNode) => void): void {
         for (const index in this.collection) {
             if (this.collection.hasOwnProperty(index)) {
-                callback(this.collection[index]);
+                callback(this.collection[index])
             }
         }
     }
 
     public removeBuildedNode(): void {
-        this.detachCollection();
+        this.detachCollection()
 
-        this.buildedNode = null;
-        this.collection = [];
+        this.buildedNode = null
+        this.collection = []
     }
 
     public getChildVirtualElements(parentVirtualElement?: VirtualElement): VirtualElement[] {
         if (parentVirtualElement) {
-            const childVirtualElements: VirtualElement[] = [];
+            const childVirtualElements: VirtualElement[] = []
 
             for (const childVirtualElement of this.childVirtualElements) {
-                const clonedChildVirtualElement = childVirtualElement.clone();
-                clonedChildVirtualElement.setParentVirtualElementAndAddThisAsChild(parentVirtualElement);
-                childVirtualElements.push(clonedChildVirtualElement);
+                const clonedChildVirtualElement = childVirtualElement.clone()
+                clonedChildVirtualElement.setParentVirtualElementAndAddThisAsChild(parentVirtualElement)
+                childVirtualElements.push(clonedChildVirtualElement)
             }
 
-            return childVirtualElements;
+            return childVirtualElements
         } else {
-            return this.childVirtualElements;
+            return this.childVirtualElements
         }
     }
 
     public attachCollection(): void {
         for (const virtualTagNode of this.collection) {
-            virtualTagNode.attachBuildedNode();
+            virtualTagNode.attachBuildedNode()
         }
-        this.attachBuildedNode();
+        this.attachBuildedNode()
     }
 
     public detachCollection(): void {
         for (const virtualTagNode of this.collection) {
-            virtualTagNode.detachBuildedNode();
+            virtualTagNode.detachBuildedNode()
         }
     }
 
     public updateForOfExpression(updatedExpressionValue: any): void {
         this.updateForExpression(updatedExpressionValue, () => {
-            this.renderForOfExpression();
-        }, this.forOfExpression);
+            this.renderForOfExpression()
+        }, this.forOfExpression)
     }
 
     public updateForInExpression(updatedExpressionValue: any): void {
         this.updateForExpression(updatedExpressionValue, () => {
-            this.renderForInExpression();
-        }, this.forInExpression);
+            this.renderForInExpression()
+        }, this.forInExpression)
     }
 
     public updateForNExpression(updatedExpressionValue: any): void {
         if (this.forNExpression && Number.isInteger(this.forNExpression.value) && this.forNExpression.value >= 0) {
-            const previousValue = this.collection.length;
-            const difference = updatedExpressionValue - previousValue;
-            this.forNExpression.value = updatedExpressionValue;
+            const previousValue = this.collection.length
+            const difference = updatedExpressionValue - previousValue
+            this.forNExpression.value = updatedExpressionValue
 
             if (difference < 0) {
-                const rudenantIndecies: any[] = [];
+                const rudenantIndecies: any[] = []
 
                 for (let i = updatedExpressionValue; i < previousValue; i++) {
-                    rudenantIndecies.push(i);
+                    rudenantIndecies.push(i)
                 }
 
-                this.cleanCollection(rudenantIndecies);
+                this.cleanCollection(rudenantIndecies)
             }
 
-            this.renderForNExpression();
+            this.renderForNExpression()
         }
     }
 
@@ -180,34 +180,34 @@ export class VirtualTagNodeCollection extends VirtualNode {
         forExpression?: VirtualTagNodeForExpression,
     ): void {
         if (forExpression) {
-            forExpression.value = updatedExpressionValue;
+            forExpression.value = updatedExpressionValue
 
             if (Array.isArray(updatedExpressionValue)) {
-                const rudenantIndecies: any[] = [];
+                const rudenantIndecies: any[] = []
 
                 for (const valueIndex in this.collection) {
                     if (this.collection.hasOwnProperty(valueIndex)) {
                         if (!updatedExpressionValue.hasOwnProperty(valueIndex)) {
-                            rudenantIndecies.push(valueIndex);
+                            rudenantIndecies.push(valueIndex)
                         }
                     }
                 }
 
                 this.cleanCollection(rudenantIndecies, (index: number) => {
                     if (forExpression) {
-                        let value = forExpression.value;
+                        let value = forExpression.value
 
                         // get original object cause we use value.splice
                         // and we don't want to trigger rerender one more time
                         if (value[PROXY_TARGET_SYMBOL]) {
-                            value = value[PROXY_TARGET_SYMBOL];
+                            value = value[PROXY_TARGET_SYMBOL]
                         }
 
-                        value.splice(index, 1);
+                        value.splice(index, 1)
                     }
-                });
+                })
 
-                callback();
+                callback()
             } else {
                 // todo: implement object @for rendering
             }
@@ -215,50 +215,50 @@ export class VirtualTagNodeCollection extends VirtualNode {
     }
 
     protected buildNode(): Node | undefined | null {
-        return document.createDocumentFragment();
+        return document.createDocumentFragment()
     }
 
     protected renderSingleTag(position?: number, afterCreate?: (virtualTagNode: VirtualTagNode) => void): void {
         if (!position) {
-            position = this.collection.length;
+            position = this.collection.length
         }
 
-        const virtualTagNode = this.createVirtualTagNode(position);
+        const virtualTagNode = this.createVirtualTagNode(position)
 
         if (afterCreate) {
-            afterCreate(virtualTagNode);
+            afterCreate(virtualTagNode)
         }
 
-        virtualTagNode.beforeRender();
-        virtualTagNode.render();
+        virtualTagNode.beforeRender()
+        virtualTagNode.render()
     }
 
     protected cleanCollection(rudenantIndecies: number[], callback?: (index: number) => void): void {
-        const collection = this.collection.slice();
+        const collection = this.collection.slice()
 
         for (const index of rudenantIndecies) {
-            this.collection[index].removeBuildedNodeAndDependencies();
-            collection.splice(index, 1);
+            this.collection[index].removeBuildedNodeAndDependencies()
+            collection.splice(index, 1)
 
             if (callback) {
-                callback(index);
+                callback(index)
             }
         }
 
-        this.collection = collection;
+        this.collection = collection
     }
 
     protected cleanCollectionWholly(callback?: (index: number) => void): void {
         for (const index in this.collection) {
             if (this.collection.hasOwnProperty(index)) {
-                this.collection[index].removeBuildedNodeAndDependencies();
+                this.collection[index].removeBuildedNodeAndDependencies()
 
                 if (callback) {
-                    callback(+index);
+                    callback(+index)
                 }
             }
         }
-        this.collection = [];
+        this.collection = []
     }
 
     protected renderForOfExpression(): void {
@@ -269,14 +269,14 @@ export class VirtualTagNodeCollection extends VirtualNode {
                 ) {
                     this.renderSingleTag(+valueIndex, (virtualTagNode: VirtualTagNode) => {
                         if (this.forOfExpression && this.forOfExpression.variableName) {
-                            const scope = virtualTagNode.getScope();
+                            const scope = virtualTagNode.getScope()
                             scope.setVariable(this.forOfExpression.variableName, () => {
                                 if (this.forOfExpression) {
-                                    return this.forOfExpression.value[valueIndex];
+                                    return this.forOfExpression.value[valueIndex]
                                 }
-                            });
+                            })
                         }
-                    });
+                    })
                 }
             }
         }
@@ -285,8 +285,8 @@ export class VirtualTagNodeCollection extends VirtualNode {
     protected renderForInExpression(): void {
         if (this.forInExpression) {
             if (Number.isInteger(this.forInExpression.value) && this.forInExpression.value >= 0) {
-                this.forNExpression = this.forInExpression;
-                this.renderForNExpression();
+                this.forNExpression = this.forInExpression
+                this.renderForNExpression()
             } else {
                 for (const valueIndex in this.forInExpression.value) {
                     if (this.forInExpression.value.hasOwnProperty(valueIndex) &&
@@ -294,12 +294,12 @@ export class VirtualTagNodeCollection extends VirtualNode {
                     ) {
                         this.renderSingleTag(+valueIndex, (virtualTagNode: VirtualTagNode) => {
                             if (this.forInExpression && this.forInExpression.variableName) {
-                                const scope = virtualTagNode.getScope();
+                                const scope = virtualTagNode.getScope()
                                 scope.setVariable(this.forInExpression.variableName, () => {
-                                    return valueIndex;
-                                });
+                                    return valueIndex
+                                })
                             }
-                        });
+                        })
                     }
                 }
             }
@@ -315,36 +315,36 @@ export class VirtualTagNodeCollection extends VirtualNode {
                 if (this.forNExpression.variableName) {
                     this.renderSingleTag(+i, (virtualTagNode: VirtualTagNode) => {
                         if (this.forNExpression && this.forNExpression.variableName) {
-                            const scope = virtualTagNode.getScope();
+                            const scope = virtualTagNode.getScope()
                             scope.setVariable(this.forNExpression.variableName, () => {
-                                return i;
-                            });
+                                return i
+                            })
                         }
-                    });
+                    })
                 } else {
-                    this.renderSingleTag(+i);
+                    this.renderSingleTag(+i)
                 }
             }
         } else {
-            this.cleanCollectionWholly();
+            this.cleanCollectionWholly()
         }
     }
 
     private createVirtualTagNode(position: number): VirtualTagNode {
-        const virtualTagNode = new VirtualTagNode();
-        const virtualTagNodeScope = virtualTagNode.getScope();
-        const collectionScope = this.getScope();
+        const virtualTagNode = new VirtualTagNode()
+        const virtualTagNodeScope = virtualTagNode.getScope()
+        const collectionScope = this.getScope()
 
-        virtualTagNode.setParsedNode(this.parsedNode);
-        virtualTagNode.setPosition(position);
-        virtualTagNode.setParentVirtualElement(this);
-        virtualTagNode.setChildVirtualElements(this.getChildVirtualElements(virtualTagNode));
-        virtualTagNode.getAttributesManager().extend(this.attributesManager);
-        virtualTagNodeScope.setParentScope(collectionScope);
-        virtualTagNodeScope.setContext(collectionScope.getContext());
+        virtualTagNode.setParsedNode(this.parsedNode)
+        virtualTagNode.setPosition(position)
+        virtualTagNode.setParentVirtualElement(this)
+        virtualTagNode.setChildVirtualElements(this.getChildVirtualElements(virtualTagNode))
+        virtualTagNode.getAttributesManager().extend(this.attributesManager)
+        virtualTagNodeScope.setParentScope(collectionScope)
+        virtualTagNodeScope.setContext(collectionScope.getContext())
 
-        this.collection[position] = virtualTagNode;
+        this.collection[position] = virtualTagNode
 
-        return virtualTagNode;
+        return virtualTagNode
     }
 }

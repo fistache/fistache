@@ -1,19 +1,19 @@
-import {VirtualNode} from "../VirtualNode";
+import { VirtualNode } from '../VirtualNode'
 
 export abstract class Attribute {
-    protected virtualNode?: VirtualNode;
+    protected virtualNode?: VirtualNode
 
-    protected name: string;
+    protected name: string
 
-    protected value: string;
+    protected value: string
 
     public constructor(name: string, value: string) {
-        this.name = name;
-        this.value = value.trim();
+        this.name = name
+        this.value = value.trim()
     }
 
     public setVirtualNode(virtualNode: VirtualNode) {
-        this.virtualNode = virtualNode;
+        this.virtualNode = virtualNode
     }
 
     public abstract getName(): string;
@@ -21,6 +21,6 @@ export abstract class Attribute {
     public abstract append(): void;
 
     public getVirtualNode(): VirtualNode | undefined {
-        return this.virtualNode;
+        return this.virtualNode
     }
 }

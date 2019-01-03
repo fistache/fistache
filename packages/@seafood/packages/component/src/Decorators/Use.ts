@@ -4,5 +4,5 @@ export function use(...args: any[]) {
     }
     return (/*target: object*/) => {
         //
-    };
+    }
 }

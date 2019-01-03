@@ -1,21 +1,21 @@
-import {VirtualTagNode} from "../Nodes/VirtualTagNode";
-import {Attribute} from "./Attribute";
+import { VirtualTagNode } from '../Nodes/VirtualTagNode'
+import { Attribute } from './Attribute'
 
 export class StaticAttribute extends Attribute {
     public getName(): string {
-        return this.name;
+        return this.name
     }
 
     public append(): void {
-        this.setAttribute(this.getName(), this.value);
+        this.setAttribute(this.getName(), this.value)
     }
 
     protected setAttribute(name: string, value: string): void {
-        const virtualTagNode = this.getVirtualNode() as VirtualTagNode;
-        const buildedNode = virtualTagNode.getBuildedNode();
+        const virtualTagNode = this.getVirtualNode() as VirtualTagNode
+        const buildedNode = virtualTagNode.getBuildedNode()
 
         if (buildedNode) {
-            buildedNode.setAttribute(name, value);
+            buildedNode.setAttribute(name, value)
         }
     }
 }

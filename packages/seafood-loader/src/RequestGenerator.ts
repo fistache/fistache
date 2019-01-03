@@ -1,5 +1,5 @@
-import LoaderUtils from "loader-utils";
-import {CompactRequestQuery} from "./CompactRequestQuery";
+import LoaderUtils from 'loader-utils'
+import { CompactRequestQuery } from './CompactRequestQuery'
 
 export class RequestGenerator {
     public static generate(
@@ -7,30 +7,30 @@ export class RequestGenerator {
         url: string, query?: CompactRequestQuery,
         loaders?: Array<string | object>,
     ): string {
-        const queryString = query ? query.toString() : "";
-        let loadersString = "";
+        const queryString = query ? query.toString() : ''
+        let loadersString = ''
 
         if (loaders) {
             loaders.forEach((loader: any) => {
-                let result = "";
-                if (typeof loader === "string") {
-                    result = loader;
-                } else if (typeof loader === "object") {
-                    const loaderPath = loader.path;
-                    const loaderOptions = loader.options ? "?" + JSON.stringify(loader.options) : "";
-                    result += `${loaderPath}${loaderOptions}`;
+                let result = ''
+                if (typeof loader === 'string') {
+                    result = loader
+                } else if (typeof loader === 'object') {
+                    const loaderPath = loader.path
+                    const loaderOptions = loader.options ? '?' + JSON.stringify(loader.options) : ''
+                    result += `${loaderPath}${loaderOptions}`
                 }
-                loadersString += `${result}!`;
-            });
+                loadersString += `${result}!`
+            })
 
             if (loaders.length) {
-                loadersString = `!!${loadersString}`;
+                loadersString = `!!${loadersString}`
             }
         }
 
         return LoaderUtils.stringifyRequest(
             loaderContext,
-            `${loadersString}${url}${queryString.length ? "?" + queryString : ""}`,
-        );
+            `${loadersString}${url}${queryString.length ? '?' + queryString : ''}`,
+        )
     }
 }

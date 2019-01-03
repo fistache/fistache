@@ -1,3 +1,3 @@
 export interface HmrOptions {
-    events: Array<Array<() => void>>;
+    events: Array<Array<() => void>>
 }

@@ -1,4 +1,4 @@
-import {VirtualTagNodeCollection} from "../VirtualTagNodeCollection";
+import { VirtualTagNodeCollection } from '../VirtualTagNodeCollection'
 
 export class VirtualComponentNode extends VirtualTagNodeCollection {
     //

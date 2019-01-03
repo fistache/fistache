@@ -1,39 +1,39 @@
-interface IQueryObject {
-    [key: string]: any;
+interface QueryObject {
+    [key: string]: any
 }
 
 export class CompactRequestQuery {
-    protected query: IQueryObject;
+    protected query: QueryObject
 
-    constructor(query: IQueryObject) {
-        this.query = Object.assign({}, query); // add object prototype
+    constructor(query: QueryObject) {
+        this.query = Object.assign({}, query) // add object prototype
     }
 
     public get(key: string) {
-        return this.query[key];
+        return this.query[key]
     }
 
     public hasKey(key: string) {
-        return this.query.hasOwnProperty(key);
+        return this.query.hasOwnProperty(key)
     }
 
     public toString(): string {
-        let result = "";
+        let result = ''
 
         for (const key in this.query) {
             if (this.query.hasOwnProperty(key)) {
-                let value: any = this.query[key];
+                let value: any = this.query[key]
 
-                if (typeof value === "undefined") {
-                    value = "";
+                if (typeof value === 'undefined') {
+                    value = ''
                 } else {
-                    value = `=${value}`;
+                    value = `=${value}`
                 }
 
-                result += `${key}${value}`;
+                result += `${key}${value}`
             }
         }
 
-        return result;
+        return result
     }
 }

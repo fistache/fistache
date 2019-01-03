@@ -1,7 +1,7 @@
-import {StaticAttribute} from "./StaticAttribute";
+import { StaticAttribute } from './StaticAttribute'
 
 export abstract class NonStaticAttribute extends StaticAttribute {
     public getName(): string {
-        return this.name.slice(1);
+        return this.name.slice(1)
     }
 }
