@@ -1,6 +1,14 @@
 import { Scope } from './Scope'
 
 export class ReactivityWatcher {
+    public static getInstance(): ReactivityWatcher {
+        if (!this.instance) {
+            this.instance = new ReactivityWatcher()
+        }
+
+        return this.instance
+    }
+
     private static instance?: ReactivityWatcher
     private recording: boolean
     private updatingFunction: ((value: any, depth?: number) => void)
@@ -12,14 +20,6 @@ export class ReactivityWatcher {
         this.updatingFunction = () => {
         }
         this.recording = false
-    }
-
-    public static getInstance(): ReactivityWatcher {
-        if (!this.instance) {
-            this.instance = new ReactivityWatcher()
-        }
-
-        return this.instance
     }
 
     public setScope(scope: Scope): void {

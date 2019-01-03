@@ -1,8 +1,8 @@
 export const REACTIVE_PROPERTY_FLAG = 'reactiveProperty'
 
 interface DependentFunction {
-    depend: () => void;
-    trigger: (depth?: number) => void;
+    depend: () => void
+    trigger: (depth?: number) => void
 }
 
 export class ReactiveProperty {

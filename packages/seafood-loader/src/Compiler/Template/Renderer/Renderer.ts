@@ -16,92 +16,28 @@ export default class Renderer {
     }
 
     public buildVirtualTree() {
-        for (const parsedItem of this.parsedContent) {
+        this.bindParsedContentPosition(this.parsedContent)
+        const stack = this.parsedContent.reverse()
+
+        while (stack.length) {
+            const parsedItem = stack.pop()
+
             console.log(parsedItem)
+
+            if (parsedItem.children) {
+                const children = parsedItem.children
+
+                this.bindParsedContentPosition(children)
+                stack.push(...children.reverse())
+            }
         }
     }
 
-    // protected createVirtualNodeRefferingToElement(element: any, parentElement?: VirtualElement): VirtualElement {
-    //     let virtualNode = null
-    //
-    //     switch (element.type) {
-    //         case(ParsedNodeType.Text):
-    //             virtualNode = this.createTextVirtualNode(element, parentElement)
-    //             break
-    //         case(ParsedNodeType.Comment):
-    //             virtualNode = this.createCommentVirtualNode(element, parentElement)
-    //             break
-    //         case(ParsedNodeType.Tag):
-    //             if (this.isItHtmlTag(element)) {
-    //                 virtualNode = this.createTagVirtualNode(element, parentElement)
-    //             } else if (this.isItEmbedContentTag(element)) {
-    //                 virtualNode = this.createEmbedContentVirtualNode(element, parentElement)
-    //             } else {
-    //                 virtualNode = this.createComponentVirtualNode(element, parentElement)
-    //             }
-    //             break
-    //         default:
-    //             virtualNode = this.createComponentVirtualNode(element, parentElement)
-    //     }
-    //
-    //     return virtualNode
-    // }
-    //
-    // protected createVirtualNodeOfType(
-    //     type: new () => VirtualElement,
-    //     parsedNode: any,
-    //     parentVirtualElement?: VirtualElement,
-    // ) {
-    //     const virtualComponentNode = new type()
-    //     virtualComponentNode.setParsedNode(parsedNode)
-    //
-    //     if (parentVirtualElement) {
-    //         virtualComponentNode.setParentVirtualElementAndAddThisAsChild(parentVirtualElement)
-    //     }
-    //
-    //     return virtualComponentNode
-    // }
-    //
-    // protected createComponentVirtualNode(parsedNode: any, parentVirtualElement?: VirtualElement): VirtualElement {
-    //     return this.createVirtualNodeOfType(VirtualComponentNode, parsedNode, parentVirtualElement)
-    // }
-    //
-    // protected createTagVirtualNode(parsedNode: any, parentVirtualElement?: VirtualElement): VirtualElement {
-    //     return this.createVirtualNodeOfType(VirtualTagNodeCollection, parsedNode, parentVirtualElement)
-    // }
-    //
-    // protected createTextVirtualNode(parsedNode: any, parentVirtualElement?: VirtualElement): VirtualElement {
-    //     return this.createVirtualNodeOfType(VirtualTextNode, parsedNode, parentVirtualElement)
-    // }
-    //
-    // protected createCommentVirtualNode(parsedNode: any, parentVirtualElement?: VirtualElement): VirtualElement {
-    //     return this.createVirtualNodeOfType(VirtualCommentNode, parsedNode, parentVirtualElement)
-    // }
-    //
-    // protected createEmbedContentVirtualNode(
-    //     parsedNode: any,
-    //     parentVirtualElement?: VirtualElement,
-    // ): VirtualElement {
-    //     return this.createVirtualNodeOfType(VirtualEmbeddedContentNode, parsedNode, parentVirtualElement)
-    // }
-    //
-    // private isItHtmlTag(element: any): boolean {
-    //     return HtmlTags.includes(element.name)
-    // }
-    //
-    // private isItEmbedContentTag(element: any): boolean {
-    //     return element.name === 'content'
-    // }
-    //
-    // private setVirtualParentNodeForChildNodes(childNodes: any[], parent?: any): void {
-    //     let parentElement = this.virtualDocumentTree
-    //
-    //     if (parent) {
-    //         parentElement = parent
-    //     }
-    //
-    //     childNodes.forEach((node: any) => {
-    //         node.virtualParentNode = parentElement
-    //     })
-    // }
+    private bindParsedContentPosition(item: any[]) {
+        for (const index in item) {
+            if (item.hasOwnProperty(index)) {
+                item[+index].position = +index
+            }
+        }
+    }
 }

@@ -11,9 +11,9 @@ export interface ComponentInterface {
 }
 
 export interface ComponentEventInterface {
-    bindEvent(eventName: Event, callback: () => void): void;
+    bindEvent(eventName: Event, callback: () => void): void
 
-    fireEvent(eventName: Event): void;
+    fireEvent(eventName: Event): void
 }
 
 export class Component implements ComponentInterface, ComponentEventInterface {
