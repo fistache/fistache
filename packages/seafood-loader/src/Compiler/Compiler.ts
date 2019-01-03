@@ -11,11 +11,11 @@ export abstract class Compiler {
         this.parseContent()
     }
 
-    public abstract compile(): string;
+    public abstract compile(): string
 
-    public abstract compileAsync(callback: (error: any, parsedContent?: string) => void): void;
+    public abstract compileAsync(callback: (error: any, parsedContent?: string) => void): void
 
-    protected abstract init(): void;
+    protected abstract init(): void
 
     protected parseContent(): void {
         if (!this.parsingTagName) {

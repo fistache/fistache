@@ -3,18 +3,18 @@ import { Event } from '@seafood/component'
 
 export default class Hmr {
     public static instance: Hmr
-    private readonly data: any
-
-    private constructor() {
-        this.data = {}
-    }
-
     public static getInstance(): Hmr {
         if (!Hmr.instance) {
             Hmr.instance = new Hmr()
         }
 
         return Hmr.instance
+    }
+
+    private readonly data: any
+
+    private constructor() {
+        this.data = {}
     }
 
     public register(id: string, options: HmrOptions): void {
@@ -52,7 +52,7 @@ export default class Hmr {
     protected bindConstructor(id: string, options: HmrOptions) {
         const data = this.data
         // do not use arrow function cause we need to bind a context
-        this.addComponentEventHandler(options, Event.Created, function (this: any) {
+        this.addComponentEventHandler(options, Event.Created, function(this: any) {
             const hmrData = data[id]
 
             if (!hmrData.constructor) {
@@ -61,7 +61,7 @@ export default class Hmr {
 
             hmrData.components.push(this)
         })
-        this.addComponentEventHandler(options, Event.Destroyed, function (this: any) {
+        this.addComponentEventHandler(options, Event.Destroyed, function(this: any) {
             // todo: implement
         })
     }

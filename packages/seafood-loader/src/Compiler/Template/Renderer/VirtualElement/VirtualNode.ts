@@ -1,39 +1,31 @@
-import { VirtualElement } from './VirtualElement'
+import { ParsedData } from '../../Parser/ParsedData'
+import { VirtualObject } from './VirtualObject'
 
-export abstract class VirtualNode {
-    // Reference to a DOM node seen after rendering.
-    protected node?: Node | null
+export abstract class VirtualNode extends VirtualObject {
+    protected parsedData: ParsedData
 
-    // Virtual element where node'll be appended.
-    protected parentVirtualElement?: VirtualElement | null
+    private node?: Node | null
 
-    // VirtualElementPackage can dynamically add a virtual
-    // element so this property helps to find a nextSiblingNode.
-    protected firstVirtualElement?: VirtualElement | null
-
-    // It is applied like property above.
-    //
-    // P.S. It is possible to find a position of a virual
-    // element using array of child element of parent element,
-    // but in this implementation used next/first element
-    // references.
-    protected nextVirtualElement?: VirtualElement | null
-
-    public beforeRender() {
-        // It runs only once unlike render() method.
-        // Can be empty.
+    constructor(parsedData: ParsedData) {
+        super()
+        this.parsedData = parsedData
     }
 
-    public render() {
-        this.node = this.makeNode()
-    }
+    public getNode(): Node {
+        if (!this.node) {
+            this.node = this.makeNode()
+        }
 
-    public getNode(): Node | undefined | null {
         return this.node
     }
 
-    public setParentVirtualElement(virtualElement: VirtualElement) {
-        this.parentVirtualElement = virtualElement
+    public delete() {
+        if (this.node && this.node.parentNode) {
+            this.node.parentNode.removeChild(this.node)
+        }
+
+        this.deleteVirtualNodes()
+        this.node = null
     }
 
     protected abstract makeNode(): Node
