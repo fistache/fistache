@@ -50,6 +50,9 @@ export class Scope {
         }
 
         this.dependent = [];
+        this.parentScope = undefined;
+        this.context = null;
+        this.variables = null;
     }
 
     public setContext(context: any): void {

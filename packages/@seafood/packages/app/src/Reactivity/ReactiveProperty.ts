@@ -8,7 +8,7 @@ interface DependentFunction {
 export class ReactiveProperty {
     private readonly dependentFunctions: DependentFunction[];
     private parentReactiveProperty?: ReactiveProperty | null;
-    private childReactiveProperties: ReactiveProperty[];
+    private readonly childReactiveProperties: ReactiveProperty[];
 
     constructor() {
         this.childReactiveProperties = [];
@@ -22,7 +22,7 @@ export class ReactiveProperty {
 
     public addChildReactiveProperty(child: ReactiveProperty): void {
         // todo: find a reason why includes method devides count of
-        // childs by half 14 -> 7
+        // childs by half
         if (!this.childReactiveProperties.includes(child)) {
             this.childReactiveProperties.push(child);
         }
@@ -42,14 +42,18 @@ export class ReactiveProperty {
         if (!this.dependentFunctions.length && this.parentReactiveProperty) {
             this.parentReactiveProperty.removeChildReactiveProperty(this);
         }
+
+        // for (const child of this.childReactiveProperties) {
+        //     child.removeChildReactiveProperty(this);
+        // }
     }
 
     public removeChildReactiveProperty(reactiveProperty: ReactiveProperty): void {
-        if (!this.childReactiveProperties.includes(reactiveProperty)) {
-            this.childReactiveProperties.splice(
-                this.childReactiveProperties.indexOf(reactiveProperty), 1,
-            );
-        }
+        const index = this.childReactiveProperties.indexOf(reactiveProperty);
+        this.childReactiveProperties[index].parentReactiveProperty = null;
+        this.childReactiveProperties.splice(
+            index, 1,
+        );
     }
 
     public depend(trigger: () => void, depend?: () => void) {

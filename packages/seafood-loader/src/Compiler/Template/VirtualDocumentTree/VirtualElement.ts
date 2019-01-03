@@ -123,9 +123,32 @@ export abstract class VirtualElement implements VirtualElementInterface {
 
     public removeBuildedNodeAndDependencies(): void {
         this.getScope().removeDependents();
-        this.parentVirtualElement = undefined;
+
+        for (const childVirtualElement of this.childVirtualElements) {
+            childVirtualElement.removeBuildedNodeAndDependencies();
+            this.removeChildVirtualElement(childVirtualElement);
+        }
+
+
+        if (this.parentVirtualElement) {
+            this.parentVirtualElement.removeChildVirtualElement(this);
+            this.parentVirtualElement = undefined;
+        }
+
         this.childVirtualElements = [];
         this.removeBuildedNode();
+    }
+
+    public removeChildVirtualElement(virtualElement: VirtualElement): void {
+        const index = this.childVirtualElements.indexOf(virtualElement);
+        if (index !== -1) {
+            this.childVirtualElements[index].getScope().removeDependents();
+            this.childVirtualElements[index].parentVirtualElement = undefined;
+            this.childVirtualElements.splice(
+                index,
+                1,
+            );
+        }
     }
 
     public detachBuildedNode(): void {

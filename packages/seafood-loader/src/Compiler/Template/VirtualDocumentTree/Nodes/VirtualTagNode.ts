@@ -75,7 +75,7 @@ export class VirtualTagNode extends VirtualNode {
 
     public removeBuildedNodeAndDependencies(): void {
         for (const childVirtualElement of this.childVirtualElements) {
-            childVirtualElement.getScope().removeDependents();
+            childVirtualElement.removeBuildedNodeAndDependencies();
         }
 
         super.removeBuildedNodeAndDependencies();

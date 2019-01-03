@@ -51,7 +51,7 @@ export class VirtualTextNode extends SingleVirtualNode {
                 this.expressionResults[expressionIndex] =
                     scope.executeExpression(expression, (value: any) => {
                         this.expressionResults[expressionIndex] = value;
-                        this.removeBuildedNode();
+                        this.removeBuildedNodeAndDependencies();
                         this.render();
                     });
             }

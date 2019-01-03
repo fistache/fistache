@@ -1,8 +1,8 @@
+import {PROXY_TARGET_SYMBOL} from "@seafood/app";
 import {VirtualTagAttributesManager} from "./Attributes/VirtualTagAttributesManager";
 import {VirtualTagNode} from "./Nodes/VirtualTagNode";
 import {VirtualElement} from "./VirtualElement";
 import {VirtualNode} from "./VirtualNode";
-import {PROXY_TARGET_SYMBOL} from "@seafood/app";
 
 /**
  * More details in presentState variable declaration in
@@ -119,7 +119,7 @@ export class VirtualTagNodeCollection extends VirtualNode {
 
             for (const childVirtualElement of this.childVirtualElements) {
                 const clonedChildVirtualElement = childVirtualElement.clone();
-                clonedChildVirtualElement.setParentVirtualElement(parentVirtualElement);
+                clonedChildVirtualElement.setParentVirtualElementAndAddThisAsChild(parentVirtualElement);
                 childVirtualElements.push(clonedChildVirtualElement);
             }
 
@@ -252,13 +252,13 @@ export class VirtualTagNodeCollection extends VirtualNode {
         for (const index in this.collection) {
             if (this.collection.hasOwnProperty(index)) {
                 this.collection[index].removeBuildedNodeAndDependencies();
-                this.collection.splice(+index, 1);
 
                 if (callback) {
                     callback(+index);
                 }
             }
         }
+        this.collection = [];
     }
 
     protected renderForOfExpression(): void {

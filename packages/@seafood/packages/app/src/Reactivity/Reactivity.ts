@@ -38,6 +38,10 @@ export class Reactivity {
                 reactiveProperty.notify();
             },
         });
+
+        if (propertyKey === "objects") {
+            console.log(reactiveProperty);
+        }
     }
 
     public static applyObjectProperties(obj: any, parentReactiveProperty: ReactiveProperty): void {
@@ -87,14 +91,6 @@ export class Reactivity {
         return reactiveProperty;
     }
 
-    public static completeObject(obj: any, parentReactiveProperty?: ReactiveProperty): void {
-        for (const propertyKey in obj) {
-            if (obj.hasOwnProperty(propertyKey) && !this.isReactiveProperty(obj, propertyKey)) {
-                this.applyObjectProperty(obj, propertyKey, parentReactiveProperty, true);
-            }
-        }
-    }
-
     public static makeProxyObject(
         obj: any,
         reactiveProperty: ReactiveProperty,
@@ -115,6 +111,7 @@ export class Reactivity {
                 if (target.hasOwnProperty(targetPropertyKey)) {
                     if (Array.isArray(target) && targetPropertyKey === "length") {
                         target[targetPropertyKey] = value;
+
                         if (!ignoreNextLengthSetNotify) {
                             reactiveProperty.notifyParentVirtualNodes();
                         }
@@ -199,6 +196,18 @@ export class Reactivity {
                         ...variableValues,
                     ), depth);
                 }, executingFunction);
+            }
+        }
+    }
+
+    public static resetObjectProperties(obj: any, propertyKey: string): void {
+        Reflect.deleteMetadata(REACTIVE_PROPERTY_FLAG, obj, propertyKey);
+
+        if (typeof obj[propertyKey] === "object") {
+            for (const targetPropertyKey in obj[propertyKey]) {
+                if (obj[propertyKey].hasOwnProperty(targetPropertyKey)) {
+                    this.resetObjectProperties(obj[propertyKey], targetPropertyKey);
+                }
             }
         }
     }
