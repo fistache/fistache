@@ -23,16 +23,21 @@ export default class Renderer {
 
     public renderTree(parentNode: Element, componentInstance: any) {
         // tmp
-        const pd = this.parsedData[1].children.slice()
-        for (let i = 0; i < 1000; i++) {
-            this.parsedData[1].children.push(...pd)
+        const pd = this.parsedData[0].children.slice()
+        for (let i = 0; i < 10; i++) {
+            const pc = []
+            pd.forEach((isd: any) => {
+                pc.push(Object.assign({}, isd))
+            })
+            this.parsedData[0].children.push(...pc)
         }
 
         this.makeTree()
         this.virtualTree.render(parentNode)
 
-        // tmp
-        Array.from(this.virtualTree.virtualNodes)[1].delete()
+        // console.log(this.virtualTree)
+        // parentNode.parentNode.removeChild(parentNode)
+        Array.from(this.virtualTree.virtualNodes)[0].delete()
     }
 
     private makeTree() {
@@ -49,7 +54,11 @@ export default class Renderer {
                 this.bindParsedItemChildrenProperty(children, virtualNode)
                 stack.push(...children.reverse())
             }
+
+            parsedItem.virtualObject = null
         }
+
+        this.parsedData = []
     }
 
     private createVirtualNode(parsedData: ParsedData): VirtualObject | null {
@@ -76,7 +85,7 @@ export default class Renderer {
                 console.warn(`Unknown virtual object type "${parsedData.type}".`)
         }
 
-        if (virtualNode) {
+        if (virtualNode && parsedData.virtualObject) {
             parsedData.virtualObject.storeVirtualNode(virtualNode)
         }
 

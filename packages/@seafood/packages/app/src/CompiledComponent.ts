@@ -1,6 +1,6 @@
 import { Component } from '@seafood/component'
 import { HmrOptions } from './HmrOptions'
-import { Reactivity } from './Reactivity/Reactivity'
+// import { Reactivity } from './Reactivity/Reactivity'
 
 export class CompiledComponent {
     public rootElement: any
@@ -9,7 +9,7 @@ export class CompiledComponent {
     public templateRenderer: any
 
     constructor(component: Component, templateRenderer: any) {
-        Reactivity.applyComponent(component)
+        // Reactivity.applyComponent(component)
 
         this.hmrOptions = {
             events: [],

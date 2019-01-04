@@ -15,6 +15,7 @@ export class VirtualTree extends VirtualNode implements VirtualRenderableInterfa
         })
 
         parentElement.appendChild(node)
+        this.node = parentElement
     }
 
     public makeNode(): Node {

@@ -9,12 +9,6 @@ export abstract class VirtualObject {
 
     public storeVirtualNode(virtualNode: VirtualNode) {
         this.virtualNodes.add(virtualNode)
-    }
-
-    protected deleteVirtualNodes() {
-        this.virtualNodes.forEach((virtualNode: VirtualNode) => {
-            virtualNode.delete()
-        })
-        this.virtualNodes.clear()
+        virtualNode.setParentVirtualNode(virtualNode)
     }
 }

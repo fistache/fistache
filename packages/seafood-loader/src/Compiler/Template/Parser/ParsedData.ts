@@ -7,7 +7,7 @@ export interface ParsedDataAttribs {
 export interface ParsedData {
     type: ParsedDataType
     position: number
-    virtualObject: VirtualObject
+    virtualObject?: VirtualObject | null
     name: string
     data: string
     attribs: ParsedDataAttribs
