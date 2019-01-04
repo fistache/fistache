@@ -30,9 +30,9 @@ export class VirtualTagAttributesManager {
     public extend(attributesManager: VirtualTagAttributesManager): void {
         this.setStaticAttributes(attributesManager.getStaticAttributes())
         this.setDynamicAttributes(attributesManager.getDynamicAttributes())
-        this.setAtShapedAttributes(this.getAtShapedAttributes())
-        this.setAtShapedDynamicAttributes(this.getAtShapedDynamicAttributes())
-        this.setAtShapedCollectionAttributes(this.getAtShapedCollectionAttributes())
+        this.setAtShapedAttributes(attributesManager.getAtShapedAttributes())
+        this.setAtShapedDynamicAttributes(attributesManager.getAtShapedDynamicAttributes())
+        this.setAtShapedCollectionAttributes(attributesManager.getAtShapedCollectionAttributes())
     }
 
     public getStaticAttributes(): StaticAttribute[] {

@@ -38,10 +38,6 @@ export class Reactivity {
                 reactiveProperty.notify()
             },
         })
-
-        if (propertyKey === 'objects') {
-            console.log(reactiveProperty)
-        }
     }
 
     public static applyObjectProperties(obj: any, parentReactiveProperty: ReactiveProperty): void {
