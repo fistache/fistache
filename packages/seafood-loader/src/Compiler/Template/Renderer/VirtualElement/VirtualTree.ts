@@ -4,21 +4,14 @@ import { VirtualNode } from './VirtualNode'
 
 export class VirtualTree extends VirtualNode implements VirtualRenderableInterface {
     constructor() {
-        super({} as ParsedData)
+        super({} as ParsedData, 0)
     }
 
     public render(parentElement: Element): void {
-        const node = this.makeNode()
-
-        this.virtualNodes.forEach((virtualNode: VirtualNode) => {
-            node.appendChild(virtualNode.getNode())
-        })
-
-        parentElement.appendChild(node)
-        this.node = parentElement
+        parentElement.appendChild(this.makeNode())
     }
 
     public makeNode(): Node {
-        return document.createDocumentFragment()
+        return Array.from(this.virtualNodes)[0].getNode()
     }
 }

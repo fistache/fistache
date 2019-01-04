@@ -153,7 +153,7 @@ export class SeafoodLoader {
                     ${SeafoodLoader.EXPORT_TEMPLATE_INSTANCE}
                 )
 
-                // $/{this.getHmrCode()}
+                ${this.getHmrCode()}
 
                 export default ${SeafoodLoader.EXPORT_COMPILED_COMPONENT_INSTANCE}
                 `)

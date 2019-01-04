@@ -1,16 +1,32 @@
 import { ParsedData } from '../../Parser/ParsedData'
-import { VirtualObject } from './VirtualObject'
 
-export abstract class VirtualNode extends VirtualObject {
+export interface VirtualNodePosition {
+    primary: number
+    secondary?: number
+}
+
+export abstract class VirtualNode {
+    protected virtualNodes: Set<VirtualNode>
+
     protected parsedData: ParsedData
 
     protected node?: Node | null
 
     protected parentVirtualNode?: VirtualNode
 
-    constructor(parsedData: ParsedData) {
-        super()
+    protected position: VirtualNodePosition
+
+    constructor(parsedData: ParsedData, primaryPosition: number) {
+        this.virtualNodes = new Set()
         this.parsedData = parsedData
+        this.position = {
+            primary: primaryPosition
+        }
+    }
+
+    public storeVirtualNode(virtualNode: VirtualNode) {
+        this.virtualNodes.add(virtualNode)
+        virtualNode.setParentVirtualNode(virtualNode)
     }
 
     public getNode(): Node {
@@ -21,12 +37,12 @@ export abstract class VirtualNode extends VirtualObject {
         return this.node
     }
 
-    public resetNode() {
-        this.node = null
+    public setParentVirtualNode(virtualNode: VirtualNode) {
+        this.parentVirtualNode = virtualNode
     }
 
-    public setParentVirtualNode(virtuanNode: VirtualNode) {
-        this.parentVirtualNode = virtuanNode
+    public setSecondaryPosition(position: number) {
+        this.position.secondary = position
     }
 
     public delete() {
@@ -41,6 +57,21 @@ export abstract class VirtualNode extends VirtualObject {
 
     public deleteVirtualNode(virtualNode: VirtualNode) {
         this.virtualNodes.delete(virtualNode)
+    }
+
+    public clone(): VirtualNode {
+        // @ts-ignore
+        const node = new this.constructor(this.parsedData, this.position.primary)
+        node.setParentVirtualNode(this.parentVirtualNode)
+
+        this.virtualNodes.forEach((virtualNode: VirtualNode) => {
+            const clonedVirtualNode = virtualNode.clone()
+
+            clonedVirtualNode.setParentVirtualNode(node)
+            node.storeVirtualNode(clonedVirtualNode)
+        })
+
+        return node
     }
 
     protected abstract makeNode(): Node

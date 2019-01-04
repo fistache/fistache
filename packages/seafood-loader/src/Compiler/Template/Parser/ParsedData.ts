@@ -1,4 +1,4 @@
-import { VirtualObject } from '../Renderer/VirtualElement/VirtualObject'
+import { VirtualNode } from '../Renderer/VirtualElement/VirtualNode'
 
 export interface ParsedDataAttribs {
     [key: string]: string
@@ -7,7 +7,7 @@ export interface ParsedDataAttribs {
 export interface ParsedData {
     type: ParsedDataType
     position: number
-    virtualObject?: VirtualObject | null
+    virtualNode?: VirtualNode | null
     name: string
     data: string
     attribs: ParsedDataAttribs
@@ -17,5 +17,5 @@ export interface ParsedData {
 export enum ParsedDataType {
     Tag = 'tag',
     Text = 'text',
-    Comment = 'comment',
+    Comment = 'comment'
 }
