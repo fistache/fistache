@@ -25,7 +25,7 @@ export abstract class Compiler {
 
         const regex = new RegExp(
             `<\s*\/?\s*${this.parsingTagName}\s*.*?>(.*)<\s*\/\s*${this.parsingTagName}\s*.*?>`,
-            's',
+            's'
         )
         const result: any = this.source.match(regex)
 

@@ -37,7 +37,7 @@ export class Parser {
                 resolve(dom)
             })
             const parser = new HtmlParser.Parser(handler, {
-                xmlMode: true,
+                xmlMode: true
             })
             parser.write(fragment)
             parser.end()

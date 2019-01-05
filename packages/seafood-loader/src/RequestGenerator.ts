@@ -5,7 +5,7 @@ export class RequestGenerator {
     public static generate(
         loaderContext: any,
         url: string, query?: CompactRequestQuery,
-        loaders?: Array<string | object>,
+        loaders?: Array<string | object>
     ): string {
         const queryString = query ? query.toString() : ''
         let loadersString = ''
@@ -30,7 +30,7 @@ export class RequestGenerator {
 
         return LoaderUtils.stringifyRequest(
             loaderContext,
-            `${loadersString}${url}${queryString.length ? '?' + queryString : ''}`,
+            `${loadersString}${url}${queryString.length ? '?' + queryString : ''}`
         )
     }
 }

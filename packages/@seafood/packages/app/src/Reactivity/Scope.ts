@@ -38,9 +38,9 @@ export class Scope {
             dep.functions.push(func)
         } else {
             this.dependent.push({
-                functions: [func],
-                reactiveProperty,
-            })
+                                    functions: [func],
+                                    reactiveProperty
+                                })
         }
     }
 
@@ -91,7 +91,7 @@ export class Scope {
         reactivityWatcher.setScope(this)
 
         const expressionResult = reactivityWatcher.bindContext(executingFunction)(
-            ...Object.values(variables),
+            ...Object.values(variables)
         )
 
         reactivityWatcher.disableRecording()
@@ -117,7 +117,7 @@ export class Scope {
                     if (extendedVariables.hasOwnProperty(variableName)) {
                         console.warn(
                             `Duplicate declaration of ${variableName} in template. `
-                            + `The value of this variable will be overriten.`,
+                            + `The value of this variable will be overriten.`
                         )
                     }
 

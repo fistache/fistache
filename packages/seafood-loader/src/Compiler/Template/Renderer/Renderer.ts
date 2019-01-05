@@ -23,14 +23,30 @@ export default class Renderer {
     }
 
     public renderTree(parentNode: Element/*, componentInstance: any*/) {
-        this.makeTree()
-        this.virtualTree.render(parentNode)
+        const stack = this.virtualTree.getChildVirtualNodesAsArray()
+
+        while (stack.length) {
+            const virtualNode = stack.pop() as VirtualNode
+
+            virtualNode.render()
+
+            // Get child nodes only after render because virtual
+            // package can create a new one.
+            const childVirtualNodes = virtualNode.getChildVirtualNodesAsArray()
+
+            if (virtualNode.shouldRenderChildVirtualNodes()) {
+                stack.push(...childVirtualNodes)
+            }
+        }
+
+        this.virtualTree.append(parentNode)
     }
 
-    private makeTree() {
+    public makeTree() {
         const virtualElement = this.createVirtualAppElement()
 
         this.virtualTree.storeVirtualNode(virtualElement)
+        virtualElement.setParentVirtualNode(this.virtualTree)
         this.bindParsedItemChildrenProperty(this.parsedData, virtualElement)
 
         const stack = this.parsedData.reverse()
@@ -78,23 +94,26 @@ export default class Renderer {
     }
 
     private createVirtualElement(parsedData: ParsedData): VirtualNode {
-        const virtualElement = new VirtualElement(parsedData, parsedData.position)
+        const { position, virtualNode: parentVirtualNode } = parsedData
+        const virtualElement = new VirtualElement(parsedData, position, parentVirtualNode as VirtualNode)
         let children: VirtualNode = virtualElement
 
         if (parsedData.attribs.hasOwnProperty('@for')) {
-            children = new VirtualPackage(parsedData, virtualElement)
+            children = new VirtualPackage(parsedData , virtualElement, parentVirtualNode as VirtualNode)
         }
 
         if (parsedData.virtualNode) {
-            children.setParentVirtualNode(parsedData.virtualNode)
             parsedData.virtualNode.storeVirtualNode(children)
+            children.setParentVirtualNode(parsedData.virtualNode)
+            virtualElement.setParentVirtualNode(parsedData.virtualNode)
         }
 
         return virtualElement
     }
 
     private createTextVirtualNode(parsedData: ParsedData): VirtualTextNode {
-        const virtualNode = new VirtualTextNode(parsedData, parsedData.position)
+        const { position, virtualNode: parentVirtualNode } = parsedData
+        const virtualNode = new VirtualTextNode(parsedData, position, parentVirtualNode as VirtualNode)
 
         if (parsedData.virtualNode) {
             virtualNode.setParentVirtualNode(parsedData.virtualNode)
@@ -105,7 +124,8 @@ export default class Renderer {
     }
 
     private createCommentVirtualNode(parsedData: ParsedData): VirtualCommentNode {
-        const virtualNode = new VirtualCommentNode(parsedData, parsedData.position)
+        const { position, virtualNode: parentVirtualNode } = parsedData
+        const virtualNode = new VirtualCommentNode(parsedData, position, parentVirtualNode as VirtualNode)
 
         if (parsedData.virtualNode) {
             virtualNode.setParentVirtualNode(parsedData.virtualNode)
@@ -116,7 +136,8 @@ export default class Renderer {
     }
 
     private createEmbedContentVirtualNode(parsedData: ParsedData): VirtualEmbeddedContentNode {
-        const virtualNode = new VirtualEmbeddedContentNode(parsedData, parsedData.position)
+        const { position, virtualNode: parentVirtualNode } = parsedData
+        const virtualNode = new VirtualEmbeddedContentNode(parsedData, position, parentVirtualNode as VirtualNode)
 
         if (parsedData.virtualNode) {
             virtualNode.setParentVirtualNode(parsedData.virtualNode)
@@ -155,6 +176,6 @@ export default class Renderer {
             data: ''
         }
 
-        return new VirtualElement(virtualElementParsedData, 0)
+        return new VirtualElement(virtualElementParsedData, 0, this.virtualTree)
     }
 }

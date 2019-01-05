@@ -12,7 +12,7 @@ export class CompiledComponent {
         // Reactivity.applyComponent(component)
 
         this.hmrOptions = {
-            events: [],
+            events: []
         }
         this.component = component
         this.templateRenderer = templateRenderer

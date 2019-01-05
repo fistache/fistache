@@ -1,17 +1,16 @@
 import { ParsedData } from '../../Parser/ParsedData'
-import { VirtualRenderableInterface } from './Interfaces/VirtualRenderableInterface'
 import { VirtualNode } from './VirtualNode'
 
-export class VirtualTree extends VirtualNode implements VirtualRenderableInterface {
+export class VirtualTree extends VirtualNode {
     constructor() {
         super({} as ParsedData, 0)
     }
 
-    public render(parentElement: Element): void {
-        parentElement.appendChild(this.makeNode())
+    public append(parentElement: Element): void {
+        parentElement.appendChild(this.node as Node)
     }
 
     public makeNode(): Node {
-        return Array.from(this.virtualNodes)[0].getNode()
+        return document.createDocumentFragment()
     }
 }

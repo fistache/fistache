@@ -1,5 +1,6 @@
 import { ParsedData } from '../../Parser/ParsedData'
 import { VirtualElement } from './VirtualElement'
+// import { VirtualElement } from './VirtualElement'
 import { VirtualNode } from './VirtualNode'
 
 export interface ForExpressionResult {
@@ -8,32 +9,30 @@ export interface ForExpressionResult {
 }
 
 export class VirtualPackage extends VirtualNode {
-    private readonly maquetteVirtualElement?: VirtualElement
+    private readonly maquetteVirtualElement: VirtualElement
 
-    constructor(parsedData: ParsedData, maquetteVirtualElement: VirtualElement) {
-        super(parsedData, parsedData.position)
+    constructor(parsedData: ParsedData, maquetteVirtualElement: VirtualElement, parentVirtualNode: VirtualNode) {
+        super(parsedData, parsedData.position, parentVirtualNode)
         this.maquetteVirtualElement = maquetteVirtualElement
     }
 
-    protected makeNode(): Node {
-        const documentFragment = document.createDocumentFragment()
+    public render() {
         const forExpressionResult = this.getForExpressionResult()
-        let secondaryPosition = 0
 
-        if (this.maquetteVirtualElement) {
-            for (let i = 0; i < forExpressionResult.value; i++) {
-                const clonedVirtualNode = this.maquetteVirtualElement.clone()
+        for (let secondaryPosition = 0; secondaryPosition < forExpressionResult.value; secondaryPosition++) {
+            const clonedVirtualNode = this.maquetteVirtualElement.clone()
 
-                this.storeVirtualNode(clonedVirtualNode)
-                clonedVirtualNode.setSecondaryPosition(secondaryPosition)
-                documentFragment.appendChild(clonedVirtualNode.getNode())
-
-                secondaryPosition++
-            }
+            clonedVirtualNode.setSecondaryPosition(secondaryPosition)
+            this.storeVirtualNode(clonedVirtualNode)
         }
-
-        return documentFragment
     }
+
+    public clone(): VirtualNode {
+        // @ts-ignore
+        return new this.constructor(this.parsedData, this.maquetteVirtualElement, this.parentVirtualNode)
+    }
+
+    protected makeNode(): void {}
 
     private getForExpression(): string {
         return this.parsedData.attribs['@for']

@@ -3,7 +3,7 @@ import { unreactive } from './Decorators/Unreactive'
 
 export enum Event {
     Created,
-    Destroyed,
+    Destroyed
 }
 
 export interface ComponentInterface {

@@ -19,7 +19,7 @@ export class Reactivity {
 
     public static applyComponentProperty(obj: any, propertyKey: string, reactiveProperty: ReactiveProperty) {
         const property = {
-            value: obj[propertyKey],
+            value: obj[propertyKey]
         }
 
         Object.defineProperty(obj, propertyKey, {
@@ -30,13 +30,13 @@ export class Reactivity {
             },
             set: (value: any): void => {
                 const reactiveValue = {
-                    [propertyKey]: value,
+                    [propertyKey]: value
                 }
 
                 this.merge(obj, reactiveValue, propertyKey, reactiveProperty)
                 property.value = reactiveValue[propertyKey]
                 reactiveProperty.notify()
-            },
+            }
         })
     }
 
@@ -52,7 +52,7 @@ export class Reactivity {
         obj: any,
         propertyKey: string,
         parentReactiveProperty?: ReactiveProperty,
-        reactiveProperty?: ReactiveProperty,
+        reactiveProperty?: ReactiveProperty
     ): ReactiveProperty {
         if (!reactiveProperty) {
             reactiveProperty = new ReactiveProperty()
@@ -71,7 +71,7 @@ export class Reactivity {
         obj: any,
         propertyKey: string,
         parentReactiveProperty?: ReactiveProperty,
-        isComlete?: boolean,
+        isComlete?: boolean
     ): ReactiveProperty {
         const propertyValue = obj[propertyKey]
         const reactiveProperty = this.applyObject(obj, propertyKey, parentReactiveProperty)
@@ -89,7 +89,7 @@ export class Reactivity {
 
     public static makeProxyObject(
         obj: any,
-        reactiveProperty: ReactiveProperty,
+        reactiveProperty: ReactiveProperty
     ): any {
         let ignoreNextLengthSetNotify = false
 
@@ -114,7 +114,7 @@ export class Reactivity {
                         ignoreNextLengthSetNotify = false
                     } else {
                         const reactiveValue = {
-                            [targetPropertyKey]: value,
+                            [targetPropertyKey]: value
                         }
 
                         this.merge(target, reactiveValue, targetPropertyKey as string, reactiveProperty)
@@ -134,7 +134,7 @@ export class Reactivity {
                 }
 
                 return true
-            },
+            }
         })
     }
 
@@ -143,7 +143,7 @@ export class Reactivity {
         to: any,
         propertyKey: string,
         reactiveProperty?: ReactiveProperty,
-        parentReactiveProperty?: ReactiveProperty,
+        parentReactiveProperty?: ReactiveProperty
     ): void {
         const fromValue = from && from[propertyKey]
         const toValue = to[propertyKey]
@@ -189,7 +189,7 @@ export class Reactivity {
 
                 reactiveProperty.depend((depth?: number) => {
                     updatingFunction(executingFunctionWithContext(
-                        ...variableValues,
+                        ...variableValues
                     ), depth)
                 }, executingFunction)
             }

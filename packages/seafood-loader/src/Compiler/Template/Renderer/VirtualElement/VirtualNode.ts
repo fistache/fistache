@@ -12,33 +12,52 @@ export abstract class VirtualNode {
 
     protected node?: Node | null
 
-    protected parentVirtualNode?: VirtualNode
+    protected parentVirtualNode: VirtualNode
 
     protected position: VirtualNodePosition
 
-    constructor(parsedData: ParsedData, primaryPosition: number) {
+    constructor(parsedData: ParsedData, primaryPosition: number, parentVirtualNode: VirtualNode) {
+        this.parentVirtualNode = parentVirtualNode
         this.virtualNodes = new Set()
         this.parsedData = parsedData
-        this.position = {
-            primary: primaryPosition
-        }
+        this.position = { primary: primaryPosition }
+
+        this.bindNode()
+    }
+
+    public render() {
+        const parentNode = this.parentVirtualNode.getNode()
+        const node = this.node as Node
+
+        parentNode.appendChild(node)
     }
 
     public storeVirtualNode(virtualNode: VirtualNode) {
         this.virtualNodes.add(virtualNode)
-        virtualNode.setParentVirtualNode(virtualNode)
+    }
+
+    public getChildVirtualNodes(): Set<VirtualNode> {
+        return this.virtualNodes
+    }
+
+    public getChildVirtualNodesAsArray(): VirtualNode[] {
+        return Array.from(this.getChildVirtualNodes())
+    }
+
+    public shouldRenderChildVirtualNodes(): boolean {
+        return true
     }
 
     public getNode(): Node {
-        if (!this.node) {
-            this.node = this.makeNode()
-        }
-
-        return this.node
+        return this.node as Node
     }
 
     public setParentVirtualNode(virtualNode: VirtualNode) {
         this.parentVirtualNode = virtualNode
+    }
+
+    public setChildVirtualNodes(virtualNodes: Set<VirtualNode>) {
+        this.virtualNodes = virtualNodes
     }
 
     public setSecondaryPosition(position: number) {
@@ -61,18 +80,20 @@ export abstract class VirtualNode {
 
     public clone(): VirtualNode {
         // @ts-ignore
-        const node = new this.constructor(this.parsedData, this.position.primary)
-        node.setParentVirtualNode(this.parentVirtualNode)
+        const virtualNode = new this.constructor(this.parsedData, this.parsedData.position, this.parentVirtualNode)
 
-        this.virtualNodes.forEach((virtualNode: VirtualNode) => {
-            const clonedVirtualNode = virtualNode.clone()
+        for (const childVirtualNode of this.getChildVirtualNodesAsArray()) {
+            const clonedVirtualNode = childVirtualNode.clone()
+            virtualNode.storeVirtualNode(clonedVirtualNode)
+            clonedVirtualNode.setParentVirtualNode(virtualNode)
+        }
 
-            clonedVirtualNode.setParentVirtualNode(node)
-            node.storeVirtualNode(clonedVirtualNode)
-        })
-
-        return node
+        return virtualNode
     }
 
-    protected abstract makeNode(): Node
+    protected abstract makeNode(): Node | void
+
+    protected bindNode() {
+        this.node = this.makeNode() as Node
+    }
 }

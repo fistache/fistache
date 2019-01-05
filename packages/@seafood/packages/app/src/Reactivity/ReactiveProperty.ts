@@ -52,7 +52,7 @@ export class ReactiveProperty {
         const index = this.childReactiveProperties.indexOf(reactiveProperty)
         this.childReactiveProperties[index].parentReactiveProperty = null
         this.childReactiveProperties.splice(
-            index, 1,
+            index, 1
         )
     }
 
@@ -61,7 +61,7 @@ export class ReactiveProperty {
         if (trigger && !this.hasFunction(depend)) {
             this.dependentFunctions.push({
                                              depend,
-                                             trigger,
+                                             trigger
                                          })
         }
     }
@@ -98,7 +98,7 @@ export class ReactiveProperty {
         const functionsToTrigger = this.getChildReactivePropertyTriggerFunctions()
         const uniqueFunctionsToTrigger: DependentFunction[] = functionsToTrigger.reduce(
             (x: DependentFunction[], y: DependentFunction) =>
-                x.findIndex((e: DependentFunction) => e.depend === y.depend) < 0 ? [...x, y] : x, [],
+                x.findIndex((e: DependentFunction) => e.depend === y.depend) < 0 ? [...x, y] : x, []
         )
 
         for (const uniqueFunction of uniqueFunctionsToTrigger) {

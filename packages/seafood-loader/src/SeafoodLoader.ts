@@ -72,7 +72,7 @@ export class SeafoodLoader {
 
     protected makeCompilationRequest(flag: CompilationFlag) {
         const query = new CompactRequestQuery({
-                                                  [SeafoodLoader.REQUEST_COMPILATION_FLAG]: flag,
+                                                  [SeafoodLoader.REQUEST_COMPILATION_FLAG]: flag
                                               })
 
         return this.generateRequestToMyself(this.resourcePath, query)
@@ -84,8 +84,8 @@ export class SeafoodLoader {
 
     private getTemplateCompilationRequest() {
         const query = new CompactRequestQuery({
-                                                  [SeafoodLoader.REQUEST_COMPILATION_FLAG]: CompilationFlag.Template,
-                                              })
+            [SeafoodLoader.REQUEST_COMPILATION_FLAG]: CompilationFlag.Template
+        })
 
         return RequestGenerator.generate(this.loader, this.resourcePath, query, ['seafood-loader'])
     }
@@ -128,11 +128,11 @@ export class SeafoodLoader {
                 const scriptRequest = this.getScriptCompilationRequest()
                 const templateRequest = RequestGenerator.generate(
                     this.loader,
-                    path.resolve(__dirname, '../src/Compiler/Template/Renderer/Renderer.ts'),
+                    path.resolve(__dirname, '../src/Compiler/Template/Renderer/Renderer.ts')
                 )
                 const hmrRequest = RequestGenerator.generate(
                     this.loader,
-                    path.resolve(__dirname, '../src/Hmr/Hmr.ts'),
+                    path.resolve(__dirname, '../src/Hmr/Hmr.ts')
                 )
 
                 this.hmrPlugin.setTemplateRequest(templateContentRequest)
@@ -145,6 +145,7 @@ export class SeafoodLoader {
 
                 const ${SeafoodLoader.EXPORT_TEMPLATE_INSTANCE} = new ${SeafoodLoader.EXPORT_TEMPLATE_BUILDER_CLASS}()
                 ${SeafoodLoader.EXPORT_TEMPLATE_INSTANCE}.setParsedContent(${parsedContent});
+                ${SeafoodLoader.EXPORT_TEMPLATE_INSTANCE}.makeTree();
 
                 const ${SeafoodLoader.EXPORT_SCRIPT_INSTANCE} = new ${SeafoodLoader.EXPORT_SCRIPT_CLASS}()
                 const ${SeafoodLoader.EXPORT_COMPILED_COMPONENT_INSTANCE} =
@@ -157,7 +158,7 @@ export class SeafoodLoader {
 
                 export default ${SeafoodLoader.EXPORT_COMPILED_COMPONENT_INSTANCE}
                 `)
-            },
+            }
         )
     }
 }

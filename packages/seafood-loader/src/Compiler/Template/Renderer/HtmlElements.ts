@@ -12,5 +12,5 @@ export const HtmlElements: string[] = [
     'pre', 's', 'samp', 'script', 'select', 'small', 'sound', 'spacer', 'span', 'strong',
     'style', 'sub', 'table', 'thead', 'td', 'a', 'address', 'app', 'applet', 'area', 'b',
     'base', 'basefont', 'bgsound', 'big', 'blink', 'blockquote', /* 'body',*/ 'br', 'button',
-    'caption', 'center', 'cite', 'code', 'col', 'colgroup', 'comment', 'dd', 'ins', 'dfn',
+    'caption', 'center', 'cite', 'code', 'col', 'colgroup', 'comment', 'dd', 'ins', 'dfn'
 ]
