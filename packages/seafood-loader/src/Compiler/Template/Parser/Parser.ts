@@ -1,4 +1,5 @@
 import HtmlParser from 'htmlparser2'
+import { ParsedDataAttribGroup, ParsedDataAttribs } from './ParsedData'
 
 export class Parser {
     private source: string
@@ -16,7 +17,7 @@ export class Parser {
         if (this.callback) {
             this.parseFragment(this.source).then((parsedContent: any) => {
                 if (this.callback) {
-                    this.callback(null, this.removeLinksToObjects(parsedContent))
+                    this.callback(null, JSON.stringify(this.removeLinksToObjects(parsedContent)))
                 }
             }).catch((error: any) => {
                 if (this.callback) {
@@ -45,6 +46,7 @@ export class Parser {
     }
 
     private removeLinksToObjects(content: any): any {
+        // todo: remove recursion
         let jsonableContent
 
         if (Array.isArray(content)) {
@@ -68,12 +70,40 @@ export class Parser {
                         index !== 'parent' &&
                         index !== 'children'
                     ) {
-                        jsonableContent[index] = content[index]
+                        if (index === 'attribs') {
+                            jsonableContent[index] = this.parseAttribs(content[index])
+                        } else {
+                            jsonableContent[index] = content[index]
+                        }
                     }
                 }
             }
         }
 
         return jsonableContent
+    }
+
+    private parseAttribs(attribs: any): ParsedDataAttribs {
+        const dynamic: ParsedDataAttribGroup = []
+        const technical: ParsedDataAttribGroup = []
+        const dynamicTechnical: ParsedDataAttribGroup = []
+        const staticAttribs: ParsedDataAttribGroup = []
+
+        for (const attribName in attribs) {
+            if (attribs.hasOwnProperty(attribName)) {
+                // attribs = {
+                //   "@if": "false"
+                // }
+
+                //
+            }
+        }
+
+        return {
+            dynamic,
+            technical,
+            dynamicTechnical,
+            static: staticAttribs
+        }
     }
 }

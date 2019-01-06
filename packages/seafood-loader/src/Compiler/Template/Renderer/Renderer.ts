@@ -169,7 +169,11 @@ export default class Renderer {
 
     private createVirtualAppElement(): VirtualElement {
         const virtualElementParsedData: ParsedData = {
-            attribs: {id: 'app-root'},
+            attribs: {
+                static: {
+                    id: 'app-root'
+                }
+            },
             name: 'div',
             position: 0,
             type: ParsedDataType.Tag,

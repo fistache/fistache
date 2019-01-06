@@ -106,7 +106,7 @@ export class SeafoodLoader {
                         this.loader.callback(error)
                     }
 
-                    this.loader.callback(null, JSON.stringify(parsedContent))
+                    this.loader.callback(null, parsedContent)
                 })
                 break
             default:
