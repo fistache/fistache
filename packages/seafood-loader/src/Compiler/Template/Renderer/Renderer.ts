@@ -18,34 +18,11 @@ export default class Renderer {
         this.parsedData = []
     }
 
-    public setParsedContent(parsedContent: any): void {
-        this.parsedData = parsedContent
-    }
-
-    public renderTree(parentNode: Element/*, componentInstance: any*/) {
-        const stack = this.virtualTree.getChildVirtualNodesAsArray()
-
-        while (stack.length) {
-            const virtualNode = stack.pop() as VirtualNode
-
-            virtualNode.render()
-
-            // Get child nodes only after render because virtual
-            // package can create a new one.
-            const childVirtualNodes = virtualNode.getChildVirtualNodesAsArray()
-
-            if (virtualNode.shouldRenderChildVirtualNodes()) {
-                stack.push(...childVirtualNodes)
-            }
-        }
-
-        this.virtualTree.append(parentNode)
-    }
-
-    public makeTree() {
+    public prepare() {
+        // todo: to make tree in the loader, not in a browser
         const virtualElement = this.createVirtualAppElement()
 
-        this.virtualTree.storeVirtualNode(virtualElement)
+        this.virtualTree.addChildVirtualNode(virtualElement)
         virtualElement.setParentVirtualNode(this.virtualTree)
         this.bindParsedItemChildrenProperty(this.parsedData, virtualElement)
 
@@ -64,6 +41,30 @@ export default class Renderer {
 
             parsedItem.virtualNode = null
         }
+    }
+
+    public render(parentNode: Element/*, componentInstance: any*/) {
+        const stack = this.virtualTree.getChildVirtualNodesAsArray().reverse()
+
+        while (stack.length) {
+            const virtualNode = stack.pop() as VirtualNode
+
+            virtualNode.render()
+
+            // Get child nodes only after render because virtual
+            // package can create a new one.
+            const childVirtualNodes = virtualNode.getChildVirtualNodesAsArray().reverse()
+
+            if (virtualNode.shouldRenderChildVirtualNodes()) {
+                stack.push(...childVirtualNodes)
+            }
+        }
+
+        this.virtualTree.append(parentNode)
+    }
+
+    public setParsedData(parsedContent: any): void {
+        this.parsedData = parsedContent
     }
 
     private createVirtualNode(parsedData: ParsedData): VirtualNode | null {
@@ -96,16 +97,15 @@ export default class Renderer {
     private createVirtualElement(parsedData: ParsedData): VirtualNode {
         const { position, virtualNode: parentVirtualNode } = parsedData
         const virtualElement = new VirtualElement(parsedData, position, parentVirtualNode as VirtualNode)
-        let children: VirtualNode = virtualElement
+        let virtualObject: VirtualNode = virtualElement
 
         if (parsedData.attribs.hasOwnProperty('@for')) {
-            children = new VirtualPackage(parsedData , virtualElement, parentVirtualNode as VirtualNode)
+            virtualObject = new VirtualPackage(parsedData , virtualElement, parentVirtualNode as VirtualNode)
         }
 
         if (parsedData.virtualNode) {
-            parsedData.virtualNode.storeVirtualNode(children)
-            children.setParentVirtualNode(parsedData.virtualNode)
-            virtualElement.setParentVirtualNode(parsedData.virtualNode)
+            parsedData.virtualNode.addChildVirtualNode(virtualObject)
+            virtualObject.setParentVirtualNode(parsedData.virtualNode)
         }
 
         return virtualElement
@@ -117,7 +117,7 @@ export default class Renderer {
 
         if (parsedData.virtualNode) {
             virtualNode.setParentVirtualNode(parsedData.virtualNode)
-            parsedData.virtualNode.storeVirtualNode(virtualNode)
+            parsedData.virtualNode.addChildVirtualNode(virtualNode)
         }
 
         return virtualNode
@@ -129,7 +129,7 @@ export default class Renderer {
 
         if (parsedData.virtualNode) {
             virtualNode.setParentVirtualNode(parsedData.virtualNode)
-            parsedData.virtualNode.storeVirtualNode(virtualNode)
+            parsedData.virtualNode.addChildVirtualNode(virtualNode)
         }
 
         return virtualNode
@@ -141,7 +141,7 @@ export default class Renderer {
 
         if (parsedData.virtualNode) {
             virtualNode.setParentVirtualNode(parsedData.virtualNode)
-            parsedData.virtualNode.storeVirtualNode(virtualNode)
+            parsedData.virtualNode.addChildVirtualNode(virtualNode)
         }
 
         return virtualNode

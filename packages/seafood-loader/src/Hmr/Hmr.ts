@@ -39,7 +39,7 @@ export default class Hmr {
                 data.components.forEach((component: CompiledComponent) => {
                     component.setTemplateRenderer(
                         // compiledComponent is SeafoodLoader.EXPORT_COMPILED_COMPONENT_INSTANCE
-                        options.compiledComponent.templateRenderer
+                        options.compiledComponent.renderer
                     )
                     // compiledComponent is SeafoodLoader.EXPORT_COMPILED_COMPONENT_INSTANCE
                     component.setComponent(options.compiledComponent.component)

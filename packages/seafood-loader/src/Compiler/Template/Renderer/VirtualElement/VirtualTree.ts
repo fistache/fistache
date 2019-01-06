@@ -3,7 +3,7 @@ import { VirtualNode } from './VirtualNode'
 
 export class VirtualTree extends VirtualNode {
     constructor() {
-        super({} as ParsedData, 0)
+        super({} as ParsedData, 0, {} as VirtualNode)
     }
 
     public append(parentElement: Element): void {

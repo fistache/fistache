@@ -23,13 +23,21 @@ export class VirtualPackage extends VirtualNode {
             const clonedVirtualNode = this.maquetteVirtualElement.clone()
 
             clonedVirtualNode.setSecondaryPosition(secondaryPosition)
-            this.storeVirtualNode(clonedVirtualNode)
+            this.addChildVirtualNode(clonedVirtualNode)
         }
     }
 
+    public setParentVirtualNode(virtualNode: VirtualNode) {
+        super.setParentVirtualNode(virtualNode)
+        this.maquetteVirtualElement.setParentVirtualNode(virtualNode)
+    }
+
     public clone(): VirtualNode {
-        // @ts-ignore
-        return new this.constructor(this.parsedData, this.maquetteVirtualElement, this.parentVirtualNode)
+        return new VirtualPackage(
+            this.parsedData,
+            this.maquetteVirtualElement.clone() as VirtualElement,
+            this.parentVirtualNode
+        )
     }
 
     protected makeNode(): void {}

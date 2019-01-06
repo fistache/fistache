@@ -6,16 +6,16 @@ export class CompiledComponent {
     public rootElement: any
     public hmrOptions: HmrOptions
     public component: Component
-    public templateRenderer: any
+    public renderer: any
 
-    constructor(component: Component, templateRenderer: any) {
+    constructor(component: Component, renderer: any) {
         // Reactivity.applyComponent(component)
 
         this.hmrOptions = {
             events: []
         }
         this.component = component
-        this.templateRenderer = templateRenderer
+        this.renderer = renderer
     }
 
     public render(element?: any): void {
@@ -26,7 +26,7 @@ export class CompiledComponent {
             element = this.rootElement
         }
 
-        this.templateRenderer.renderTree(element, this.component)
+        this.renderer.render(element, this.component)
     }
 
     public setComponent(component: Component): void {
@@ -34,7 +34,7 @@ export class CompiledComponent {
     }
 
     public setTemplateRenderer(templateRenderer: any): void {
-        this.templateRenderer = templateRenderer
+        this.renderer = templateRenderer
     }
 
     private clearContent() {

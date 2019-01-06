@@ -6,19 +6,19 @@ export interface VirtualNodePosition {
 }
 
 export abstract class VirtualNode {
-    protected virtualNodes: Set<VirtualNode>
+    protected childVirtualNodes: Set<VirtualNode>
+
+    protected parentVirtualNode: VirtualNode
 
     protected parsedData: ParsedData
 
     protected node?: Node | null
 
-    protected parentVirtualNode: VirtualNode
-
     protected position: VirtualNodePosition
 
     constructor(parsedData: ParsedData, primaryPosition: number, parentVirtualNode: VirtualNode) {
         this.parentVirtualNode = parentVirtualNode
-        this.virtualNodes = new Set()
+        this.childVirtualNodes = new Set()
         this.parsedData = parsedData
         this.position = { primary: primaryPosition }
 
@@ -32,18 +32,6 @@ export abstract class VirtualNode {
         parentNode.appendChild(node)
     }
 
-    public storeVirtualNode(virtualNode: VirtualNode) {
-        this.virtualNodes.add(virtualNode)
-    }
-
-    public getChildVirtualNodes(): Set<VirtualNode> {
-        return this.virtualNodes
-    }
-
-    public getChildVirtualNodesAsArray(): VirtualNode[] {
-        return Array.from(this.getChildVirtualNodes())
-    }
-
     public shouldRenderChildVirtualNodes(): boolean {
         return true
     }
@@ -52,43 +40,58 @@ export abstract class VirtualNode {
         return this.node as Node
     }
 
-    public setParentVirtualNode(virtualNode: VirtualNode) {
-        this.parentVirtualNode = virtualNode
-    }
-
-    public setChildVirtualNodes(virtualNodes: Set<VirtualNode>) {
-        this.virtualNodes = virtualNodes
-    }
-
-    public setSecondaryPosition(position: number) {
-        this.position.secondary = position
-    }
-
     public delete() {
         if (this.node && this.node.parentNode) {
             this.node.parentNode.removeChild(this.node)
         }
 
         if (this.parentVirtualNode) {
-            this.parentVirtualNode.deleteVirtualNode(this)
+            this.parentVirtualNode.removeVirtualNode(this)
         }
     }
 
-    public deleteVirtualNode(virtualNode: VirtualNode) {
-        this.virtualNodes.delete(virtualNode)
+    public removeVirtualNode(virtualNode: VirtualNode) {
+        this.childVirtualNodes.delete(virtualNode)
     }
 
     public clone(): VirtualNode {
-        // @ts-ignore
-        const virtualNode = new this.constructor(this.parsedData, this.parsedData.position, this.parentVirtualNode)
+        const virtualNode = new (this.constructor as any)(
+            this.parsedData,
+            this.position.primary,
+            this.parentVirtualNode
+        )
 
         for (const childVirtualNode of this.getChildVirtualNodesAsArray()) {
             const clonedVirtualNode = childVirtualNode.clone()
-            virtualNode.storeVirtualNode(clonedVirtualNode)
+            virtualNode.addChildVirtualNode(clonedVirtualNode)
             clonedVirtualNode.setParentVirtualNode(virtualNode)
         }
 
         return virtualNode
+    }
+
+    public addChildVirtualNode(virtualNode: VirtualNode) {
+        this.childVirtualNodes.add(virtualNode)
+    }
+
+    public getChildVirtualNodes(): Set<VirtualNode> {
+        return this.childVirtualNodes
+    }
+
+    public getChildVirtualNodesAsArray(): VirtualNode[] {
+        return Array.from(this.getChildVirtualNodes())
+    }
+
+    public setParentVirtualNode(virtualNode: VirtualNode) {
+        this.parentVirtualNode = virtualNode
+    }
+
+    public setChildVirtualNodes(virtualNodes: Set<VirtualNode>) {
+        this.childVirtualNodes = virtualNodes
+    }
+
+    public setSecondaryPosition(position: number) {
+        this.position.secondary = position
     }
 
     protected abstract makeNode(): Node | void

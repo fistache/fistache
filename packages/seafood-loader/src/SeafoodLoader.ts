@@ -13,7 +13,7 @@ export class SeafoodLoader {
     public static readonly EXPORT_SCRIPT_INSTANCE = 'component'
     public static readonly EXPORT_TEMPLATE_BUILDER_CLASS = 'TemplateBuilder'
     public static readonly EXPORT_TEMPLATE_INSTANCE = 'template'
-    public static readonly EXPORT_TEMPLATE_CONTENT = 'templateContent'
+    public static readonly EXPORT_TEMPLATE_CONTENT = 'templateData'
     public static readonly EXPORT_HMR_CLASS = 'Hmr'
     public static readonly EXPORT_HMR_INSTANCE = 'hmr'
     public static readonly EXPORT_COMPILED_COMPONENT_CLASS = 'CompiledComponent'
@@ -144,8 +144,8 @@ export class SeafoodLoader {
                 import {CompiledComponent} from "@seafood/app"
 
                 const ${SeafoodLoader.EXPORT_TEMPLATE_INSTANCE} = new ${SeafoodLoader.EXPORT_TEMPLATE_BUILDER_CLASS}()
-                ${SeafoodLoader.EXPORT_TEMPLATE_INSTANCE}.setParsedContent(${parsedContent});
-                ${SeafoodLoader.EXPORT_TEMPLATE_INSTANCE}.makeTree();
+                ${SeafoodLoader.EXPORT_TEMPLATE_INSTANCE}.setParsedData(${parsedContent});
+                ${SeafoodLoader.EXPORT_TEMPLATE_INSTANCE}.prepare();
 
                 const ${SeafoodLoader.EXPORT_SCRIPT_INSTANCE} = new ${SeafoodLoader.EXPORT_SCRIPT_CLASS}()
                 const ${SeafoodLoader.EXPORT_COMPILED_COMPONENT_INSTANCE} =
