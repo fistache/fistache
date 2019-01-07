@@ -161,7 +161,7 @@ export default class Renderer {
                 items[+index].position = +index
 
                 if (virtualNode) {
-                    items[+index].virtualNode = virtualNode
+                    items[+index].virtualElement = virtualNode
                 }
             }
         }
@@ -170,9 +170,10 @@ export default class Renderer {
     private createVirtualAppElement(): VirtualElement {
         const virtualElementParsedData: ParsedData = {
             attribs: {
-                static: {
-                    id: 'app-root'
-                }
+                static: [{
+                    name: 'id',
+                    value: 'app-root'
+                }]
             },
             name: 'div',
             position: 0,

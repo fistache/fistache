@@ -1,6 +1,5 @@
-import { ParsedData } from '../../Parser/ParsedData'
+import { ParsedData, ParsedDataAttrib } from '../../Parser/ParsedData'
 import { VirtualElement } from './VirtualElement'
-// import { VirtualElement } from './VirtualElement'
 import { VirtualNode } from './VirtualNode'
 
 export interface ForExpressionResult {
@@ -8,7 +7,7 @@ export interface ForExpressionResult {
     value: any
 }
 
-export class VirtualPackage extends VirtualNode {
+export class VirtualPackage extends VirtualElement {
     private readonly maquetteVirtualElement: VirtualElement
 
     constructor(parsedData: ParsedData, maquetteVirtualElement: VirtualElement, parentVirtualNode: VirtualNode) {
@@ -42,8 +41,12 @@ export class VirtualPackage extends VirtualNode {
 
     protected makeNode(): void {}
 
-    private getForExpression(): string {
-        return this.parsedData.attribs['@for']
+    private getForExpression(): string | void {
+        for (const technicalAttribute of this.parsedData.attribs.technical as ParsedDataAttrib[]) {
+            if (technicalAttribute.name === '@for') {
+                return technicalAttribute.value
+            }
+        }
     }
 
     private getForExpressionResult(): ForExpressionResult {

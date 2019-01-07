@@ -1,14 +1,15 @@
 import { VirtualNode } from '../Renderer/VirtualElement/VirtualNode'
 
-export interface ParsedDataAttribGroup {
-    [key: string]: string
+export interface ParsedDataAttrib {
+    name: string
+    value: string
 }
 
 export interface ParsedDataAttribs {
-    dynamic?: ParsedDataAttribGroup
-    technical?: ParsedDataAttribGroup
-    dynamicTechnical?: ParsedDataAttribGroup
-    static?: ParsedDataAttribGroup
+    dynamic: ParsedDataAttrib[]
+    technical: ParsedDataAttrib[]
+    technicalDynamic: ParsedDataAttrib[]
+    static: ParsedDataAttrib[]
 }
 
 export interface ParsedData {

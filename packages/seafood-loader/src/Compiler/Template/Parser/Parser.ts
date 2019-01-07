@@ -1,5 +1,5 @@
 import HtmlParser from 'htmlparser2'
-import { ParsedDataAttribGroup, ParsedDataAttribs } from './ParsedData'
+import { ParsedDataAttrib, ParsedDataAttribs } from './ParsedData'
 
 export class Parser {
     private source: string
@@ -17,7 +17,8 @@ export class Parser {
         if (this.callback) {
             this.parseFragment(this.source).then((parsedContent: any) => {
                 if (this.callback) {
-                    this.callback(null, JSON.stringify(this.removeLinksToObjects(parsedContent)))
+                    this.decycleObject(parsedContent)
+                    this.callback(null, JSON.stringify(parsedContent))
                 }
             }).catch((error: any) => {
                 if (this.callback) {
@@ -45,65 +46,87 @@ export class Parser {
         })
     }
 
-    private removeLinksToObjects(content: any): any {
-        // todo: remove recursion
-        let jsonableContent
+    private decycleObject(content: any): void {
+        const stack = content.slice()
 
-        if (Array.isArray(content)) {
-            jsonableContent = []
-            for (const item of content) {
-                jsonableContent.push(this.removeLinksToObjects(item))
-            }
-        } else {
-            jsonableContent = Object.create(null)
+        while (stack.length) {
+            const item = stack.pop()
 
-            if (content.children) {
-                jsonableContent.children = this.removeLinksToObjects(content.children)
-            }
-
-            for (const index in content) {
-                if (content.hasOwnProperty(index)) {
-                    if (index !== 'next' &&
-                        index !== 'prev' &&
-                        index !== '__proto__' &&
-                        index !== 'prototype' &&
-                        index !== 'parent' &&
-                        index !== 'children'
+            for (const fieldName in item) {
+                if (item.hasOwnProperty(fieldName)) {
+                    if (fieldName === 'next' ||
+                        fieldName === 'prev' ||
+                        fieldName === 'parent'
                     ) {
-                        if (index === 'attribs') {
-                            jsonableContent[index] = this.parseAttribs(content[index])
-                        } else {
-                            jsonableContent[index] = content[index]
-                        }
+                        delete item[fieldName]
                     }
                 }
             }
-        }
 
-        return jsonableContent
+            if (item.attribs) {
+                item.attribs = this.parseAttribs(item.attribs)
+            }
+
+            if (item.children) {
+                stack.push(...item.children.slice())
+            }
+        }
     }
 
     private parseAttribs(attribs: any): ParsedDataAttribs {
-        const dynamic: ParsedDataAttribGroup = []
-        const technical: ParsedDataAttribGroup = []
-        const dynamicTechnical: ParsedDataAttribGroup = []
-        const staticAttribs: ParsedDataAttribGroup = []
+        const dynamic: ParsedDataAttrib[] = []
+        const technical: ParsedDataAttrib[] = []
+        const technicalDynamic: ParsedDataAttrib[] = []
+        const staticAttribs: ParsedDataAttrib[] = []
 
         for (const attribName in attribs) {
             if (attribs.hasOwnProperty(attribName)) {
-                // attribs = {
-                //   "@if": "false"
-                // }
+                const attribValue = attribs[attribName]
 
-                //
+                if (this.testIsThisDynamicAttribute(attribName)) {
+                    dynamic.push({
+                        name: attribName,
+                        value: attribValue
+                     })
+                } else if (this.testIsThisTechnicalAttribute(attribName)) {
+                    technical.push({
+                        name: attribName,
+                        value: attribValue
+                    })
+                } else if (this.testIsThisTechnicalDynamicAttribute(attribName)) {
+                    technicalDynamic.push({
+                        name: attribName,
+                        value: attribValue
+                    })
+                } else {
+                    staticAttribs.push({
+                        name: attribName,
+                        value: attribValue
+                    })
+                }
             }
         }
 
         return {
             dynamic,
             technical,
-            dynamicTechnical,
+            technicalDynamic,
             static: staticAttribs
         }
+    }
+
+    private testIsThisTechnicalAttribute(attributeName: string): boolean {
+        const regex = new RegExp(/^(@[a-zA-Z0-9_.-]+(?<!-))$/)
+        return regex.test(attributeName)
+    }
+
+    private testIsThisDynamicAttribute(attributeName: string): boolean {
+        const regex = new RegExp(/^(:[a-zA-Z0-9_.-]+(?<!-))$/)
+        return regex.test(attributeName)
+    }
+
+    private testIsThisTechnicalDynamicAttribute(attributeName: string): boolean {
+        const regex = new RegExp(/^(@[a-zA-Z0-9_.-]+(?<!-))?(:[a-zA-Z0-9_.-]+(?<!-))$/)
+        return regex.test(attributeName)
     }
 }
