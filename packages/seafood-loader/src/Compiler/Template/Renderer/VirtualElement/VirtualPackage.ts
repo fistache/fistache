@@ -21,6 +21,10 @@ export class VirtualPackage extends VirtualElement {
         for (let secondaryPosition = 0; secondaryPosition < forExpressionResult.value; secondaryPosition++) {
             const clonedVirtualNode = this.maquetteVirtualElement.clone()
 
+            if (clonedVirtualNode instanceof VirtualElement) {
+                clonedVirtualNode.getAttibuteContainer().extend(this.getAttibuteContainer())
+            }
+
             clonedVirtualNode.setSecondaryPosition(secondaryPosition)
             this.addChildVirtualNode(clonedVirtualNode)
         }

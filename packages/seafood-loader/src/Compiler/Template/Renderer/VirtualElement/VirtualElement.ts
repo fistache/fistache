@@ -7,11 +7,17 @@ export class VirtualElement extends VirtualNode {
 
     constructor(parsedData: ParsedData, primaryPosition: number, parentVirtualNode: VirtualNode) {
         super(parsedData, primaryPosition, parentVirtualNode)
-        this.attibuteContainer = new AttributeContainer()
+        this.attibuteContainer = new AttributeContainer(this)
     }
 
     public beforeRender() {
         this.attibuteContainer.initialize(this.parsedData.attribs)
+    }
+
+    public render() {
+        super.render()
+        this.attibuteContainer.renderStaticAttributes()
+        this.attibuteContainer.renderDynamicAttributes()
     }
 
     public getAttibuteContainer(): AttributeContainer {

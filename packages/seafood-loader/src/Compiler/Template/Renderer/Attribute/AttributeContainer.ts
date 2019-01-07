@@ -1,16 +1,21 @@
 import { ParsedDataAttribs } from '../../Parser/ParsedData'
+import { VirtualElement } from '../VirtualElement/VirtualElement'
+import { Attribute } from './Attribute'
 import { DynamicAttribute } from './DynamicAttribute'
 import { StaticAttribute } from './StaticAttribute'
 import { TechnicalAttribute } from './TechnicalAttribute'
 import { TechnicalDynamicAttribute } from './TechnicalDynamicAttribute'
 
 export class AttributeContainer {
+    private virtualElement: VirtualElement
+
     private staticAttributes: Set<StaticAttribute>
     private dynamicAttributes: Set<DynamicAttribute>
     private technicalAttributes: Set<TechnicalAttribute>
     private technicalDynamicAttributes: Set<TechnicalDynamicAttribute>
 
-    constructor() {
+    constructor(virtualElement: VirtualElement) {
+        this.virtualElement = virtualElement
         this.staticAttributes = new Set()
         this.dynamicAttributes = new Set()
         this.technicalAttributes = new Set()
@@ -57,8 +62,35 @@ export class AttributeContainer {
     }
 
     public initialize(attribs: ParsedDataAttribs) {
-        for (const staticAttribute of attribs.static) {
-            this.staticAttributes.add(new StaticAttribute(staticAttribute.name, staticAttribute.value))
+        for (const attribute of attribs.static) {
+            this.staticAttributes.add(new StaticAttribute(attribute.name, attribute.value))
         }
+
+        for (const attribute of attribs.dynamic) {
+            this.dynamicAttributes.add(new DynamicAttribute(attribute.name, attribute.value))
+        }
+
+        for (const attribute of attribs.technical) {
+            this.technicalAttributes.add(new TechnicalAttribute(attribute.name, attribute.value))
+        }
+
+        for (const attribute of attribs.technicalDynamic) {
+            this.technicalDynamicAttributes.add(new TechnicalDynamicAttribute(attribute.name, attribute.value))
+        }
+    }
+
+    public renderStaticAttributes() {
+        this.renderAttributes(this.getStaticAttributes())
+    }
+
+    public renderDynamicAttributes() {
+        this.renderAttributes(this.getDynamicAttributes())
+    }
+
+    private renderAttributes(attributes: Set<Attribute>) {
+        attributes.forEach((attribute: Attribute) => {
+            attribute.setVirtualElement(this.virtualElement)
+            attribute.append()
+        })
     }
 }

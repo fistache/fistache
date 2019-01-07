@@ -108,6 +108,8 @@ export default class Renderer {
             virtualObject.setParentVirtualNode(parsedData.virtualNode)
         }
 
+        virtualElement.beforeRender()
+
         return virtualElement
     }
 
@@ -161,7 +163,7 @@ export default class Renderer {
                 items[+index].position = +index
 
                 if (virtualNode) {
-                    items[+index].virtualElement = virtualNode
+                    items[+index].virtualNode = virtualNode
                 }
             }
         }
@@ -173,7 +175,10 @@ export default class Renderer {
                 static: [{
                     name: 'id',
                     value: 'app-root'
-                }]
+                }],
+                dynamic: [],
+                technical: [],
+                technicalDynamic: []
             },
             name: 'div',
             position: 0,
