@@ -1,16 +1,16 @@
 import { Component } from '@seafood/component'
 import { HmrOptions } from './HmrOptions'
-// import { Reactivity } from './Reactivity/Reactivity'
 
 export class CompiledComponent {
     public rootElement: any
     public hmrOptions: HmrOptions
     public component: Component
     public renderer: any
+    public isItCompiledComponent = true
+
+    private name?: string
 
     constructor(component: Component, renderer: any) {
-        // Reactivity.applyComponent(component)
-
         this.hmrOptions = {
             events: []
         }
@@ -27,6 +27,18 @@ export class CompiledComponent {
         }
 
         this.renderer.render(element, this.component)
+    }
+
+    public setName(name: string) {
+        this.name = name
+    }
+
+    public getName(): string | undefined {
+        return this.name
+    }
+
+    public getComponent(): Component {
+        return this.component
     }
 
     public setComponent(component: Component): void {

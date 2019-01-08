@@ -1,4 +1,5 @@
 import { ParsedData } from '../../Parser/ParsedData'
+import { Scope } from '../Reactivity/Scope'
 
 export interface VirtualNodePosition {
     primary: number
@@ -16,11 +17,14 @@ export abstract class VirtualNode {
 
     protected position: VirtualNodePosition
 
+    protected scope: Scope
+
     constructor(parsedData: ParsedData, primaryPosition: number, parentVirtualNode: VirtualNode) {
         this.parentVirtualNode = parentVirtualNode
         this.childVirtualNodes = new Set()
         this.parsedData = parsedData
         this.position = { primary: primaryPosition }
+        this.scope = new Scope()
 
         this.bindNode()
     }
@@ -80,6 +84,10 @@ export abstract class VirtualNode {
 
     public getChildVirtualNodesAsArray(): VirtualNode[] {
         return Array.from(this.getChildVirtualNodes())
+    }
+
+    public getScope(): Scope {
+        return this.scope
     }
 
     public setParentVirtualNode(virtualNode: VirtualNode) {

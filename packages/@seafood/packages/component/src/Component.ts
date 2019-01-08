@@ -1,3 +1,4 @@
+import { CompiledComponent } from '@seafood/app'
 import { ComponentAttribute } from './ComponentAttribute'
 import { unreactive } from './Decorators/Unreactive'
 
@@ -18,13 +19,19 @@ export interface ComponentEventInterface {
 
 export class Component implements ComponentInterface, ComponentEventInterface {
     @unreactive()
-    private attributes: ComponentAttribute[] = []
+    protected attributes: ComponentAttribute[] = []
 
     @unreactive()
-    private readonly eventHandlers: Event[][]
+    protected readonly eventHandlers: Event[][] = []
+
+    @unreactive()
+    protected readonly usedStuff?: Set<any>
+
+    @unreactive()
+    protected readonly usedComponents?: Map<string, CompiledComponent>
 
     constructor() {
-        this.eventHandlers = []
+        console.log(this.usedComponents, this.usedStuff)
     }
 
     public getAttributes(): ComponentAttribute[] {

@@ -19,7 +19,7 @@ export default class Renderer {
     }
 
     public prepare() {
-        // todo: to make tree in the loader, not in a browser
+        // todo: to make a virtual tree in the loader, not in a browser
         const virtualElement = this.createVirtualAppElement()
 
         this.virtualTree.addChildVirtualNode(virtualElement)
@@ -43,7 +43,8 @@ export default class Renderer {
         }
     }
 
-    public render(parentNode: Element/*, componentInstance: any*/) {
+    public render(parentNode: Element, component: any) {
+        this.virtualTree.getScope().setContext(component)
         const stack = this.virtualTree.getChildVirtualNodesAsArray().reverse()
 
         while (stack.length) {
@@ -185,7 +186,9 @@ export default class Renderer {
             type: ParsedDataType.Tag,
             data: ''
         }
+        const virtualElement = new VirtualElement(virtualElementParsedData, 0, this.virtualTree)
+        virtualElement.beforeRender()
 
-        return new VirtualElement(virtualElementParsedData, 0, this.virtualTree)
+        return virtualElement
     }
 }
