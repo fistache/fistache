@@ -22,14 +22,3 @@ export function use(...args: any[]) {
         }
     }
 }
-
-export function computeComponentName(compiledComponent: CompiledComponent): string {
-    const component = compiledComponent.getComponent()
-    let className = component.constructor.name
-
-    if (className.includes('Component')) {
-        className = className.slice(0, className.lastIndexOf('Component'))
-    }
-
-    const i = 0
-}

@@ -17,7 +17,9 @@ export class RequestGenerator {
                     result = loader
                 } else if (typeof loader === 'object') {
                     const loaderPath = loader.path
-                    const loaderOptions = loader.options ? '?' + JSON.stringify(loader.options) : ''
+                    const loaderOptions = loader.options ? '?' + (typeof loader.options === 'string'
+                        ? loader.options
+                        : JSON.stringify(loader.options)) : ''
                     result += `${loaderPath}${loaderOptions}`
                 }
                 loadersString += `${result}!`

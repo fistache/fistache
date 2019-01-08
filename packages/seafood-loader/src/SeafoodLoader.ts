@@ -1,4 +1,5 @@
 import hash from 'hash-sum'
+import hyphenate from 'hyphenate'
 import path from 'path'
 import { CompactRequestQuery } from './CompactRequestQuery'
 import { CompilationFlag } from './CompilationFlag'
@@ -114,6 +115,17 @@ export class SeafoodLoader {
         }
     }
 
+    private getComponentName() {
+        let componentName = path.basename(this.resourcePath)
+        componentName = componentName.slice(0, componentName.lastIndexOf('.'))
+
+        if (componentName.includes('Component')) {
+            componentName = componentName.slice(0, componentName.lastIndexOf('Component'))
+        }
+
+        return hyphenate(componentName, {lowerCase: true})
+    }
+
     private exportCompiledComponentInstance(): void {
         const templateContentRequest = this.getTemplateCompilationRequest()
 
@@ -134,11 +146,12 @@ export class SeafoodLoader {
                     this.loader,
                     path.resolve(__dirname, '../src/Hmr/Hmr.ts')
                 )
+                const componentName = this.getComponentName()
 
                 this.hmrPlugin.setTemplateRequest(templateContentRequest)
 
                 this.loader.callback(null, `
-                import {default as ${SeafoodLoader.EXPORT_SCRIPT_CLASS}, name as className} from ${scriptRequest}
+                import {default as ${SeafoodLoader.EXPORT_SCRIPT_CLASS}} from ${scriptRequest}
                 import {default as ${SeafoodLoader.EXPORT_TEMPLATE_BUILDER_CLASS}} from ${templateRequest}
                 import {default as ${SeafoodLoader.EXPORT_HMR_CLASS}} from ${hmrRequest}
                 import {CompiledComponent} from "@seafood/app"
@@ -148,13 +161,12 @@ export class SeafoodLoader {
                 ${SeafoodLoader.EXPORT_TEMPLATE_INSTANCE}.prepare();
 
                 const ${SeafoodLoader.EXPORT_SCRIPT_INSTANCE} = new ${SeafoodLoader.EXPORT_SCRIPT_CLASS}()
-                ${SeafoodLoader.EXPORT_SCRIPT_INSTANCE}.setName(className)
-
                 const ${SeafoodLoader.EXPORT_COMPILED_COMPONENT_INSTANCE} =
                 new CompiledComponent(
                     ${SeafoodLoader.EXPORT_SCRIPT_INSTANCE},
                     ${SeafoodLoader.EXPORT_TEMPLATE_INSTANCE}
                 )
+                ${SeafoodLoader.EXPORT_COMPILED_COMPONENT_INSTANCE}.setName('${componentName}')
 
                 ${this.getHmrCode()}
 
