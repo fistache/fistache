@@ -1,14 +1,19 @@
 import { CompiledComponent } from '@seafood/app'
+import hyphenate from 'hyphenate'
 
-export function use(...args: any[]) {
+export function use(args: any) {
     const usedComponents = new Map<string, CompiledComponent>()
     const usedStuff = new Set()
 
-    for (const arg of args) {
-        if (arg.isItCompiledComponent) {
-            usedComponents.set(arg.getName(), arg)
-        } else {
-            usedStuff.add(arg)
+    for (const argName in args) {
+        if (args.hasOwnProperty(argName)) {
+            const argValue = args[argName]
+
+            if (argValue.isItCompiledComponent) {
+                usedComponents.set(computeComponentName(argName), argValue)
+            } else {
+                usedStuff.add(argValue)
+            }
         }
     }
 
@@ -21,4 +26,12 @@ export function use(...args: any[]) {
             target.prototype.usedComponents = usedComponents
         }
     }
+}
+
+export const computeComponentName = (name: string): string => {
+    if (name.includes('Component')) {
+        name = name.slice(0, name.lastIndexOf('Component'))
+    }
+
+    return hyphenate(name, {lowerCase: true})
 }
