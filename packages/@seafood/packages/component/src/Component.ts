@@ -30,10 +30,6 @@ export class Component implements ComponentInterface, ComponentEventInterface {
     @unreactive()
     protected readonly usedComponents?: Map<string, CompiledComponent>
 
-    constructor() {
-        console.log(this.usedComponents, this.usedStuff)
-    }
-
     public getAttributes(): ComponentAttribute[] {
         return this.attributes
     }
@@ -52,5 +48,9 @@ export class Component implements ComponentInterface, ComponentEventInterface {
                 event()
             })
         }
+    }
+
+    public getUsedComponents(): Map<string, CompiledComponent> | undefined {
+        return this.usedComponents
     }
 }

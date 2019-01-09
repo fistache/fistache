@@ -8,9 +8,9 @@ export interface ForExpressionResult {
 }
 
 export class VirtualPackage extends VirtualElement {
-    private readonly maquetteVirtualElement: VirtualElement
+    private readonly maquetteVirtualElement: VirtualNode
 
-    constructor(parsedData: ParsedData, maquetteVirtualElement: VirtualElement, parentVirtualNode: VirtualNode) {
+    constructor(parsedData: ParsedData, maquetteVirtualElement: VirtualNode, parentVirtualNode: VirtualNode) {
         super(parsedData, parsedData.position, parentVirtualNode)
         this.maquetteVirtualElement = maquetteVirtualElement
     }

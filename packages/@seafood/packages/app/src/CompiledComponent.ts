@@ -1,4 +1,5 @@
 import { Component } from '@seafood/component'
+import { VirtualTree } from '../../../../seafood-loader/src/Compiler/Template/Renderer/VirtualElement/VirtualTree'
 import { HmrOptions } from './HmrOptions'
 
 export class CompiledComponent {
@@ -16,6 +17,7 @@ export class CompiledComponent {
         }
         this.component = component
         this.renderer = renderer
+        this.renderer.prepare(this.component.getUsedComponents())
     }
 
     public render(element?: any): void {
@@ -27,6 +29,10 @@ export class CompiledComponent {
         }
 
         this.renderer.render(element, this.component)
+    }
+
+    public getRenderer(): any {
+        return this.renderer
     }
 
     public setName(name: string) {

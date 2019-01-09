@@ -11,6 +11,7 @@ export class VirtualElement extends VirtualNode {
     }
 
     public beforeRender() {
+        super.beforeRender()
         this.attibuteContainer.initialize(this.parsedData.attribs)
     }
 

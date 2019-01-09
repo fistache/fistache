@@ -25,7 +25,9 @@ export abstract class VirtualNode {
         this.parsedData = parsedData
         this.position = { primary: primaryPosition }
         this.scope = new Scope()
+    }
 
+    public beforeRender() {
         this.bindNode()
     }
 

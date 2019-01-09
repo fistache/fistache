@@ -1,6 +1,9 @@
+import { CompiledComponent } from '@seafood/app'
+import { Component } from '@seafood/component'
 import { ParsedData, ParsedDataType } from '../Parser/ParsedData'
 import { HtmlElements } from './HtmlElements'
 import { VirtualCommentNode } from './VirtualElement/VirtualCommentNode'
+import { VirtualComponent } from './VirtualElement/VirtualComponent'
 import { VirtualElement } from './VirtualElement/VirtualElement'
 import { VirtualEmbeddedContentNode } from './VirtualElement/VirtualEmbeddedContentNode'
 import { VirtualNode } from './VirtualElement/VirtualNode'
@@ -13,18 +16,21 @@ export default class Renderer {
 
     private parsedData: ParsedData[]
 
+    private usedComponents?: Map<string, CompiledComponent>
+
     constructor() {
         this.virtualTree = new VirtualTree()
         this.parsedData = []
     }
 
-    public prepare() {
+    public prepare(usedComponents?: Map<string, CompiledComponent>) {
         // todo: to make a virtual tree in the loader, not in a browser
-        const virtualElement = this.createVirtualAppElement()
+        // const virtualElement = this.createVirtualAppElement()
+        this.usedComponents = usedComponents
 
-        this.virtualTree.addChildVirtualNode(virtualElement)
-        virtualElement.setParentVirtualNode(this.virtualTree)
-        this.bindParsedItemChildrenProperty(this.parsedData, virtualElement)
+        // this.virtualTree.addChildVirtualNode(virtualElement)
+        // virtualElement.setParentVirtualNode(this.virtualTree)
+        this.bindParsedItemChildrenProperty(this.parsedData, this.virtualTree)
 
         const stack = this.parsedData.reverse()
 
@@ -43,13 +49,15 @@ export default class Renderer {
         }
     }
 
-    public render(parentNode: Element, component: any) {
+    public render(parentNode: Element, component: Component) {
+        this.virtualTree.beforeRender()
         this.virtualTree.getScope().setContext(component)
         const stack = this.virtualTree.getChildVirtualNodesAsArray().reverse()
 
         while (stack.length) {
             const virtualNode = stack.pop() as VirtualNode
 
+            virtualNode.beforeRender()
             virtualNode.render()
 
             // Get child nodes only after render because virtual
@@ -79,13 +87,15 @@ export default class Renderer {
                 virtualNode = this.createCommentVirtualNode(parsedData)
                 break
             case(ParsedDataType.Tag):
-                if (this.isItHtmlTag(parsedData)) {
+                const compiledComponent = this.getCompiledComponent(parsedData)
+                if (compiledComponent) {
+                    virtualNode = this.createVirtualComponent(compiledComponent as CompiledComponent, parsedData)
+                } else if (this.isItHtmlTag(parsedData)) {
                     virtualNode = this.createVirtualElement(parsedData)
                 } else if (this.isItEmbedContentTag(parsedData)) {
                     virtualNode = this.createEmbedContentVirtualNode(parsedData)
                 } else {
-                    // todo: implement seperate class for a component
-                    virtualNode = this.createVirtualElement(parsedData)
+                    throw new Error(`Undefined component <${parsedData.name}>`)
                 }
                 break
             default:
@@ -93,6 +103,23 @@ export default class Renderer {
         }
 
         return virtualNode
+    }
+
+    private createVirtualComponent(compiledComponent: CompiledComponent, parsedData: ParsedData): VirtualNode {
+        const { position, virtualNode: parentVirtualNode } = parsedData
+        const virtualComponent = new VirtualComponent(compiledComponent, position, parentVirtualNode as VirtualNode)
+        let virtualObject: VirtualNode = virtualComponent
+
+        if (parsedData.attribs.hasOwnProperty('@for')) {
+            virtualObject = new VirtualPackage(parsedData , virtualComponent, parentVirtualNode as VirtualNode)
+        }
+
+        if (parsedData.virtualNode) {
+            parsedData.virtualNode.addChildVirtualNode(virtualObject)
+            virtualObject.setParentVirtualNode(parsedData.virtualNode)
+        }
+
+        return virtualComponent
     }
 
     private createVirtualElement(parsedData: ParsedData): VirtualNode {
@@ -108,8 +135,6 @@ export default class Renderer {
             parsedData.virtualNode.addChildVirtualNode(virtualObject)
             virtualObject.setParentVirtualNode(parsedData.virtualNode)
         }
-
-        virtualElement.beforeRender()
 
         return virtualElement
     }
@@ -156,6 +181,22 @@ export default class Renderer {
 
     private isItEmbedContentTag(parsedData: ParsedData): boolean {
         return parsedData.name === 'content'
+    }
+
+    private getCompiledComponent(parsedData: ParsedData): CompiledComponent | null {
+        if (this.usedComponents) {
+            const iterator = this.usedComponents[Symbol.iterator]()
+            for (const record of iterator) {
+                const componentName = record[0]
+                const componentValue = record[1]
+
+                if (componentName === parsedData.name) {
+                    return componentValue
+                }
+            }
+        }
+
+        return null
     }
 
     private bindParsedItemChildrenProperty(items: ParsedData[], virtualNode: VirtualNode) {

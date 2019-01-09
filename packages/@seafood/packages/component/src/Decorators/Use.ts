@@ -33,5 +33,7 @@ export const computeComponentName = (name: string): string => {
         name = name.slice(0, name.lastIndexOf('Component'))
     }
 
-    return hyphenate(name, {lowerCase: true})
+    return hyphenate(name, {
+        lowerCase: true
+    })
 }

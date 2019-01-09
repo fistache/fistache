@@ -158,7 +158,6 @@ export class SeafoodLoader {
 
                 const ${SeafoodLoader.EXPORT_TEMPLATE_INSTANCE} = new ${SeafoodLoader.EXPORT_TEMPLATE_BUILDER_CLASS}()
                 ${SeafoodLoader.EXPORT_TEMPLATE_INSTANCE}.setParsedData(${parsedContent});
-                ${SeafoodLoader.EXPORT_TEMPLATE_INSTANCE}.prepare();
 
                 const ${SeafoodLoader.EXPORT_SCRIPT_INSTANCE} = new ${SeafoodLoader.EXPORT_SCRIPT_CLASS}()
                 const ${SeafoodLoader.EXPORT_COMPILED_COMPONENT_INSTANCE} =
