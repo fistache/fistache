@@ -1,4 +1,5 @@
 import { ParsedData } from '../../Parser/ParsedData'
+import { Reactivity } from '../Reactivity/Reactivity'
 import { Scope } from '../Reactivity/Scope'
 
 export interface VirtualNodePosition {

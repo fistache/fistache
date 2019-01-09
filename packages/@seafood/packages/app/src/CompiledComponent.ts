@@ -1,5 +1,4 @@
 import { Component } from '@seafood/component'
-import { VirtualTree } from '../../../../seafood-loader/src/Compiler/Template/Renderer/VirtualElement/VirtualTree'
 import { HmrOptions } from './HmrOptions'
 
 export class CompiledComponent {

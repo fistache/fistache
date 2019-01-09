@@ -25,11 +25,7 @@ export default class Renderer {
 
     public prepare(usedComponents?: Map<string, CompiledComponent>) {
         // todo: to make a virtual tree in the loader, not in a browser
-        // const virtualElement = this.createVirtualAppElement()
         this.usedComponents = usedComponents
-
-        // this.virtualTree.addChildVirtualNode(virtualElement)
-        // virtualElement.setParentVirtualNode(this.virtualTree)
         this.bindParsedItemChildrenProperty(this.parsedData, this.virtualTree)
 
         const stack = this.parsedData.reverse()
@@ -50,8 +46,9 @@ export default class Renderer {
     }
 
     public render(parentNode: Element, component: Component) {
-        this.virtualTree.beforeRender()
         this.virtualTree.getScope().setContext(component)
+        this.virtualTree.beforeRender()
+
         const stack = this.virtualTree.getChildVirtualNodesAsArray().reverse()
 
         while (stack.length) {
@@ -209,27 +206,5 @@ export default class Renderer {
                 }
             }
         }
-    }
-
-    private createVirtualAppElement(): VirtualElement {
-        const virtualElementParsedData: ParsedData = {
-            attribs: {
-                static: [{
-                    name: 'id',
-                    value: 'app-root'
-                }],
-                dynamic: [],
-                technical: [],
-                technicalDynamic: []
-            },
-            name: 'div',
-            position: 0,
-            type: ParsedDataType.Tag,
-            data: ''
-        }
-        const virtualElement = new VirtualElement(virtualElementParsedData, 0, this.virtualTree)
-        virtualElement.beforeRender()
-
-        return virtualElement
     }
 }
