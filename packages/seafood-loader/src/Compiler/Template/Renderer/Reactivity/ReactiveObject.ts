@@ -4,14 +4,17 @@ export class ReactiveObject {
     private readonly map = new Map<any, ReactiveProperty>()
 
     public get(key: any) {
-        return this.map.get(key)
-    }
+        let reactiveProperty = this.map.get(key)
 
-    public set(key: any, reactiveProperty?: ReactiveProperty) {
         if (!reactiveProperty) {
             reactiveProperty = new ReactiveProperty()
+            this.set(key, reactiveProperty)
         }
 
+        return reactiveProperty
+    }
+
+    public set(key: any, reactiveProperty: ReactiveProperty) {
         this.map.set(key, reactiveProperty)
     }
 }
