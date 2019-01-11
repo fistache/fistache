@@ -1,3 +1,4 @@
+import { VirtualElement } from '../VirtualElement/VirtualElement'
 import { NonStaticAttribute } from './NonStaticAttribute'
 
 export class TechnicalAttribute extends NonStaticAttribute {
@@ -17,12 +18,12 @@ export class TechnicalAttribute extends NonStaticAttribute {
     }
 
     protected appendIfAttribute(): void {
-        // const virtualTagNode = this.getVirtualElement()
-        // const scope = virtualTagNode.getScope()
-        // const expressionResult = scope.executeExpression(this.value, (value: any) => {
-        //     virtualTagNode.updateIfAttributeValue(value)
-        // })
-        //
-        // virtualTagNode.updateIfAttributeValue(expressionResult)
+        const virtualElement = this.getVirtualElement() as VirtualElement
+        const scope = virtualElement.getScope()
+        const expressionResult = scope.executeExpression(this.value, (value: any) => {
+            virtualElement.updateIfAttributeValue(value)
+        })
+
+        virtualElement.updateIfAttributeValue(expressionResult)
     }
 }

@@ -1,5 +1,4 @@
 import { ParsedData } from '../../Parser/ParsedData'
-import { Reactivity } from '../Reactivity/Reactivity'
 import { Scope } from '../Reactivity/Scope'
 
 export interface VirtualNodePosition {
@@ -20,15 +19,19 @@ export abstract class VirtualNode {
 
     protected scope: Scope
 
+    protected anchorNode: Node
+
     constructor(parsedData: ParsedData, primaryPosition: number, parentVirtualNode: VirtualNode) {
         this.parentVirtualNode = parentVirtualNode
         this.childVirtualNodes = new Set()
         this.parsedData = parsedData
         this.position = { primary: primaryPosition }
         this.scope = new Scope()
+        this.anchorNode = document.createTextNode('')
     }
 
     public beforeRender() {
+        this.attachAnchorNode()
         this.bindNode()
     }
 
@@ -39,12 +42,48 @@ export abstract class VirtualNode {
         parentNode.appendChild(node)
     }
 
+    public afterRender() {
+        //
+    }
+
     public shouldRenderChildVirtualNodes(): boolean {
         return true
     }
 
     public getNode(): Node {
         return this.node as Node
+    }
+
+    public getAnchorNode(): Node {
+        return this.anchorNode
+    }
+
+    public getNextSiblingNode(position: VirtualNodePosition): Node | null {
+        let node = null
+
+        if (position.secondary) {
+            //
+        } else {
+            for (const child of this.childVirtualNodes.values()) {
+                if (child.position.primary > position.primary) {
+                    node = child.getAnchorNode()
+                    break
+                }
+            }
+        }
+
+        return node
+    }
+
+    public attach() {
+        if (this.parentVirtualNode) {
+            const nextSiblingNode = this.parentVirtualNode.getNextSiblingNode(this.position)
+
+            if (nextSiblingNode && nextSiblingNode.parentNode) {
+                nextSiblingNode.parentNode.insertBefore(this.getNode(), nextSiblingNode)
+                this.afterRender()
+            }
+        }
     }
 
     public delete() {
@@ -97,6 +136,10 @@ export abstract class VirtualNode {
         this.parentVirtualNode = virtualNode
     }
 
+    public getParentVirtualNode(): VirtualNode | undefined {
+        return this.parentVirtualNode
+    }
+
     public setChildVirtualNodes(virtualNodes: Set<VirtualNode>) {
         this.childVirtualNodes = virtualNodes
     }
@@ -109,5 +152,13 @@ export abstract class VirtualNode {
 
     protected bindNode() {
         this.node = this.makeNode() as Node
+    }
+
+    protected attachAnchorNode() {
+        const parentNode = this.parentVirtualNode.getNode()
+
+        if (parentNode) {
+            parentNode.appendChild(this.anchorNode)
+        }
     }
 }

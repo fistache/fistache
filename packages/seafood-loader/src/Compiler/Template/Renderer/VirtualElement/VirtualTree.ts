@@ -10,7 +10,7 @@ export class VirtualTree extends VirtualNode {
     }
 
     public beforeRender() {
-        super.beforeRender()
+        this.bindNode()
         this.reactivity = new Reactivity(this.scope.getContext())
         this.reactivity.bindComponent()
     }

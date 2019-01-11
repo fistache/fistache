@@ -30,11 +30,6 @@ export class VirtualPackage extends VirtualElement {
         }
     }
 
-    public setParentVirtualNode(virtualNode: VirtualNode) {
-        super.setParentVirtualNode(virtualNode)
-        this.maquetteVirtualElement.setParentVirtualNode(virtualNode)
-    }
-
     public clone(): VirtualNode {
         return new VirtualPackage(
             this.parsedData,

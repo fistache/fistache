@@ -89,6 +89,10 @@ export class AttributeContainer {
         this.renderAttributes(this.getDynamicAttributes())
     }
 
+    public renderTechnicalAttributes() {
+        this.renderAttributes(this.getTeachnicalAttributes())
+    }
+
     private renderAttributes(attributes: Set<Attribute>) {
         attributes.forEach((attribute: Attribute) => {
             attribute.setVirtualElement(this.virtualElement)

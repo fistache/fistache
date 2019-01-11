@@ -54,6 +54,7 @@ export default class Renderer {
         while (stack.length) {
             const virtualNode = stack.pop() as VirtualNode
 
+            virtualNode.getScope().setContext(component)
             virtualNode.beforeRender()
             virtualNode.render()
 
