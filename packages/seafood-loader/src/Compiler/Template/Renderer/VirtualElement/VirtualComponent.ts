@@ -1,8 +1,9 @@
 import { CompiledComponent } from '@seafood/app'
 import { ParsedData } from '../../Parser/ParsedData'
+import { VirtualElement } from './VirtualElement'
 import { VirtualNode } from './VirtualNode'
 
-export class VirtualComponent extends VirtualNode {
+export class VirtualComponent extends VirtualElement {
     private compiledComponent: CompiledComponent
 
     constructor(component: CompiledComponent, position: number, parentVirtualNode: VirtualNode) {
@@ -15,9 +16,11 @@ export class VirtualComponent extends VirtualNode {
     }
 
     public render() {
-        const parentNode = this.parentVirtualNode.getNode()
-        this.compiledComponent.getRenderer().render(parentNode, this.compiledComponent.component)
-    }
+        this.attibuteContainer.renderTechnicalAttributes()
 
-    protected makeNode(): void {}
+        if (this.isPresent()) {
+            const parentNode = this.parentVirtualNode.getNode()
+            this.compiledComponent.getRenderer().render(parentNode, this.compiledComponent.component)
+        }
+    }
 }

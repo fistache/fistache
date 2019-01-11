@@ -87,7 +87,7 @@ export class VirtualElement extends VirtualNode {
         return document.createElement(this.parsedData.name)
     }
 
-    private isPresent(): boolean {
+    protected isPresent(): boolean {
         return this.getPresentState() === VirtualElementPresentState.Present
     }
 }
