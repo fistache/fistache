@@ -11,6 +11,9 @@ export class TechnicalAttribute extends NonStaticAttribute {
             case('if'):
                 this.appendIfAttribute()
                 break
+            case ('for'):
+                // @for is special attirube only for packages
+                break
             default:
                 console.warn(`Attribute ${this.name} is unknown.`)
                 break

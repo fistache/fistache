@@ -5,6 +5,7 @@ import { ReactivityWatcher } from './ReactivityWatcher'
 export const PROXY_TARGET_SYMBOL = Symbol('ProxyTarget')
 export type ObjectPropertyContainer = Map<PropertyKey, ReactiveProperty>
 
+// todo: fix memory leak
 export class Reactivity {
     private readonly component: any
     private log = new WeakMap<object, ObjectPropertyContainer>()

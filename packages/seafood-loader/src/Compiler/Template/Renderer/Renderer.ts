@@ -1,6 +1,6 @@
 import { CompiledComponent } from '@seafood/app'
 import { Component } from '@seafood/component'
-import { ParsedData, ParsedDataType } from '../Parser/ParsedData'
+import { ParsedData, ParsedDataAttrib, ParsedDataType } from '../Parser/ParsedData'
 import { HtmlElements } from './HtmlElements'
 import { VirtualCommentNode } from './VirtualElement/VirtualCommentNode'
 import { VirtualComponent } from './VirtualElement/VirtualComponent'
@@ -106,10 +106,16 @@ export default class Renderer {
     private createVirtualComponent(compiledComponent: CompiledComponent, parsedData: ParsedData): VirtualNode {
         const { position, virtualNode: parentVirtualNode } = parsedData
         const virtualComponent = new VirtualComponent(compiledComponent, position, parentVirtualNode as VirtualNode)
+        const forExpression = this.getForAttributeValue(parsedData.attribs.technical)
         let virtualObject: VirtualNode = virtualComponent
 
-        if (parsedData.attribs.hasOwnProperty('@for')) {
-            virtualObject = new VirtualPackage(parsedData , virtualComponent, parentVirtualNode as VirtualNode)
+        if (forExpression) {
+            virtualObject = new VirtualPackage(
+                parsedData,
+                virtualComponent,
+                parentVirtualNode as VirtualNode,
+                forExpression
+            )
         }
 
         if (parsedData.virtualNode) {
@@ -123,10 +129,16 @@ export default class Renderer {
     private createVirtualElement(parsedData: ParsedData): VirtualNode {
         const { position, virtualNode: parentVirtualNode } = parsedData
         const virtualElement = new VirtualElement(parsedData, position, parentVirtualNode as VirtualNode)
+        const forExpression = this.getForAttributeValue(parsedData.attribs.technical)
         let virtualObject: VirtualNode = virtualElement
 
-        if (parsedData.attribs.hasOwnProperty('@for')) {
-            virtualObject = new VirtualPackage(parsedData , virtualElement, parentVirtualNode as VirtualNode)
+        if (forExpression) {
+            virtualObject = new VirtualPackage(
+                parsedData,
+                virtualElement,
+                parentVirtualNode as VirtualNode,
+                forExpression
+            )
         }
 
         if (parsedData.virtualNode) {
@@ -207,5 +219,15 @@ export default class Renderer {
                 }
             }
         }
+    }
+
+    private getForAttributeValue(attribs: ParsedDataAttrib[]): string | undefined {
+        for (const attrib of attribs) {
+            if (attrib.name === '@for') {
+                return attrib.value
+            }
+        }
+
+        return undefined
     }
 }
