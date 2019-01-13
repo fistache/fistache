@@ -49,7 +49,7 @@ export default class Renderer {
         this.virtualTree.getScope().setContext(component)
         this.virtualTree.beforeRender()
 
-        const stack = this.virtualTree.getChildVirtualNodesAsArray().reverse()
+        const stack = this.virtualTree.getChildVirtualNodes().reverse()
 
         while (stack.length) {
             const virtualNode = stack.pop() as VirtualNode
@@ -60,7 +60,7 @@ export default class Renderer {
 
             // Get child nodes only after render because virtual
             // package can create a new one.
-            const childVirtualNodes = virtualNode.getChildVirtualNodesAsArray().reverse()
+            const childVirtualNodes = virtualNode.getChildVirtualNodes().reverse()
 
             if (virtualNode.shouldRenderChildVirtualNodes()) {
                 stack.push(...childVirtualNodes)

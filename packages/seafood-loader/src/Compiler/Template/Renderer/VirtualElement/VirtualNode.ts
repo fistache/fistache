@@ -7,7 +7,7 @@ export interface VirtualNodePosition {
 }
 
 export abstract class VirtualNode {
-    protected childVirtualNodes: Set<VirtualNode>
+    protected childVirtualNodes: VirtualNode[]
 
     protected parentVirtualNode: VirtualNode
 
@@ -23,7 +23,7 @@ export abstract class VirtualNode {
 
     constructor(parsedData: ParsedData, primaryPosition: number, parentVirtualNode: VirtualNode) {
         this.parentVirtualNode = parentVirtualNode
-        this.childVirtualNodes = new Set()
+        this.childVirtualNodes = []
         this.parsedData = parsedData
         this.position = { primary: primaryPosition }
         this.scope = new Scope()
@@ -97,7 +97,11 @@ export abstract class VirtualNode {
     }
 
     public removeVirtualNode(virtualNode: VirtualNode) {
-        this.childVirtualNodes.delete(virtualNode)
+        const index = this.childVirtualNodes.indexOf(virtualNode)
+
+        if (index !== -1) {
+            this.childVirtualNodes.splice(index, 1)
+        }
     }
 
     public clone(): VirtualNode {
@@ -107,7 +111,7 @@ export abstract class VirtualNode {
             this.parentVirtualNode
         )
 
-        for (const childVirtualNode of this.getChildVirtualNodesAsArray()) {
+        for (const childVirtualNode of this.getChildVirtualNodes()) {
             const clonedVirtualNode = childVirtualNode.clone()
             virtualNode.addChildVirtualNode(clonedVirtualNode)
             clonedVirtualNode.setParentVirtualNode(virtualNode)
@@ -117,15 +121,11 @@ export abstract class VirtualNode {
     }
 
     public addChildVirtualNode(virtualNode: VirtualNode) {
-        this.childVirtualNodes.add(virtualNode)
+        this.childVirtualNodes.push(virtualNode)
     }
 
-    public getChildVirtualNodes(): Set<VirtualNode> {
+    public getChildVirtualNodes(): VirtualNode[] {
         return this.childVirtualNodes
-    }
-
-    public getChildVirtualNodesAsArray(): VirtualNode[] {
-        return Array.from(this.getChildVirtualNodes())
     }
 
     public getScope(): Scope {
@@ -138,10 +138,6 @@ export abstract class VirtualNode {
 
     public getParentVirtualNode(): VirtualNode | undefined {
         return this.parentVirtualNode
-    }
-
-    public setChildVirtualNodes(virtualNodes: Set<VirtualNode>) {
-        this.childVirtualNodes = virtualNodes
     }
 
     public setSecondaryPosition(position: number) {

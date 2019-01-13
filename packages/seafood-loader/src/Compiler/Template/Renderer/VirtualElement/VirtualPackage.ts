@@ -1,4 +1,5 @@
 import { ParsedData } from '../../Parser/ParsedData'
+import { PROXY_TARGET_SYMBOL } from '../Reactivity/Reactivity'
 import { VirtualElement } from './VirtualElement'
 import { VirtualNode } from './VirtualNode'
 
@@ -73,16 +74,71 @@ export class VirtualPackage extends VirtualElement {
         }
     }
 
-    private updateForOfExpression(value: any) {
-        console.log(value)
-    }
-
     private appendForInAttribute() {
         //
     }
 
     private appendForNAttribute() {
         //
+    }
+
+    private updateForOfExpression(value: any) {
+        console.log(value)
+    }
+
+    private updateForExpression(
+        updatedExpressionValue: any,
+        callback: () => void,
+        expressionResult?: ForExpressionResult
+    ): void {
+        if (expressionResult) {
+            expressionResult.value = updatedExpressionValue
+
+            if (Array.isArray(updatedExpressionValue)) {
+                const rudenantIndecies: any[] = []
+
+                for (const valueIndex in this.childVirtualNodes) {
+                    if (this.childVirtualNodes.hasOwnProperty(valueIndex)) {
+                        if (!updatedExpressionValue.hasOwnProperty(valueIndex)) {
+                            rudenantIndecies.push(valueIndex)
+                        }
+                    }
+                }
+
+                this.cleanCollection(rudenantIndecies, (index: number) => {
+                    if (expressionResult) {
+                        let value = expressionResult.value
+
+                        // get original object cause we use value.splice
+                        // and we don't want to trigger rerender one more time
+                        if (value[PROXY_TARGET_SYMBOL]) {
+                            value = value[PROXY_TARGET_SYMBOL]
+                        }
+
+                        value.splice(index, 1)
+                    }
+                })
+
+                callback()
+            } else {
+                // todo: implement object @for rendering
+            }
+        }
+    }
+
+    private cleanCollection(rudenantIndecies: number[], callback?: (index: number) => void): void {
+        const collection = this.childVirtualNodes.slice()
+
+        for (const index of rudenantIndecies) {
+            this.childVirtualNodes[index].delete()
+            collection.splice(index, 1)
+
+            if (callback) {
+                callback(index)
+            }
+        }
+
+        this.childVirtualNodes = collection
     }
 
     private renderMaquette(secondaryPosition: number, expressionResult: ForExpressionResult) {
