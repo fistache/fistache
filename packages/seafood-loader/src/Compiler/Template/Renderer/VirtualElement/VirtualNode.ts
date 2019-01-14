@@ -111,6 +111,8 @@ export abstract class VirtualNode {
             this.parentVirtualNode
         )
 
+        virtualNode.getScope().setContext(this.getScope().getContext())
+
         for (const childVirtualNode of this.getChildVirtualNodes()) {
             const clonedVirtualNode = childVirtualNode.clone()
             virtualNode.addChildVirtualNode(clonedVirtualNode)
@@ -120,8 +122,12 @@ export abstract class VirtualNode {
         return virtualNode
     }
 
-    public addChildVirtualNode(virtualNode: VirtualNode) {
-        this.childVirtualNodes.push(virtualNode)
+    public addChildVirtualNode(virtualNode: VirtualNode, index?: number) {
+        if (index) {
+            this.childVirtualNodes[index] = virtualNode
+        } else {
+            this.childVirtualNodes.push(virtualNode)
+        }
     }
 
     public getChildVirtualNodes(): VirtualNode[] {

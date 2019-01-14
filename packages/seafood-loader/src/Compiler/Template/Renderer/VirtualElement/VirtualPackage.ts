@@ -1,5 +1,6 @@
 import { ParsedData } from '../../Parser/ParsedData'
 import { PROXY_TARGET_SYMBOL } from '../Reactivity/Reactivity'
+import Renderer from '../Renderer'
 import { VirtualElement } from './VirtualElement'
 import { VirtualNode } from './VirtualNode'
 
@@ -10,7 +11,8 @@ export interface ForExpressionResult {
 
 export class VirtualPackage extends VirtualElement {
     private readonly maquetteVirtualElement: VirtualNode
-    private readonly forExpression: string
+    private readonly forExpressionOrigin: string
+    private forExpressionResult?: ForExpressionResult
 
     constructor(
         parsedData: ParsedData,
@@ -20,7 +22,7 @@ export class VirtualPackage extends VirtualElement {
     ) {
         super(parsedData, parsedData.position, parentVirtualNode)
         this.maquetteVirtualElement = maquetteVirtualElement
-        this.forExpression = forExpression
+        this.forExpressionOrigin = forExpression
     }
 
     public render() {
@@ -32,16 +34,16 @@ export class VirtualPackage extends VirtualElement {
             this.parsedData,
             this.maquetteVirtualElement.clone() as VirtualElement,
             this.parentVirtualNode,
-            this.forExpression
+            this.forExpressionOrigin
         )
     }
 
     protected makeNode(): void {}
 
     private resolveForAttribute() {
-        if (this.forExpression.includes(' of ')) {
+        if (this.forExpressionOrigin.includes(' of ')) {
             this.appendForOfAttribute()
-        } else if (this.forExpression.includes(' in ')) {
+        } else if (this.forExpressionOrigin.includes(' in ')) {
             this.appendForInAttribute()
         } else {
             this.appendForNAttribute()
@@ -49,7 +51,7 @@ export class VirtualPackage extends VirtualElement {
     }
 
     private appendForOfAttribute() {
-        const expressionParts = this.forExpression.split(' of ', 2)
+        const expressionParts = this.forExpressionOrigin.split(' of ', 2)
         const variable = expressionParts[0]
         const expression = expressionParts[1]
 
@@ -60,15 +62,12 @@ export class VirtualPackage extends VirtualElement {
                 }
             })
 
-            for (const index in expressionResult) {
-                if (expressionResult.hasOwnProperty(index)) {
-                    const expressionValue = expressionResult[index]
-                    this.renderMaquette(+index, {
-                        variable,
-                        value: expressionValue
-                    })
-                }
+            this.forExpressionResult = {
+                variable,
+                value: expressionResult
             }
+
+            this.renderForOfExpression()
         } else {
             console.warn('Variable name or expression is not provided in @for..of attribute.')
         }
@@ -82,47 +81,59 @@ export class VirtualPackage extends VirtualElement {
         //
     }
 
+    private renderForOfExpression(isItUpdate: boolean = false) {
+        const expressionResult = this.forExpressionResult as ForExpressionResult
+        for (const index in expressionResult.value) {
+            if (expressionResult.value.hasOwnProperty(index) && !this.childVirtualNodes.hasOwnProperty(index)) {
+                const expressionValue = expressionResult.value[index]
+                const virtualNode = this.renderMaquette(+index, {
+                    variable: expressionResult.variable,
+                    value: expressionValue
+                })
+                if (isItUpdate) {
+                    this.renderFragmentOnTree(virtualNode)
+                }
+            }
+        }
+    }
+
     private updateForOfExpression(value: any) {
-        console.log(value)
+        (this.forExpressionResult as ForExpressionResult).value = value
+        this.updateForExpression(value, () => {
+            this.renderForOfExpression(true)
+        })
     }
 
     private updateForExpression(
-        updatedExpressionValue: any,
-        callback: () => void,
-        expressionResult?: ForExpressionResult
+        value: any,
+        callback: () => void
     ): void {
-        if (expressionResult) {
-            expressionResult.value = updatedExpressionValue
+        if (Array.isArray(value)) {
+            const rudenantIndecies: any[] = []
 
-            if (Array.isArray(updatedExpressionValue)) {
-                const rudenantIndecies: any[] = []
-
-                for (const valueIndex in this.childVirtualNodes) {
-                    if (this.childVirtualNodes.hasOwnProperty(valueIndex)) {
-                        if (!updatedExpressionValue.hasOwnProperty(valueIndex)) {
-                            rudenantIndecies.push(valueIndex)
-                        }
+            for (const valueIndex in this.childVirtualNodes) {
+                if (this.childVirtualNodes.hasOwnProperty(valueIndex)) {
+                    if (!value.hasOwnProperty(valueIndex)) {
+                        rudenantIndecies.push(valueIndex)
                     }
                 }
-
-                this.cleanCollection(rudenantIndecies, (index: number) => {
-                    if (expressionResult) {
-                        let value = expressionResult.value
-
-                        // get original object cause we use value.splice
-                        // and we don't want to trigger rerender one more time
-                        if (value[PROXY_TARGET_SYMBOL]) {
-                            value = value[PROXY_TARGET_SYMBOL]
-                        }
-
-                        value.splice(index, 1)
-                    }
-                })
-
-                callback()
-            } else {
-                // todo: implement object @for rendering
             }
+
+            if (rudenantIndecies.length) {
+                this.cleanCollection(rudenantIndecies, (index: number) => {
+                    // get original object cause we use value.splice
+                    // and we don't want to trigger rerender one more time
+                    if (value[PROXY_TARGET_SYMBOL]) {
+                        value = value[PROXY_TARGET_SYMBOL]
+                    }
+
+                    value.splice(index, 1)
+                })
+            }
+
+            callback()
+        } else {
+            // todo: implement object @for rendering
         }
     }
 
@@ -130,7 +141,7 @@ export class VirtualPackage extends VirtualElement {
         const collection = this.childVirtualNodes.slice()
 
         for (const index of rudenantIndecies) {
-            this.childVirtualNodes[index].delete()
+            collection[index].delete()
             collection.splice(index, 1)
 
             if (callback) {
@@ -141,17 +152,24 @@ export class VirtualPackage extends VirtualElement {
         this.childVirtualNodes = collection
     }
 
-    private renderMaquette(secondaryPosition: number, expressionResult: ForExpressionResult) {
+    private renderMaquette(secondaryPosition: number, expressionResult: ForExpressionResult): VirtualNode {
         const clonedVirtualNode = this.maquetteVirtualElement.clone()
 
         if (clonedVirtualNode instanceof VirtualElement) {
             clonedVirtualNode.getAttibuteContainer().extend(this.getAttibuteContainer())
         }
 
-        clonedVirtualNode.setSecondaryPosition(secondaryPosition)
         if (expressionResult.variable) {
             clonedVirtualNode.getScope().setVariable(expressionResult.variable, expressionResult.value)
         }
-        this.addChildVirtualNode(clonedVirtualNode)
+
+        clonedVirtualNode.setSecondaryPosition(secondaryPosition)
+        this.addChildVirtualNode(clonedVirtualNode, secondaryPosition)
+
+        return clonedVirtualNode
+    }
+
+    private renderFragmentOnTree(virtualNode: VirtualNode) {
+        Renderer.renderFragment([virtualNode], virtualNode.getScope().getContext())
     }
 }

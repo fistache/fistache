@@ -12,6 +12,24 @@ import { VirtualTextNode } from './VirtualElement/VirtualTextNode'
 import { VirtualTree } from './VirtualElement/VirtualTree'
 
 export default class Renderer {
+    public static renderFragment(stack: VirtualNode[], context: any) {
+        while (stack.length) {
+            const virtualNode = stack.pop() as VirtualNode
+
+            virtualNode.getScope().setContext(context)
+            virtualNode.beforeRender()
+            virtualNode.render()
+
+            // Get child nodes only after render because virtual
+            // package can create a new one.
+            const childVirtualNodes = virtualNode.getChildVirtualNodes().slice().reverse()
+
+            if (virtualNode.shouldRenderChildVirtualNodes()) {
+                stack.push(...childVirtualNodes)
+            }
+        }
+    }
+
     private readonly virtualTree: VirtualTree
 
     private parsedData: ParsedData[]
@@ -49,23 +67,7 @@ export default class Renderer {
         this.virtualTree.getScope().setContext(component)
         this.virtualTree.beforeRender()
 
-        const stack = this.virtualTree.getChildVirtualNodes().reverse()
-
-        while (stack.length) {
-            const virtualNode = stack.pop() as VirtualNode
-
-            virtualNode.getScope().setContext(component)
-            virtualNode.beforeRender()
-            virtualNode.render()
-
-            // Get child nodes only after render because virtual
-            // package can create a new one.
-            const childVirtualNodes = virtualNode.getChildVirtualNodes().reverse()
-
-            if (virtualNode.shouldRenderChildVirtualNodes()) {
-                stack.push(...childVirtualNodes)
-            }
-        }
+        Renderer.renderFragment(this.virtualTree.getChildVirtualNodes().reverse(), component)
 
         this.virtualTree.append(parentNode)
     }
