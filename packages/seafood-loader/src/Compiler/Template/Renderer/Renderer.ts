@@ -67,7 +67,7 @@ export default class Renderer {
         this.virtualTree.getScope().setContext(component)
         this.virtualTree.beforeRender()
 
-        Renderer.renderFragment(this.virtualTree.getChildVirtualNodes().reverse(), component)
+        Renderer.renderFragment(this.virtualTree.getChildVirtualNodes().slice().reverse(), component)
 
         this.virtualTree.append(parentNode)
     }

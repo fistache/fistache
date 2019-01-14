@@ -57,7 +57,7 @@ export class Reactivity {
                     [propertyKey]: value
                 }
 
-                // this.merge(obj, reactiveValue, propertyKey as string, reactiveProperty)
+                this.merge(obj, reactiveValue, propertyKey as string, reactiveProperty)
                 property.value = reactiveValue[propertyKey as string]
                 reactiveProperty.notifyParentAndChildren()
             }
@@ -143,7 +143,7 @@ export class Reactivity {
                             [targetPropertyKey]: value
                         }
 
-                        // this.merge(target, reactiveValue, targetPropertyKey as string, reactiveProperty)
+                        this.merge(target, reactiveValue, targetPropertyKey as string, reactiveProperty)
 
                         target[targetPropertyKey] = reactiveValue[targetPropertyKey as string]
 

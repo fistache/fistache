@@ -3,6 +3,7 @@ import { PROXY_TARGET_SYMBOL } from '../Reactivity/Reactivity'
 import Renderer from '../Renderer'
 import { VirtualElement } from './VirtualElement'
 import { VirtualNode } from './VirtualNode'
+import { VirtualTree } from './VirtualTree'
 
 export interface ForExpressionResult {
     variable?: string
@@ -170,6 +171,26 @@ export class VirtualPackage extends VirtualElement {
     }
 
     private renderFragmentOnTree(virtualNode: VirtualNode) {
-        Renderer.renderFragment([virtualNode], virtualNode.getScope().getContext())
+        const context = virtualNode.getScope().getContext()
+        const virtualTree = new VirtualTree()
+        const parentVirtualNode = virtualNode.getParentVirtualNode() as VirtualNode
+        let nextSibling = this.getNextSiblingNode(virtualNode.getPosition())
+
+        if (!nextSibling) {
+            nextSibling = parentVirtualNode.getNextSiblingNode(this.getPosition())
+        }
+
+        virtualTree.getScope().setContext(context)
+        virtualTree.beforeRender()
+
+        virtualNode.setParentVirtualNode(virtualTree)
+        Renderer.renderFragment([virtualNode], context)
+        virtualNode.setParentVirtualNode(parentVirtualNode)
+
+        const node = virtualNode.getNode()
+        const treeNode = virtualTree.getNode()
+
+        treeNode.removeChild(node)
+        virtualNode.attach(nextSibling)
     }
 }

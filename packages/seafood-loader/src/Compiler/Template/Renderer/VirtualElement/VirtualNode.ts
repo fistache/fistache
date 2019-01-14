@@ -61,23 +61,21 @@ export abstract class VirtualNode {
     public getNextSiblingNode(position: VirtualNodePosition): Node | null {
         let node = null
 
-        if (position.secondary) {
-            //
-        } else {
-            for (const child of this.childVirtualNodes.values()) {
-                if (child.position.primary > position.primary) {
-                    node = child.getAnchorNode()
-                    break
-                }
+        for (const child of this.childVirtualNodes) {
+            if (child.position.primary > position.primary) {
+                node = child.getAnchorNode()
+                break
             }
         }
 
         return node
     }
 
-    public attach() {
+    public attach(nextSiblingNode?: Node | null) {
         if (this.parentVirtualNode) {
-            const nextSiblingNode = this.parentVirtualNode.getNextSiblingNode(this.position)
+            if (!nextSiblingNode) {
+                nextSiblingNode = this.parentVirtualNode.getNextSiblingNode(this.position)
+            }
 
             if (nextSiblingNode && nextSiblingNode.parentNode) {
                 nextSiblingNode.parentNode.insertBefore(this.getNode(), nextSiblingNode)
@@ -148,6 +146,10 @@ export abstract class VirtualNode {
 
     public setSecondaryPosition(position: number) {
         this.position.secondary = position
+    }
+
+    public getPosition(): VirtualNodePosition {
+        return this.position
     }
 
     protected abstract makeNode(): Node | void
