@@ -1,4 +1,4 @@
-import { Component } from '@seafood/component'
+import { Component, Event } from '@seafood/component'
 import { HmrOptions } from './HmrOptions'
 
 export class CompiledComponent {
@@ -19,15 +19,24 @@ export class CompiledComponent {
         this.renderer.prepare(this.component.getUsedComponents())
     }
 
+    public beforeRender() {
+        this.bindSystemEvents()
+    }
+
     public render(element?: any): void {
         if (element) {
             this.rootElement = element
         } else {
+            this.component.fireEvent(Event.Destroyed)
             this.clearContent()
-            element = this.rootElement
         }
 
-        this.renderer.render(element, this.component)
+        this.rerender()
+    }
+
+    public rerender() {
+        this.renderer.render(this.rootElement, this.component)
+        this.component.fireEvent(Event.Created)
     }
 
     public getRenderer(): any {
@@ -57,6 +66,16 @@ export class CompiledComponent {
     private clearContent() {
         while (this.rootElement.hasChildNodes()) {
             this.rootElement.removeChild(this.rootElement.lastChild)
+        }
+    }
+
+    private bindSystemEvents() {
+        const handleCreatedEvents = this.hmrOptions.events[Event.Created]
+        console.log(this.component, handleCreatedEvents)
+        if (Array.isArray(handleCreatedEvents)) {
+            handleCreatedEvents.forEach((event: () => void) => {
+                this.component.bindEvent(Event.Created, event.bind(this))
+            })
         }
     }
 }

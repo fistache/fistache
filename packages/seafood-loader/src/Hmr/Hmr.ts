@@ -17,24 +17,26 @@ export default class Hmr {
         this.data = {}
     }
 
-    public register(id: string, options: HmrOptions): void {
+    public register(id: string, compiledComponent: CompiledComponent): void {
         if (this.data.hasOwnProperty(id)) {
             return
         }
 
         const constructor = null
-        this.bindConstructor(id, options)
+        this.bindConstructor(id, compiledComponent.hmrOptions)
+        compiledComponent.beforeRender()
 
         this.data[id] = {
             components: [],
             constructor,
-            options
+            options: compiledComponent.hmrOptions
         }
     }
 
     public rerender(id: string, options: any): void {
         this.handleRerender(() => {
             const data = this.data[id]
+            console.log(data)
             if (data && data.constructor) {
                 data.components.forEach((component: CompiledComponent) => {
                     component.setTemplateRenderer(
@@ -43,6 +45,7 @@ export default class Hmr {
                     )
                     // compiledComponent is SeafoodLoader.EXPORT_COMPILED_COMPONENT_INSTANCE
                     component.setComponent(options.compiledComponent.component)
+                    console.log(component)
                     component.render()
                 })
             }

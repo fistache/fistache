@@ -26,7 +26,7 @@ export class HmrPlugin {
             } else {
                 ${SeafoodLoader.EXPORT_HMR_CLASS}.getInstance().register(
                    '${this.requestId}',
-                   ${SeafoodLoader.EXPORT_COMPILED_COMPONENT_INSTANCE}.hmrOptions
+                   ${SeafoodLoader.EXPORT_COMPILED_COMPONENT_INSTANCE}
                 )
             }
 

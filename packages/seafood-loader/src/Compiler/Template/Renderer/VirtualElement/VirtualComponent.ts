@@ -20,7 +20,7 @@ export class VirtualComponent extends VirtualElement {
 
         if (this.isPresent()) {
             const parentNode = this.parentVirtualNode.getNode()
-            this.compiledComponent.getRenderer().render(parentNode, this.compiledComponent.component)
+            this.compiledComponent.render(parentNode)
         }
     }
 }
