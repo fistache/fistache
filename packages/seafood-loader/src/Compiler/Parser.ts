@@ -3,13 +3,13 @@ import { ParsedDataAttrib, ParsedDataAttribs } from './ParsedData'
 
 export class Parser {
     private source: string
-    private callback?: (error: any, parsedContent?: string) => void
+    private callback?: (error: any, parsedContent?: any[]) => void
 
     public constructor(source: string) {
         this.source = source
     }
 
-    public setCallback(callback: (error: any, parsedContent?: string) => void): void {
+    public setCallback(callback: (error: any, parsedContent?: any[]) => void): void {
         this.callback = callback
     }
 
@@ -17,8 +17,9 @@ export class Parser {
         if (this.callback) {
             this.parseFragment(this.source).then((parsedContent: any) => {
                 if (this.callback) {
+                    this.checkOnlyOneRootTag(parsedContent)
                     this.decycleObject(parsedContent)
-                    this.callback(null, JSON.stringify(parsedContent))
+                    this.callback(null, parsedContent)
                 }
             }).catch((error: any) => {
                 if (this.callback) {
@@ -44,6 +45,20 @@ export class Parser {
             parser.write(fragment)
             parser.end()
         })
+    }
+
+    private checkOnlyOneRootTag(content: any[]) {
+        let tagsCount = 0
+
+        for (const item of content) {
+            if (item.type === 'tag') {
+                tagsCount++
+            }
+
+            if (tagsCount > 1) {
+                throw new Error('Component must contain only one root tag.')
+            }
+        }
     }
 
     private decycleObject(content: any): void {

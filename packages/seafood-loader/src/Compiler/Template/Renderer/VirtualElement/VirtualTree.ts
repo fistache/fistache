@@ -1,4 +1,4 @@
-import { ParsedData } from '../../Parser/ParsedData'
+import { ParsedData } from '../../../ParsedData'
 import { Reactivity } from '../Reactivity/Reactivity'
 import { VirtualNode } from './VirtualNode'
 

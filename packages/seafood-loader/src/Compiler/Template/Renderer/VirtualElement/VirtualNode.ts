@@ -1,4 +1,4 @@
-import { ParsedData } from '../../Parser/ParsedData'
+import { ParsedData } from '../../../ParsedData'
 import { Scope } from '../Reactivity/Scope'
 
 export interface VirtualNodePosition {

@@ -1,4 +1,4 @@
-import { ParsedDataAttribs } from '../../Parser/ParsedData'
+import { ParsedDataAttribs } from '../../../ParsedData'
 import { VirtualElement } from '../VirtualElement/VirtualElement'
 import { Attribute } from './Attribute'
 import { DynamicAttribute } from './DynamicAttribute'

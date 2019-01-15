@@ -1,38 +1,68 @@
+import { Parser } from './Parser'
+
 export abstract class Compiler {
     protected readonly loader: any
     protected readonly source: string
+    protected parsingTagNumber: number = 0
     protected parsingTagName?: string
-    protected content: any
+    protected parseDataOnly = true
 
     constructor(loader: any, source: any) {
         this.loader = loader
         this.source = source
-        this.init()
-        this.parseContent()
     }
 
-    public abstract compile(): string
+    public compileAsync(): void {
+        const parser = new Parser(this.source)
+        parser.setCallback((error: any, parsedContent?: any[]) => {
+            if (error) {
+                this.loader.callback(error)
+                return
+            }
 
-    public abstract compileAsync(callback: (error: any, parsedContent?: string) => void): void
+            try {
+                const content = this.parseContent(parsedContent as any[])
+                this.loader.callback(null, content)
+            } catch (e) {
+                this.loader.callback(e)
+            }
+        })
+        parser.parseContent()
+    }
 
-    protected abstract init(): void
-
-    protected parseContent(): void {
-        if (!this.parsingTagName) {
-            this.content = ''
-            return
+    protected parseContent(content: any[]): string {
+        if (!Number.isInteger(this.parsingTagNumber)) {
+            return ''
         }
 
-        const regex = new RegExp(
-            `<\s*\/?\s*${this.parsingTagName}\s*.*?>(.*)<\s*\/\s*${this.parsingTagName}\s*.*?>`,
-            's'
-        )
-        const result: any = this.source.match(regex)
+        let tagNumber = 0
+        let result = ''
 
-        if (result && result.length) {
-            this.content = result[1]
-        } else {
-            this.content = ''
+        for (const item of content) {
+            if (item.hasOwnProperty('name')) {
+                if (this.parsingTagNumber === tagNumber) {
+                    if (this.parsingTagName && this.parsingTagName !== item.name) {
+                        throw new Error('Component parts must be ordered.' +
+                        '1. script' +
+                        '2. template (only one root tag)' +
+                        '3. style (optional)' +
+                        `'${this.parsingTagName}' is wrong ordered.`)
+                    }
+
+                    if (this.parseDataOnly) {
+                        if (item.children.length) {
+                            result = item.children[0].data || ''
+                        }
+                    } else {
+                        // for template
+                        result = JSON.stringify(JSON.stringify([item]))
+                    }
+                    break
+                }
+                tagNumber++
+            }
         }
+
+        return result
     }
 }

@@ -1,4 +1,4 @@
-import { ParsedData } from '../../Parser/ParsedData'
+import { ParsedData } from '../../../ParsedData'
 import { PROXY_TARGET_SYMBOL } from '../Reactivity/Reactivity'
 import Renderer from '../Renderer'
 import { VirtualElement } from './VirtualElement'

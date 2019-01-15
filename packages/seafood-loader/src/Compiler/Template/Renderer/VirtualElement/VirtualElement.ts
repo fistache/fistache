@@ -1,4 +1,4 @@
-import { ParsedData } from '../../Parser/ParsedData'
+import { ParsedData } from '../../../ParsedData'
 import { AttributeContainer } from '../Attribute/AttributeContainer'
 import { VirtualNode } from './VirtualNode'
 

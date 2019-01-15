@@ -36,7 +36,6 @@ export default class Hmr {
     public rerender(id: string, options: any): void {
         this.handleRerender(() => {
             const data = this.data[id]
-            console.log(data)
             if (data && data.constructor) {
                 data.components.forEach((component: CompiledComponent) => {
                     component.setTemplateRenderer(
@@ -45,7 +44,6 @@ export default class Hmr {
                     )
                     // compiledComponent is SeafoodLoader.EXPORT_COMPILED_COMPONENT_INSTANCE
                     component.setComponent(options.compiledComponent.component)
-                    console.log(component)
                     component.render()
                 })
             }

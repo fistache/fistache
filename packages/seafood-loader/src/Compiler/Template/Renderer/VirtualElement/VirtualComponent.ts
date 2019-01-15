@@ -1,5 +1,5 @@
 import { CompiledComponent } from '@seafood/app'
-import { ParsedData } from '../../Parser/ParsedData'
+import { ParsedData } from '../../../ParsedData'
 import { VirtualElement } from './VirtualElement'
 import { VirtualNode } from './VirtualNode'
 
@@ -18,6 +18,15 @@ export class VirtualComponent extends VirtualElement {
     public render() {
         this.attibuteContainer.renderTechnicalAttributes()
 
+        if (this.isPresent()) {
+            const parentNode = this.parentVirtualNode.getNode()
+            this.compiledComponent.setVirtualNode(this)
+            this.compiledComponent.render(parentNode)
+        }
+    }
+
+    public rerender() {
+        this.delete()
         if (this.isPresent()) {
             const parentNode = this.parentVirtualNode.getNode()
             this.compiledComponent.render(parentNode)

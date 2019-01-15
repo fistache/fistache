@@ -1,6 +1,6 @@
 import { CompiledComponent } from '@seafood/app'
 import { Component } from '@seafood/component'
-import { ParsedData, ParsedDataAttrib, ParsedDataType } from '../Parser/ParsedData'
+import { ParsedData, ParsedDataAttrib, ParsedDataType } from '../../ParsedData'
 import { HtmlElements } from './HtmlElements'
 import { VirtualCommentNode } from './VirtualElement/VirtualCommentNode'
 import { VirtualComponent } from './VirtualElement/VirtualComponent'
@@ -73,7 +73,7 @@ export default class Renderer {
     }
 
     public setParsedData(parsedContent: any): void {
-        this.parsedData = parsedContent
+        this.parsedData = JSON.parse(parsedContent)
     }
 
     private createVirtualNode(parsedData: ParsedData): VirtualNode | null {

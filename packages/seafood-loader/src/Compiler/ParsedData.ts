@@ -1,4 +1,4 @@
-import { VirtualNode } from '../Renderer/VirtualElement/VirtualNode'
+import { VirtualNode } from './Template/Renderer/VirtualElement/VirtualNode'
 
 export interface ParsedDataAttrib {
     name: string

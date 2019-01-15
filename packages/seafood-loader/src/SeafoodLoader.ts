@@ -4,7 +4,7 @@ import path from 'path'
 import { CompactRequestQuery } from './CompactRequestQuery'
 import { CompilationFlag } from './CompilationFlag'
 import { ScriptCompiler } from './Compiler/Script/ScriptCompiler'
-import { TemplateCompiler } from './Compiler/Template/Parser/TemplateCompiler'
+import { TemplateCompiler } from './Compiler/Template/TemplateCompiler'
 import { HmrPlugin } from './Hmr/HmrPlugin'
 import { RequestGenerator } from './RequestGenerator'
 
@@ -98,17 +98,11 @@ export class SeafoodLoader {
         switch (Number(compilationFlag)) {
             case (CompilationFlag.Script):
                 compiler = new ScriptCompiler(this.loader, this.source)
-                this.loader.callback(null, compiler.compile())
+                compiler.compileAsync()
                 break
             case (CompilationFlag.Template):
                 compiler = new TemplateCompiler(this.loader, this.source)
-                compiler.compileAsync((error: any, parsedContent?: string) => {
-                    if (error) {
-                        this.loader.callback(error)
-                    }
-
-                    this.loader.callback(null, parsedContent)
-                })
+                compiler.compileAsync()
                 break
             default:
                 throw new Error(`Unknown compilation flag "${compilationFlag}"`)
@@ -131,9 +125,9 @@ export class SeafoodLoader {
 
         this.loader.loadModule(
             JSON.parse(templateContentRequest),
-            (error: any, parsedContent: string) => {
-                if (error) {
-                    this.loader.callback(error)
+            (templateError: any, templateContent: string) => {
+                if (templateError) {
+                    this.loader.callback(templateError)
                     return
                 }
 
@@ -150,26 +144,29 @@ export class SeafoodLoader {
 
                 this.hmrPlugin.setTemplateRequest(templateContentRequest)
 
+                // todo: check if script loads parser
+
                 this.loader.callback(null, `
-                import {default as ${SeafoodLoader.EXPORT_SCRIPT_CLASS}} from ${scriptRequest}
-                import {default as ${SeafoodLoader.EXPORT_TEMPLATE_BUILDER_CLASS}} from ${templateRequest}
-                import {default as ${SeafoodLoader.EXPORT_HMR_CLASS}} from ${hmrRequest}
-                import {CompiledComponent} from "@seafood/app"
+                    import {default as ${SeafoodLoader.EXPORT_SCRIPT_CLASS}} from ${scriptRequest}
+                    import {default as ${SeafoodLoader.EXPORT_TEMPLATE_BUILDER_CLASS}} from ${templateRequest}
+                    import {default as ${SeafoodLoader.EXPORT_HMR_CLASS}} from ${hmrRequest}
+                    import {CompiledComponent} from '@seafood/app'
 
-                const ${SeafoodLoader.EXPORT_TEMPLATE_INSTANCE} = new ${SeafoodLoader.EXPORT_TEMPLATE_BUILDER_CLASS}()
-                ${SeafoodLoader.EXPORT_TEMPLATE_INSTANCE}.setParsedData(${parsedContent});
+                    const ${SeafoodLoader.EXPORT_TEMPLATE_INSTANCE} =
+                    new ${SeafoodLoader.EXPORT_TEMPLATE_BUILDER_CLASS}()
+                    ${SeafoodLoader.EXPORT_TEMPLATE_INSTANCE}.setParsedData(${templateContent})
 
-                const ${SeafoodLoader.EXPORT_SCRIPT_INSTANCE} = new ${SeafoodLoader.EXPORT_SCRIPT_CLASS}()
-                const ${SeafoodLoader.EXPORT_COMPILED_COMPONENT_INSTANCE} =
-                new CompiledComponent(
-                    ${SeafoodLoader.EXPORT_SCRIPT_INSTANCE},
-                    ${SeafoodLoader.EXPORT_TEMPLATE_INSTANCE}
-                )
-                ${SeafoodLoader.EXPORT_COMPILED_COMPONENT_INSTANCE}.setName('${componentName}')
+                    const ${SeafoodLoader.EXPORT_SCRIPT_INSTANCE} = new ${SeafoodLoader.EXPORT_SCRIPT_CLASS}()
+                    const ${SeafoodLoader.EXPORT_COMPILED_COMPONENT_INSTANCE} =
+                    new CompiledComponent(
+                        ${SeafoodLoader.EXPORT_SCRIPT_INSTANCE},
+                        ${SeafoodLoader.EXPORT_TEMPLATE_INSTANCE}
+                    )
+                    ${SeafoodLoader.EXPORT_COMPILED_COMPONENT_INSTANCE}.setName('${componentName}')
 
-                ${this.getHmrCode()}
+                    ${this.getHmrCode()}
 
-                export default ${SeafoodLoader.EXPORT_COMPILED_COMPONENT_INSTANCE}
+                    export default ${SeafoodLoader.EXPORT_COMPILED_COMPONENT_INSTANCE}
                 `)
             }
         )

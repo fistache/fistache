@@ -12,7 +12,7 @@ export class StaticAttribute extends Attribute {
 
     protected setAttribute(name: string, value: string): void {
         const virtualElement = this.getVirtualElement() as VirtualElement
-        const buildedNode = virtualElement.getNode()
+        const buildedNode = virtualElement.getNode() as Element
 
         if (buildedNode) {
             buildedNode.setAttribute(name, value)

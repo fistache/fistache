@@ -1,4 +1,6 @@
 import { Component, Event } from '@seafood/component'
+// tslint:disable-next-line: max-line-length
+import { VirtualComponent } from '../../../../seafood-loader/src/Compiler/Template/Renderer/VirtualElement/VirtualComponent'
 import { HmrOptions } from './HmrOptions'
 
 export class CompiledComponent {
@@ -8,6 +10,7 @@ export class CompiledComponent {
     public renderer: any
     public isItCompiledComponent = true
 
+    private virtualNode?: VirtualComponent
     private name?: string
 
     constructor(component: Component, renderer: any) {
@@ -26,17 +29,16 @@ export class CompiledComponent {
     public render(element?: any): void {
         if (element) {
             this.rootElement = element
+            this.renderer.render(this.rootElement, this.component)
+            this.component.fireEvent(Event.Created)
         } else {
             this.component.fireEvent(Event.Destroyed)
-            this.clearContent()
+            if (this.virtualNode) {
+                this.virtualNode.rerender()
+            } else {
+                this.clearContent()
+            }
         }
-
-        this.rerender()
-    }
-
-    public rerender() {
-        this.renderer.render(this.rootElement, this.component)
-        this.component.fireEvent(Event.Created)
     }
 
     public getRenderer(): any {
@@ -63,7 +65,12 @@ export class CompiledComponent {
         this.renderer = templateRenderer
     }
 
+    public setVirtualNode(virtualNode: VirtualComponent) {
+        this.virtualNode = virtualNode
+    }
+
     private clearContent() {
+        console.log(this.rootElement)
         while (this.rootElement.hasChildNodes()) {
             this.rootElement.removeChild(this.rootElement.lastChild)
         }
@@ -71,7 +78,6 @@ export class CompiledComponent {
 
     private bindSystemEvents() {
         const handleCreatedEvents = this.hmrOptions.events[Event.Created]
-        console.log(this.component, handleCreatedEvents)
         if (Array.isArray(handleCreatedEvents)) {
             handleCreatedEvents.forEach((event: () => void) => {
                 this.component.bindEvent(Event.Created, event.bind(this))
