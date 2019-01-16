@@ -13,13 +13,16 @@ export class CompiledComponent {
     private virtualNode?: VirtualComponent
     private name?: string
 
-    constructor(component: Component, renderer: any) {
+    constructor(component: Component, renderer: any, shouldPrepare = true) {
         this.hmrOptions = {
             events: []
         }
         this.component = component
         this.renderer = renderer
-        this.renderer.prepare(this.component.getUsedComponents())
+
+        if (shouldPrepare) {
+            this.renderer.prepare(this.component.getUsedComponents())
+        }
     }
 
     public beforeRender() {
@@ -28,6 +31,7 @@ export class CompiledComponent {
 
     public render(element?: any, beforeChild?: any): Node | null {
         let node = null
+
         if (element) {
             this.rootElement = element
             node = this.renderer.render(this.rootElement, this.component, beforeChild)
@@ -35,7 +39,8 @@ export class CompiledComponent {
         } else {
             this.component.fireEvent(Event.Destroyed)
             if (this.virtualNode) {
-                this.virtualNode.attach()
+                this.virtualNode.delete()
+                this.virtualNode.rerender()
             } else {
                 this.clearContent()
                 node = this.renderer.render(this.rootElement, this.component, beforeChild)
@@ -43,6 +48,14 @@ export class CompiledComponent {
             this.component.fireEvent(Event.Created)
         }
         return node
+    }
+
+    public clone(): CompiledComponent {
+        return new CompiledComponent(
+            this.component,
+            this.renderer.clone(),
+            false
+        )
     }
 
     public getRenderer(): any {
@@ -71,6 +84,10 @@ export class CompiledComponent {
 
     public setVirtualNode(virtualNode: VirtualComponent) {
         this.virtualNode = virtualNode
+    }
+
+    public deleteVirtualNode() {
+        this.virtualNode = undefined
     }
 
     private clearContent() {

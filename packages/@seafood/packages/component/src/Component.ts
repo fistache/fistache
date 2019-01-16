@@ -22,13 +22,13 @@ export class Component implements ComponentInterface, ComponentEventInterface {
     protected attributes: ComponentAttribute[] = []
 
     @unreactive()
-    protected readonly eventHandlers: Event[][] = []
+    protected eventHandlers: Event[][] = []
 
     @unreactive()
-    protected readonly usedStuff?: Set<any>
+    protected usedStuff?: Set<any>
 
     @unreactive()
-    protected readonly usedComponents?: Map<string, CompiledComponent>
+    protected usedComponents?: Map<string, CompiledComponent>
 
     public getAttributes(): ComponentAttribute[] {
         return this.attributes

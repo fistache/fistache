@@ -1,9 +1,9 @@
 import { ParsedData } from '../../../ParsedData'
 import { PROXY_TARGET_SYMBOL } from '../Reactivity/Reactivity'
 import Renderer from '../Renderer'
+import { VirtualComponent } from './VirtualComponent'
 import { VirtualElement } from './VirtualElement'
 import { VirtualNode } from './VirtualNode'
-import { VirtualTree } from './VirtualTree'
 
 export interface ForExpressionResult {
     variable?: string
@@ -287,7 +287,7 @@ export class VirtualPackage extends VirtualElement {
     private renderMaquette(secondaryPosition: number, expressionResult?: ForExpressionResult): VirtualNode {
         const clonedVirtualNode = this.maquetteVirtualElement.clone()
 
-        if (clonedVirtualNode instanceof VirtualElement) {
+        if (clonedVirtualNode instanceof VirtualElement || clonedVirtualNode instanceof VirtualComponent) {
             clonedVirtualNode.getAttibuteContainer().extend(this.getAttibuteContainer())
         }
 
@@ -303,7 +303,6 @@ export class VirtualPackage extends VirtualElement {
 
     private renderFragmentOnTree(virtualNode: VirtualNode) {
         const context = virtualNode.getScope().getContext()
-        const virtualTree = new VirtualTree()
         const parentVirtualNode = virtualNode.getParentVirtualNode() as VirtualNode
         let nextSibling = this.getNextSiblingNode(virtualNode.getPosition())
 
@@ -311,17 +310,8 @@ export class VirtualPackage extends VirtualElement {
             nextSibling = parentVirtualNode.getNextSiblingNode(this.getPosition())
         }
 
-        virtualTree.getScope().setContext(context)
-        virtualTree.beforeRender()
-
-        virtualNode.setParentVirtualNode(virtualTree)
+        // todo: render to document fragment to improve performance
         Renderer.renderFragment([virtualNode], context)
-        virtualNode.setParentVirtualNode(parentVirtualNode)
-
-        const node = virtualNode.getNode()
-        const treeNode = virtualTree.getNode()
-
-        treeNode.removeChild(node)
         virtualNode.attach(nextSibling)
     }
 }

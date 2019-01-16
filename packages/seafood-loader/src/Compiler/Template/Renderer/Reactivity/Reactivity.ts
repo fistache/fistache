@@ -14,12 +14,13 @@ export class Reactivity {
         this.component = component
     }
 
-    public bindComponent() {
+    public bindComponent(): any {
         for (const propertyKey in this.component) {
             if (this.component.hasOwnProperty(propertyKey)
                 && !Reflect.hasMetadata(DECORATOR_UNREACTIVE_FLAG, this.component, propertyKey)
             ) {
                 const reactiveProperty = this.bindObjectProperty(this.component, propertyKey)
+                // todo: replace it whit this.makeProxy
                 this.bindComponentProperty(this.component, propertyKey, reactiveProperty)
             }
         }

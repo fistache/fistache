@@ -30,15 +30,14 @@ export default class Renderer {
         }
     }
 
-    private readonly virtualTree: VirtualTree
+    private virtualTree: VirtualTree
 
-    private parsedData: ParsedData[]
+    private parsedData: ParsedData[] = []
 
     private usedComponents?: Map<string, CompiledComponent>
 
     constructor() {
         this.virtualTree = new VirtualTree()
-        this.parsedData = []
     }
 
     public prepare(usedComponents?: Map<string, CompiledComponent>) {
@@ -70,6 +69,15 @@ export default class Renderer {
         Renderer.renderFragment(this.virtualTree.getChildVirtualNodes().slice().reverse(), component)
 
         return this.virtualTree.append(parentNode, beforeChild)
+    }
+
+    public clone() {
+        const renderer = new Renderer()
+
+        renderer.virtualTree = this.virtualTree.clone() as VirtualTree
+        renderer.parsedData = this.parsedData
+
+        return renderer
     }
 
     public setParsedData(parsedContent: any): void {

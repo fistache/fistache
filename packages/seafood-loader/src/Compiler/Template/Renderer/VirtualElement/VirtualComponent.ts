@@ -16,31 +16,36 @@ export class VirtualComponent extends VirtualElement {
         this.compiledComponent = component
     }
 
+    public beforeRender() {
+        super.beforeRender()
+        this.compiledComponent.setVirtualNode(this)
+    }
+
     public render() {
         this.attibuteContainer.renderTechnicalAttributes()
 
         if (this.isPresent()) {
             const parentNode = this.parentVirtualNode.getNode()
-            this.compiledComponent.setVirtualNode(this)
             this.node = this.compiledComponent.render(parentNode)
+            console.log(this.node)
         }
     }
 
-    public attach() {
-        this.delete()
+    public rerender() {
         if (this.isPresent()) {
             const parentNode = this.parentVirtualNode.getNode()
             const nextSibling = this.parentVirtualNode.getNextSiblingNode(this.getPosition())
             this.node = this.compiledComponent.render(parentNode, nextSibling)
+            console.log(this.node)
         }
     }
 
     public clone(): VirtualNode {
-        return super.clone(new (this.constructor as any)(
+        return super.clone(new VirtualComponent(
             this.parsedData,
             this.position.primary,
             this.parentVirtualNode,
-            this.compiledComponent
-        ) as VirtualNode)
+            this.compiledComponent.clone()
+        ))
     }
 }
