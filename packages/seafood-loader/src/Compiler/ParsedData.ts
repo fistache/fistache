@@ -6,10 +6,10 @@ export interface ParsedDataAttrib {
 }
 
 export interface ParsedDataAttribs {
-    dynamic: ParsedDataAttrib[]
-    technical: ParsedDataAttrib[]
-    technicalDynamic: ParsedDataAttrib[]
-    static: ParsedDataAttrib[]
+    dynamic?: ParsedDataAttrib[]
+    technical?: ParsedDataAttrib[]
+    technicalDynamic?: ParsedDataAttrib[]
+    static?: ParsedDataAttrib[]
 }
 
 export interface ParsedData {

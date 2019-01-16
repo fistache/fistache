@@ -108,7 +108,7 @@ export default class Renderer {
     private createVirtualComponent(compiledComponent: CompiledComponent, parsedData: ParsedData): VirtualNode {
         const { position, virtualNode: parentVirtualNode } = parsedData
         const virtualComponent = new VirtualComponent(compiledComponent, position, parentVirtualNode as VirtualNode)
-        const forExpression = this.getForAttributeValue(parsedData.attribs.technical)
+        const forExpression = this.getForAttributeValue(parsedData.attribs.technical || [])
         let virtualObject: VirtualNode = virtualComponent
 
         if (forExpression) {
@@ -131,7 +131,7 @@ export default class Renderer {
     private createVirtualElement(parsedData: ParsedData): VirtualNode {
         const { position, virtualNode: parentVirtualNode } = parsedData
         const virtualElement = new VirtualElement(parsedData, position, parentVirtualNode as VirtualNode)
-        const forExpression = this.getForAttributeValue(parsedData.attribs.technical)
+        const forExpression = this.getForAttributeValue(parsedData.attribs.technical || [])
         let virtualObject: VirtualNode = virtualElement
 
         if (forExpression) {

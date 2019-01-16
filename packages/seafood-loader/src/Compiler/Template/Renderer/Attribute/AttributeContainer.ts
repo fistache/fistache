@@ -63,20 +63,28 @@ export class AttributeContainer {
 
     public initialize(attribs?: ParsedDataAttribs) {
         if (attribs) {
-            for (const attribute of attribs.static) {
-                this.staticAttributes.add(new StaticAttribute(attribute.name, attribute.value))
+            if (attribs.static) {
+                for (const attribute of attribs.static) {
+                    this.staticAttributes.add(new StaticAttribute(attribute.name, attribute.value))
+                }
             }
 
-            for (const attribute of attribs.dynamic) {
-                this.dynamicAttributes.add(new DynamicAttribute(attribute.name, attribute.value))
+            if (attribs.dynamic) {
+                for (const attribute of attribs.dynamic) {
+                    this.dynamicAttributes.add(new DynamicAttribute(attribute.name, attribute.value))
+                }
             }
 
-            for (const attribute of attribs.technical) {
-                this.technicalAttributes.add(new TechnicalAttribute(attribute.name, attribute.value))
+            if (attribs.technical) {
+                for (const attribute of attribs.technical) {
+                    this.technicalAttributes.add(new TechnicalAttribute(attribute.name, attribute.value))
+                }
             }
 
-            for (const attribute of attribs.technicalDynamic) {
-                this.technicalDynamicAttributes.add(new TechnicalDynamicAttribute(attribute.name, attribute.value))
+            if (attribs.technicalDynamic) {
+                for (const attribute of attribs.technicalDynamic) {
+                    this.technicalDynamicAttributes.add(new TechnicalDynamicAttribute(attribute.name, attribute.value))
+                }
             }
         }
     }

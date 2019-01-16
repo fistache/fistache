@@ -93,6 +93,7 @@ export class Parser {
         const technical: ParsedDataAttrib[] = []
         const technicalDynamic: ParsedDataAttrib[] = []
         const staticAttribs: ParsedDataAttrib[] = []
+        const result: ParsedDataAttribs = {}
 
         for (const attribName in attribs) {
             if (attribs.hasOwnProperty(attribName)) {
@@ -122,12 +123,23 @@ export class Parser {
             }
         }
 
-        return {
-            dynamic,
-            technical,
-            technicalDynamic,
-            static: staticAttribs
+        if (dynamic.length) {
+            result.dynamic = dynamic
         }
+
+        if (technical.length) {
+            result.technical = technical
+        }
+
+        if (technicalDynamic.length) {
+            result.technicalDynamic = technicalDynamic
+        }
+
+        if (staticAttribs.length) {
+            result.static = staticAttribs
+        }
+
+        return result
     }
 
     private testIsThisTechnicalAttribute(attributeName: string): boolean {
