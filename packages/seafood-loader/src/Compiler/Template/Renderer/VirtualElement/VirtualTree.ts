@@ -15,8 +15,10 @@ export class VirtualTree extends VirtualNode {
         this.reactivity.bindComponent()
     }
 
-    public append(parentElement: Element): void {
-        parentElement.appendChild(this.node as Node)
+    public append(parentElement: Element, beforeChild?: Node): Node | null | undefined {
+        const node = this.node && this.node.lastChild
+        parentElement.insertBefore(this.node as Node, beforeChild || null)
+        return node
     }
 
     public makeNode(): Node {

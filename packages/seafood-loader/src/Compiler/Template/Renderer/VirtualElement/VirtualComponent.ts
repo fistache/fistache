@@ -21,7 +21,7 @@ export class VirtualComponent extends VirtualElement {
         if (this.isPresent()) {
             const parentNode = this.parentVirtualNode.getNode()
             this.compiledComponent.setVirtualNode(this)
-            this.compiledComponent.render(parentNode)
+            this.node = this.compiledComponent.render(parentNode)
         }
     }
 
@@ -29,7 +29,8 @@ export class VirtualComponent extends VirtualElement {
         this.delete()
         if (this.isPresent()) {
             const parentNode = this.parentVirtualNode.getNode()
-            this.compiledComponent.render(parentNode)
+            const nextSibling = this.parentVirtualNode.getNextSiblingNode(this.getPosition())
+            this.node = this.compiledComponent.render(parentNode, nextSibling)
         }
     }
 }

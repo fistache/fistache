@@ -63,13 +63,13 @@ export default class Renderer {
         }
     }
 
-    public render(parentNode: Element, component: Component) {
+    public render(parentNode: Element, component: Component, beforeChild?: Node): Node | null | undefined {
         this.virtualTree.getScope().setContext(component)
         this.virtualTree.beforeRender()
 
         Renderer.renderFragment(this.virtualTree.getChildVirtualNodes().slice().reverse(), component)
 
-        this.virtualTree.append(parentNode)
+        return this.virtualTree.append(parentNode, beforeChild)
     }
 
     public setParsedData(parsedContent: any): void {

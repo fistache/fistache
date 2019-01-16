@@ -26,10 +26,11 @@ export class CompiledComponent {
         this.bindSystemEvents()
     }
 
-    public render(element?: any): void {
+    public render(element?: any, beforeChild?: any): Node | null {
+        let node = null
         if (element) {
             this.rootElement = element
-            this.renderer.render(this.rootElement, this.component)
+            node = this.renderer.render(this.rootElement, this.component, beforeChild)
             this.component.fireEvent(Event.Created)
         } else {
             this.component.fireEvent(Event.Destroyed)
@@ -37,8 +38,11 @@ export class CompiledComponent {
                 this.virtualNode.rerender()
             } else {
                 this.clearContent()
+                node = this.renderer.render(this.rootElement, this.component, beforeChild)
             }
+            this.component.fireEvent(Event.Created)
         }
+        return node
     }
 
     public getRenderer(): any {
