@@ -35,7 +35,7 @@ export class CompiledComponent {
         } else {
             this.component.fireEvent(Event.Destroyed)
             if (this.virtualNode) {
-                this.virtualNode.rerender()
+                this.virtualNode.attach()
             } else {
                 this.clearContent()
                 node = this.renderer.render(this.rootElement, this.component, beforeChild)
@@ -74,7 +74,6 @@ export class CompiledComponent {
     }
 
     private clearContent() {
-        console.log(this.rootElement)
         while (this.rootElement.hasChildNodes()) {
             this.rootElement.removeChild(this.rootElement.lastChild)
         }

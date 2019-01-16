@@ -13,7 +13,7 @@ export class ReactiveProperty {
     }
 
     public notifyParent(depth: number = 0) {
-        this.notify(depth)
+        this.notify()
 
         if (this.parent) {
             this.parent.notifyParent(++depth)
@@ -26,8 +26,8 @@ export class ReactiveProperty {
     }
 
     public notifyChildren() {
-        for (const updatingFunction of this.getUniqueChildrenUpdatingFunctions()) {
-            updatingFunction()
+        for (const functions of this.getUniqueChildrenUpdatingFunctions()) {
+            functions[1]()
         }
     }
 
@@ -59,18 +59,21 @@ export class ReactiveProperty {
         return this.functions
     }
 
-    public getUniqueChildrenUpdatingFunctions(updatingFunctions?: Set<UpdatingFunction>): Set<UpdatingFunction> {
-        if (!updatingFunctions) {
-            updatingFunctions = new Set<UpdatingFunction>()
+    public getUniqueChildrenUpdatingFunctions(
+        map?: Map<ExecutingFunction,
+            UpdatingFunction>
+    ): Map<ExecutingFunction, UpdatingFunction> {
+        if (!map) {
+            map = new Map<ExecutingFunction, UpdatingFunction>()
         }
 
         for (const child of this.children) {
-            for (const updatingFunction of child.getFunctions().values()) {
-                updatingFunctions.add(updatingFunction)
+            for (const functions of child.getFunctions()) {
+                map.set(functions[0], functions[1])
             }
-            child.getUniqueChildrenUpdatingFunctions(updatingFunctions)
+            child.getUniqueChildrenUpdatingFunctions(map)
         }
 
-        return updatingFunctions
+        return map
     }
 }

@@ -4,15 +4,16 @@ import { VirtualElement } from './VirtualElement'
 import { VirtualNode } from './VirtualNode'
 
 export class VirtualComponent extends VirtualElement {
-    private compiledComponent: CompiledComponent
+    private readonly compiledComponent: CompiledComponent
 
-    constructor(component: CompiledComponent, position: number, parentVirtualNode: VirtualNode) {
-        super({} as ParsedData, position, parentVirtualNode)
+    constructor(
+        parsedData: ParsedData,
+        position: number,
+        parentVirtualNode: VirtualNode,
+        component: CompiledComponent
+    ) {
+        super(parsedData, position, parentVirtualNode)
         this.compiledComponent = component
-    }
-
-    public beforeRender() {
-        super.beforeRender()
     }
 
     public render() {
@@ -25,12 +26,21 @@ export class VirtualComponent extends VirtualElement {
         }
     }
 
-    public rerender() {
+    public attach() {
         this.delete()
         if (this.isPresent()) {
             const parentNode = this.parentVirtualNode.getNode()
             const nextSibling = this.parentVirtualNode.getNextSiblingNode(this.getPosition())
             this.node = this.compiledComponent.render(parentNode, nextSibling)
         }
+    }
+
+    public clone(): VirtualNode {
+        return super.clone(new (this.constructor as any)(
+            this.parsedData,
+            this.position.primary,
+            this.parentVirtualNode,
+            this.compiledComponent
+        ) as VirtualNode)
     }
 }

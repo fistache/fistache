@@ -28,6 +28,10 @@ export abstract class VirtualNode {
         this.position = { primary: primaryPosition }
         this.scope = new Scope()
         this.anchorNode = document.createTextNode('')
+
+        if (this.parentVirtualNode && this.parentVirtualNode.getScope) {
+            this.scope.setParentScope(this.parentVirtualNode.getScope())
+        }
     }
 
     public beforeRender() {
@@ -102,19 +106,27 @@ export abstract class VirtualNode {
         }
     }
 
-    public clone(): VirtualNode {
-        const virtualNode = new (this.constructor as any)(
-            this.parsedData,
-            this.position.primary,
-            this.parentVirtualNode
-        )
+    public clone(virtualNode?: VirtualNode): VirtualNode {
+        const parentScope = this.getScope().getParentScope()
+        if (!virtualNode) {
+            virtualNode = new (this.constructor as any)(
+                this.parsedData,
+                this.position.primary,
+                this.parentVirtualNode
+            ) as VirtualNode
+        }
 
         virtualNode.getScope().setContext(this.getScope().getContext())
+
+        if (parentScope) {
+            virtualNode.getScope().setParentScope(parentScope)
+        }
 
         for (const childVirtualNode of this.getChildVirtualNodes()) {
             const clonedVirtualNode = childVirtualNode.clone()
             virtualNode.addChildVirtualNode(clonedVirtualNode)
             clonedVirtualNode.setParentVirtualNode(virtualNode)
+            clonedVirtualNode.getScope().setParentScope(virtualNode.getScope())
         }
 
         return virtualNode

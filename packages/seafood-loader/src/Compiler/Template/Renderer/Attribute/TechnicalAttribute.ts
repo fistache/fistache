@@ -26,6 +26,10 @@ export class TechnicalAttribute extends NonStaticAttribute {
         const expressionResult = scope.executeExpression(this.value, (value: any) => {
             virtualElement.updateIfAttributeValue(value)
         })
+        // todo: разобраться почему эта функция дёргается слишком много раз
+        // примерно в 3 раза чаще чем нужно
+        // console.log(this.value, expressionResult)
+        // console.log('')
 
         virtualElement.updateIfAttributeValue(expressionResult)
     }

@@ -175,9 +175,15 @@ export class VirtualPackage extends VirtualElement {
 
     private updateForOfExpression(value: any) {
         (this.forExpressionResult as ForExpressionResult).value = value
-        this.updateForExpression(value, () => {
+
+        if (typeof value === 'string') {
+            this.cleanCollectionWholly()
             this.renderForOfExpression(true)
-        })
+        } else {
+            this.updateForExpression(value, () => {
+                this.renderForOfExpression(true)
+            })
+        }
     }
 
     private updateForInExpression(value: any) {
