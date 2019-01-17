@@ -22,13 +22,11 @@ export default class Hmr {
             return
         }
 
-        const constructor = null
         this.bindConstructor(id, compiledComponent.hmrOptions)
         compiledComponent.beforeRender()
 
         this.data[id] = {
             components: [],
-            constructor,
             options: compiledComponent.hmrOptions
         }
     }
@@ -36,14 +34,14 @@ export default class Hmr {
     public rerender(id: string, options: any): void {
         this.handleRerender(() => {
             const data = this.data[id]
-            if (data && data.constructor) {
+            if (data) {
                 data.components.forEach((component: CompiledComponent) => {
                     component.setTemplateRenderer(
                         // compiledComponent is SeafoodLoader.EXPORT_COMPILED_COMPONENT_INSTANCE
-                        options.compiledComponent.renderer
+                        options.compiledComponent.renderer.clone()
                     )
                     // compiledComponent is SeafoodLoader.EXPORT_COMPILED_COMPONENT_INSTANCE
-                    component.setComponent(options.compiledComponent.component)
+                    component.setComponent(options.compiledComponent.component.clone())
                     component.render()
                 })
             }
@@ -54,13 +52,7 @@ export default class Hmr {
         const data = this.data
         // do not use arrow function cause we need to bind a context
         this.addComponentEventHandler(options, Event.Created, function(this: any) {
-            const hmrData = data[id]
-
-            if (!hmrData.constructor) {
-                hmrData.constructor = this.constructor
-            }
-
-            hmrData.components.push(this)
+            data[id].components.push(this)
         })
         this.addComponentEventHandler(options, Event.Destroyed, function(this: any) {
             // todo: implement

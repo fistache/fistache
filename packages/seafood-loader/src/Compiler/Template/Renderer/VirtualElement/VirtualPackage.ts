@@ -24,6 +24,10 @@ export class VirtualPackage extends VirtualElement {
         super(parsedData, parsedData.position, parentVirtualNode)
         this.maquetteVirtualElement = maquetteVirtualElement
         this.forExpressionOrigin = forExpression
+
+        if (this.maquetteVirtualElement instanceof VirtualComponent) {
+            this.maquetteVirtualElement.getCompiledComponent().isItMaquetteComponent = true
+        }
     }
 
     public render() {

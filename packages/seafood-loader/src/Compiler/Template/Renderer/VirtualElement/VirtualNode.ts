@@ -88,10 +88,14 @@ export abstract class VirtualNode {
         }
     }
 
-    public delete() {
+    public detach() {
         if (this.node && this.node.parentNode) {
             this.node.parentNode.removeChild(this.node)
         }
+    }
+
+    public delete() {
+        this.detach()
 
         if (this.parentVirtualNode) {
             this.parentVirtualNode.removeVirtualNode(this)

@@ -9,6 +9,7 @@ export class CompiledComponent {
     public component: Component
     public renderer: any
     public isItCompiledComponent = true
+    public isItMaquetteComponent = false
 
     private virtualNode?: VirtualComponent
     private name?: string
@@ -30,6 +31,10 @@ export class CompiledComponent {
     }
 
     public render(element?: any, beforeChild?: any): Node | null {
+        if (this.isItMaquetteComponent) {
+            return null
+        }
+
         let node = null
 
         if (element) {
@@ -38,8 +43,9 @@ export class CompiledComponent {
             this.component.fireEvent(Event.Created)
         } else {
             this.component.fireEvent(Event.Destroyed)
+            console.log(this.virtualNode)
             if (this.virtualNode) {
-                this.virtualNode.delete()
+                this.virtualNode.detach()
                 this.virtualNode.rerender()
             } else {
                 this.clearContent()
@@ -51,11 +57,18 @@ export class CompiledComponent {
     }
 
     public clone(): CompiledComponent {
-        return new CompiledComponent(
-            this.component,
+        const compiledComponent = new CompiledComponent(
+            this.component.clone(),
             this.renderer.clone(),
             false
         )
+
+        compiledComponent.hmrOptions = this.hmrOptions
+        compiledComponent.rootElement = this.rootElement
+        compiledComponent.virtualNode = this.virtualNode
+        compiledComponent.bindSystemEvents()
+
+        return compiledComponent
     }
 
     public getRenderer(): any {
@@ -97,11 +110,11 @@ export class CompiledComponent {
     }
 
     private bindSystemEvents() {
-        const handleCreatedEvents = this.hmrOptions.events[Event.Created]
-        if (Array.isArray(handleCreatedEvents)) {
-            handleCreatedEvents.forEach((event: () => void) => {
-                this.component.bindEvent(Event.Created, event.bind(this))
-            })
+        const events = this.hmrOptions.events[Event.Created]
+        this.component.unbindEvent(Event.Created)
+
+        if (events && events.length) {
+            this.component.bindEvent(Event.Created, events[0].bind(this))
         }
     }
 }

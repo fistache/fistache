@@ -34,7 +34,7 @@ export class Component implements ComponentInterface, ComponentEventInterface {
         return this.attributes
     }
 
-    public bindEvent(eventName: Event, callback: () => void): void {
+    public bindEvent(eventName: Event, callback: () => void) {
         if (!this.eventHandlers.hasOwnProperty(eventName)) {
             this.eventHandlers[eventName] = []
         }
@@ -42,7 +42,11 @@ export class Component implements ComponentInterface, ComponentEventInterface {
         (this.eventHandlers as any)[eventName].push(callback)
     }
 
-    public fireEvent(eventName: Event): void {
+    public unbindEvent(eventName: Event) {
+        this.eventHandlers[eventName] = []
+    }
+
+    public fireEvent(eventName: Event) {
         if (this.eventHandlers.hasOwnProperty(eventName)) {
             (this.eventHandlers as any)[eventName].forEach((event: () => void) => {
                 event()
@@ -52,5 +56,9 @@ export class Component implements ComponentInterface, ComponentEventInterface {
 
     public getUsedComponents(): Map<string, CompiledComponent> | undefined {
         return this.usedComponents
+    }
+
+    public clone() {
+        return new (this.constructor as any)()
     }
 }
