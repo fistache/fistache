@@ -12,7 +12,7 @@ export class TechnicalAttribute extends NonStaticAttribute {
                 this.appendIfAttribute()
                 break
             case ('for'):
-                // @for is special attirube only for packages
+                // @for is a special attribute only for a package
                 break
             default:
                 console.warn(`Attribute ${this.name} is unknown.`)
@@ -28,8 +28,6 @@ export class TechnicalAttribute extends NonStaticAttribute {
         })
         // todo: разобраться почему эта функция дёргается слишком много раз
         // примерно в 3 раза чаще чем нужно
-        // console.log(this.value, expressionResult)
-        // console.log('')
 
         virtualElement.updateIfAttributeValue(expressionResult)
     }

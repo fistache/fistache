@@ -144,7 +144,9 @@ export class VirtualPackage extends VirtualElement {
                 if (expressionResult.value.hasOwnProperty(index) && !this.childVirtualNodes.hasOwnProperty(index)) {
                     const virtualNode = this.renderMaquette(+index, {
                         variable: expressionResult.variable,
-                        value: index
+                        value: () => {
+                            return index
+                        }
                     })
                     if (isItUpdate) {
                         this.renderFragmentOnTree(virtualNode)
@@ -163,7 +165,9 @@ export class VirtualPackage extends VirtualElement {
                 if (this.forExpressionResult.variable) {
                     virtualNode = this.renderMaquette(+i, {
                         variable: this.forExpressionResult.variable,
-                        value: i
+                        value: () => {
+                            return i
+                        }
                     })
                 } else {
                     virtualNode = this.renderMaquette(+i)

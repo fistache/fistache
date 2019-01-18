@@ -17,8 +17,8 @@ export class VirtualComponent extends VirtualElement {
     }
 
     public beforeRender() {
-        super.beforeRender()
         this.compiledComponent.setVirtualNode(this)
+        super.beforeRender()
     }
 
     public render() {
