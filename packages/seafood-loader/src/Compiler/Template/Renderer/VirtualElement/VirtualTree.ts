@@ -18,6 +18,7 @@ export class VirtualTree extends VirtualNode {
     public append(parentElement: Element, beforeChild?: Node): Node | null | undefined {
         const node = this.node && this.node.lastChild
         parentElement.insertBefore(this.node as Node, beforeChild || null)
+
         return node
     }
 

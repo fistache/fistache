@@ -31,7 +31,6 @@ export class VirtualComponent extends VirtualElement {
     }
 
     public rerender() {
-        console.log(this.node)
         if (this.isPresent()) {
             const parentNode = this.parentVirtualNode.getNode()
             const nextSibling = this.parentVirtualNode.getNextSiblingNode(this.getPosition())

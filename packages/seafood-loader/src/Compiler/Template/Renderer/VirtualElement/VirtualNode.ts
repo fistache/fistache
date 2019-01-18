@@ -97,9 +97,17 @@ export abstract class VirtualNode {
     public delete() {
         this.detach()
 
-        if (this.parentVirtualNode) {
+        if (this.parentVirtualNode && this.parentVirtualNode.removeVirtualNode) {
             this.parentVirtualNode.removeVirtualNode(this)
         }
+    }
+
+    public deleteWithChildren() {
+        for (const child of this.childVirtualNodes) {
+            child.deleteWithChildren()
+        }
+
+        this.delete()
     }
 
     public removeVirtualNode(virtualNode: VirtualNode) {

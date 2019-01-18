@@ -173,7 +173,7 @@ export class VirtualPackage extends VirtualElement {
                 }
             }
         } else {
-            this.cleanCollectionWholly()
+            this.deleteCollection()
         }
     }
 
@@ -181,7 +181,7 @@ export class VirtualPackage extends VirtualElement {
         (this.forExpressionResult as ForExpressionResult).value = value
 
         if (typeof value === 'string') {
-            this.cleanCollectionWholly()
+            this.deleteCollection()
             this.renderForOfExpression(true)
         } else {
             this.updateForExpression(value, () => {
@@ -279,7 +279,7 @@ export class VirtualPackage extends VirtualElement {
         this.childVirtualNodes = collection
     }
 
-    private cleanCollectionWholly() {
+    private deleteCollection() {
         for (const index in this.childVirtualNodes) {
             if (this.childVirtualNodes.hasOwnProperty(index)) {
                 this.childVirtualNodes[index].delete()
@@ -299,6 +299,7 @@ export class VirtualPackage extends VirtualElement {
             clonedVirtualNode.getScope().setVariable(expressionResult.variable, expressionResult.value)
         }
 
+        clonedVirtualNode.setParentVirtualNode(this.parentVirtualNode)
         clonedVirtualNode.setSecondaryPosition(secondaryPosition)
         this.addChildVirtualNode(clonedVirtualNode, secondaryPosition)
 

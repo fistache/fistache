@@ -39,17 +39,16 @@ export class CompiledComponent {
 
         if (element) {
             this.rootElement = element
-            node = this.renderer.render(this.rootElement, this.component, beforeChild)
+            node = this.renderer.render(this.rootElement, this.component, beforeChild, this)
             this.component.fireEvent(Event.Created)
         } else {
             this.component.fireEvent(Event.Destroyed)
-            console.log(this.virtualNode)
             if (this.virtualNode) {
                 this.virtualNode.detach()
                 this.virtualNode.rerender()
             } else {
                 this.clearContent()
-                node = this.renderer.render(this.rootElement, this.component, beforeChild)
+                this.renderer.render(this.rootElement, this.component)
             }
             this.component.fireEvent(Event.Created)
         }
