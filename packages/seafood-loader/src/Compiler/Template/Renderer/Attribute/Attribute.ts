@@ -1,3 +1,4 @@
+import { ParsedDataAttrib } from '../../../ParsedData'
 import { VirtualElement } from '../VirtualElement/VirtualElement'
 
 export abstract class Attribute {
@@ -7,9 +8,9 @@ export abstract class Attribute {
 
     protected value: string
 
-    constructor(name: string, value: string) {
-        this.name = name
-        this.value = value.trim()
+    constructor(attrib: ParsedDataAttrib) {
+        this.name = attrib.name
+        this.value = attrib.value.trim()
     }
 
     public abstract getName(): string

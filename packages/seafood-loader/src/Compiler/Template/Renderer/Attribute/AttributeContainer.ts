@@ -65,25 +65,25 @@ export class AttributeContainer {
         if (attribs) {
             if (attribs.static) {
                 for (const attribute of attribs.static) {
-                    this.staticAttributes.add(new StaticAttribute(attribute.name, attribute.value))
+                    this.staticAttributes.add(new StaticAttribute(attribute))
                 }
             }
 
             if (attribs.dynamic) {
                 for (const attribute of attribs.dynamic) {
-                    this.dynamicAttributes.add(new DynamicAttribute(attribute.name, attribute.value))
+                    this.dynamicAttributes.add(new DynamicAttribute(attribute))
                 }
             }
 
             if (attribs.technical) {
                 for (const attribute of attribs.technical) {
-                    this.technicalAttributes.add(new TechnicalAttribute(attribute.name, attribute.value))
+                    this.technicalAttributes.add(new TechnicalAttribute(attribute))
                 }
             }
 
             if (attribs.technicalDynamic) {
                 for (const attribute of attribs.technicalDynamic) {
-                    this.technicalDynamicAttributes.add(new TechnicalDynamicAttribute(attribute.name, attribute.value))
+                    this.technicalDynamicAttributes.add(new TechnicalDynamicAttribute(attribute))
                 }
             }
         }

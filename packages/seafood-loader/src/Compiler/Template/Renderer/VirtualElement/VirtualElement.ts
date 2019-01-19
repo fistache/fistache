@@ -35,6 +35,7 @@ export class VirtualElement extends VirtualNode {
 
         if (this.isPresent()) {
             super.render()
+            this.afterRender()
         }
     }
 
