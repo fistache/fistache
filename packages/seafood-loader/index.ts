@@ -1,3 +1,4 @@
+import { getOptions } from 'loader-utils'
 import QueryString from 'query-string'
 import { CompactRequestQuery } from './src/CompactRequestQuery'
 import { SeafoodLoader } from './src/SeafoodLoader'
@@ -12,9 +13,10 @@ export default function(this: any, source: any): void {
     }
 
     const {rootContext, resourceQuery} = this
+    const options = getOptions(this)
     const context = rootContext || process.cwd()
     const query = new CompactRequestQuery(QueryString.parse(resourceQuery.slice(1)))
-    const loader = new SeafoodLoader(this, context, query, source)
+    const loader = new SeafoodLoader(this, context, query, source, options)
 
     loader.resolveRequest()
 }

@@ -22,12 +22,16 @@ export abstract class Compiler {
 
             try {
                 const content = this.parseContent(parsedContent as any[])
-                this.loader.callback(null, content)
+                this.loader.callback(null, this.afterParsing(content))
             } catch (e) {
                 this.loader.callback(e)
             }
         })
         parser.parseContent()
+    }
+
+    protected afterParsing(content: string): string {
+        return content
     }
 
     protected parseContent(content: any[]): string {

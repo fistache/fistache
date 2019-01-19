@@ -1,5 +1,6 @@
 export enum CompilationFlag {
     Script,
     Template,
-    Style
+    Style,
+    StyleAddScope
 }

@@ -30,10 +30,10 @@ export class CompactRequestQuery {
                     value = `=${value}`
                 }
 
-                result += `${key}${value}`
+                result += `&${key}${value}`
             }
         }
 
-        return result
+        return result.slice(1)
     }
 }

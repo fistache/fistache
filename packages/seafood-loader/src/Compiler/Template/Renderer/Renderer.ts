@@ -36,6 +36,8 @@ export default class Renderer {
 
     private usedComponents?: Map<string, CompiledComponent>
 
+    private scopeId?: string
+
     constructor() {
         this.virtualTree = new VirtualTree()
     }
@@ -49,6 +51,18 @@ export default class Renderer {
 
         while (stack.length) {
             const parsedItem = stack.pop() as ParsedData
+
+            if (this.scopeId && parsedItem.name) {
+                if (!parsedItem.attribs.static) {
+                    parsedItem.attribs.static = []
+                }
+
+                parsedItem.attribs.static.push({
+                    name: this.scopeId,
+                    value: ''
+                })
+            }
+
             const virtualNode = this.createVirtualNode(parsedItem)
 
             if (virtualNode && parsedItem.children) {
@@ -82,6 +96,10 @@ export default class Renderer {
 
     public setParsedData(parsedContent: any): void {
         this.parsedData = JSON.parse(parsedContent)
+    }
+
+    public setScopeId(scopeId: string): void {
+        this.scopeId = scopeId
     }
 
     private createVirtualNode(parsedData: ParsedData): VirtualNode | null {

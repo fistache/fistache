@@ -32,10 +32,15 @@
     "node": ">= 8.0.0"
   },
   "dependencies": {
+    "@types/crypto-random-string": "^1.0.0",
+    "crypto-random-string": "^1.0.0",
     "hash-sum": "^1.0.2",
     "htmlparser2": "^3.10.0",
     "hyphenate": "^0.2.4",
     "path": "^0.12.7",
+    "postcss": "^7.0.13",
+    "postcss-prefix-selector": "^1.6.0",
+    "postcss-selector-parser": "^5.0.0",
     "reflect-metadata": "^0.1.12"
   },
   "peerDependencies": {
