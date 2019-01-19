@@ -180,6 +180,9 @@ export class SeafoodLoader {
                     import ${SeafoodLoader.EXPORT_STYLE_STRING} from ${styleRequest}
                     import {CompiledComponent} from '@seafood/app'
 
+                    // append css styles
+                    ${SeafoodLoader.EXPORT_STYLE_STRING}.className
+
                     const ${SeafoodLoader.EXPORT_TEMPLATE_INSTANCE} =
                     new ${SeafoodLoader.EXPORT_TEMPLATE_BUILDER_CLASS}()
                     ${SeafoodLoader.EXPORT_TEMPLATE_INSTANCE}.setParsedData(${templateContent})
