@@ -1,5 +1,6 @@
 import { ParsedData } from '../../../ParsedData'
 import { AttributeContainer } from '../Attribute/AttributeContainer'
+import { InputCheckboxStrategy } from '../DataBinding/InputCheckboxStrategy'
 import { InputTextStrategy } from '../DataBinding/InputTextStrategy'
 import { VirtualNode } from './VirtualNode'
 
@@ -64,12 +65,17 @@ export class VirtualElement extends VirtualNode {
                 const tagName = node.tagName.toLowerCase()
                 let strategy: any
 
-                if (tagName === 'input') {
+                if (tagName === 'textarea') {
+                    strategy = InputTextStrategy
+                } else if (tagName === 'input') {
                     const inputType = (node as HTMLInputElement).type.toLowerCase()
 
                     switch (inputType) {
                         case('text'):
                             strategy = InputTextStrategy
+                            break
+                        case('checkbox'):
+                            strategy = InputCheckboxStrategy
                             break
                     }
                 }

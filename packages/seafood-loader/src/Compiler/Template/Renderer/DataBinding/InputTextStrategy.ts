@@ -8,15 +8,8 @@ export class InputTextStrategy extends Strategy {
         node.value = scope.executeExpression(this.bindExpression, (updatedValue: any) => {
             node.value = updatedValue
         })
-
-        node.addEventListener('input', (event: Event) => {
-            const context = scope.getContext()
-
-            if (context.hasOwnProperty(this.variableName)) {
-                context[this.variableName] = (event as any).target.value
-            } else {
-                console.error(`Unknown variable '${this.variableName}' have to be data binded.`)
-            }
+        this.addEventListener('input', (event: Event) => {
+            return (event.target as HTMLInputElement).value
         })
     }
 }
