@@ -99,7 +99,9 @@ export class Parser {
             if (attribs.hasOwnProperty(attribName)) {
                 const attribValue = attribs[attribName]
 
-                if (this.testIsThisDynamicAttribute(attribName)) {
+                if (attribName === ':') {
+                    result.bind = attribValue
+                } else if (this.testIsThisDynamicAttribute(attribName)) {
                     dynamic.push({
                         name: attribName,
                         value: attribValue

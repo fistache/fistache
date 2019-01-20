@@ -1,5 +1,6 @@
 import { ParsedData } from '../../../ParsedData'
 import { AttributeContainer } from '../Attribute/AttributeContainer'
+import { InputTextStrategy } from '../DataBinding/InputTextStrategy'
 import { VirtualNode } from './VirtualNode'
 
 export enum VirtualElementPresentState {
@@ -18,11 +19,17 @@ export class VirtualElement extends VirtualNode {
 
     protected attibuteContainer: AttributeContainer
 
+    protected bindExpression?: string
+
     private hasBeenIfAttributeValueChanged: boolean = false
 
     constructor(parsedData: ParsedData, primaryPosition: number, parentVirtualNode: VirtualNode) {
         super(parsedData, primaryPosition, parentVirtualNode)
         this.attibuteContainer = new AttributeContainer(this)
+
+        if (parsedData.attribs.bind) {
+            this.bindExpression = parsedData.attribs.bind.trim()
+        }
     }
 
     public beforeRender() {
@@ -36,6 +43,7 @@ export class VirtualElement extends VirtualNode {
         if (this.isPresent()) {
             super.render()
             this.afterRender()
+            this.bindData()
         }
     }
 
@@ -43,6 +51,37 @@ export class VirtualElement extends VirtualNode {
         super.afterRender()
         this.attibuteContainer.renderStaticAttributes()
         this.attibuteContainer.renderDynamicAttributes()
+    }
+
+    public bindData() {
+        if (this.bindExpression) {
+            const isItContextVariable = this.bindExpression.startsWith('this.')
+            // 5 is 'this.'.length
+            const variableName = isItContextVariable ? this.bindExpression.slice(5) : this.bindExpression
+            const node = this.getNode() as Element
+
+            if (isItContextVariable) {
+                const tagName = node.tagName.toLowerCase()
+                let strategy: any
+
+                if (tagName === 'input') {
+                    const inputType = (node as HTMLInputElement).type.toLowerCase()
+
+                    switch (inputType) {
+                        case('text'):
+                            strategy = InputTextStrategy
+                            break
+                    }
+                }
+
+                if (strategy) {
+                    strategy = new strategy(this.bindExpression, variableName, this)
+                    strategy.handle()
+                }
+            } else {
+                console.warn(`Data binding is not working with not component variables yet.`)
+            }
+        }
     }
 
     public getAttibuteContainer(): AttributeContainer {

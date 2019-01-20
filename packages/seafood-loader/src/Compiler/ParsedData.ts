@@ -10,6 +10,7 @@ export interface ParsedDataAttribs {
     technical?: ParsedDataAttrib[]
     technicalDynamic?: ParsedDataAttrib[]
     static?: ParsedDataAttrib[]
+    bind?: string
 }
 
 export interface ParsedData {
