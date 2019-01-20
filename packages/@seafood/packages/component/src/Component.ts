@@ -40,7 +40,6 @@ export class Component implements ComponentInterface, ComponentEventInterface {
     }
 
     public checkRequeredAttributesExistance(this: any): void {
-        console.log('here', this.attributes)
         // todo: disable for production
         for (const attribute of this.attributes) {
             if (attribute && attribute[1].required && this[attribute[0]] === null || this[attribute[0]] === undefined) {

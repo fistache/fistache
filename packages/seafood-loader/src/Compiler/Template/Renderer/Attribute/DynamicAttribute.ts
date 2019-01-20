@@ -22,7 +22,6 @@ export class DynamicAttribute extends NonStaticAttribute {
             const component = virtualElement.getComponent()
             const attributeName = camelCase(name)
 
-            console.log(attributeName, value)
             component.setAttribute(attributeName, value)
         } else {
             this.setAttribute(name, value)

@@ -18,10 +18,10 @@ export class VirtualComponent extends VirtualElement {
     }
 
     public beforeRender() {
+        super.beforeRender()
         this.compiledComponent.setVirtualNode(this)
         this.attibuteContainer.renderDynamicAttributes()
-        // this.compiledComponent.getComponent().checkRequeredAttributesExistance()
-        super.beforeRender()
+        this.compiledComponent.getComponent().checkRequeredAttributesExistance()
     }
 
     public render() {
@@ -32,6 +32,11 @@ export class VirtualComponent extends VirtualElement {
             this.node = this.compiledComponent.render(parentNode)
             this.afterRender()
         }
+    }
+
+    public afterRender() {
+        // must be empty because component render
+        // attributes before render, not after
     }
 
     public rerender() {
