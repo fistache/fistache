@@ -16,11 +16,9 @@ export class Reactivity {
 
     public bindComponent(): any {
         for (const propertyKey in this.component) {
-            if (this.component.hasOwnProperty(propertyKey)
-                && !Reflect.hasMetadata(DECORATOR_UNREACTIVE_FLAG, this.component, propertyKey)
-            ) {
+            if (!Reflect.hasMetadata(DECORATOR_UNREACTIVE_FLAG, this.component, propertyKey)) {
                 const reactiveProperty = this.bindObjectProperty(this.component, propertyKey)
-                // todo: replace it whit this.makeProxy
+                // not proxy to work "this" in setTimeout and etc inside constructor
                 this.bindComponentProperty(this.component, propertyKey, reactiveProperty)
             }
         }
@@ -102,7 +100,7 @@ export class Reactivity {
         const propertyValue = obj[propertyKey]
         const reactiveProperty = this.bindObject(obj, propertyKey, parentReactiveProperty)
 
-        if (typeof propertyValue === 'object') {
+        if (propertyValue !== null && typeof propertyValue === 'object') {
             this.bindObjectProperties(obj[propertyKey], reactiveProperty)
 
             if (!isComlete) {

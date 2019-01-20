@@ -21,6 +21,8 @@ export class CompiledComponent {
         this.component = component
         this.renderer = renderer
 
+        this.component.setAttributes()
+
         if (shouldPrepare) {
             this.renderer.prepare(this.component.getUsedComponents())
         }

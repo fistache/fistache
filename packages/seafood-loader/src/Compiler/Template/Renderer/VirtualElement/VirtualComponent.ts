@@ -1,4 +1,5 @@
 import { CompiledComponent } from '@seafood/app'
+import { Component } from '@seafood/component'
 import { ParsedData } from '../../../ParsedData'
 import { VirtualElement } from './VirtualElement'
 import { VirtualNode } from './VirtualNode'
@@ -18,6 +19,8 @@ export class VirtualComponent extends VirtualElement {
 
     public beforeRender() {
         this.compiledComponent.setVirtualNode(this)
+        this.attibuteContainer.renderDynamicAttributes()
+        // this.compiledComponent.getComponent().checkRequeredAttributesExistance()
         super.beforeRender()
     }
 
@@ -27,6 +30,7 @@ export class VirtualComponent extends VirtualElement {
         if (this.isPresent()) {
             const parentNode = this.parentVirtualNode.getNode()
             this.node = this.compiledComponent.render(parentNode)
+            this.afterRender()
         }
     }
 
@@ -49,5 +53,9 @@ export class VirtualComponent extends VirtualElement {
 
     public getCompiledComponent(): CompiledComponent {
         return this.compiledComponent
+    }
+
+    public getComponent(): Component {
+        return this.getCompiledComponent().component
     }
 }

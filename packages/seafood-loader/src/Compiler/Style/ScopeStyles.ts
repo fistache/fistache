@@ -23,6 +23,7 @@ export default postcss.plugin('add-id', (options: any) => (root: Root) => {
         }
         node.selector = selectorParser((selectors: any) => {
             selectors.each((selector: any) => {
+                // tslint:disable-next-line
                 let node: any = null
 
                 // @ts-ignore
@@ -35,7 +36,7 @@ export default postcss.plugin('add-id', (options: any) => (root: Root) => {
                     }
                     // /deep/ alias for >>>, since >>> doesn't work in SASS
                     if (n.type === 'tag' && n.value === '/deep/') {
-                        const prev = n.prev()
+                        const prev = (n.prev as () => any)()
                         if (prev && prev.type === 'combinator' && prev.value === ' ') {
                             prev.remove()
                         }
@@ -59,8 +60,8 @@ export default postcss.plugin('add-id', (options: any) => (root: Root) => {
                 selector.insertAfter(
                     node,
                     selectorParser.attribute({
-                        attribute: id
-                    } as AttributeOptions)
+                                                 attribute: id
+                                             } as AttributeOptions)
                 )
             })
         }).processSync(node.selector)
@@ -71,21 +72,21 @@ export default postcss.plugin('add-id', (options: any) => (root: Root) => {
     // Caveat: this only works for keyframes and animation rules in the same
     // <style> element.
     if (Object.keys(keyframes).length) {
-        root.walkDecls(decl => {
+        root.walkDecls((decl) => {
             // individual animation-name declaration
             if (/^(-\w+-)?animation-name$/.test(decl.prop)) {
                 decl.value = decl.value
                     .split(',')
-                    .map(v => keyframes[v.trim()] || v.trim())
+                    .map((v) => keyframes[v.trim()] || v.trim())
                     .join(',')
             }
             // shorthand
             if (/^(-\w+-)?animation$/.test(decl.prop)) {
                 decl.value = decl.value
                     .split(',')
-                    .map(v => {
+                    .map((v) => {
                         const vals = v.trim().split(/\s+/)
-                        const i = vals.findIndex(val => keyframes[val])
+                        const i = vals.findIndex((val) => keyframes[val])
                         if (i !== -1) {
                             vals.splice(i, 1, keyframes[vals[i]])
                             return vals.join(' ')
