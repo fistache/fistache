@@ -16,7 +16,8 @@ export class Reactivity {
 
     public bindComponent(): any {
         for (const propertyKey in this.component) {
-            if (!Reflect.hasMetadata(DECORATOR_UNREACTIVE_FLAG, this.component, propertyKey)) {
+            if (typeof this.component[propertyKey] !== 'function'
+                && !Reflect.hasMetadata(DECORATOR_UNREACTIVE_FLAG, this.component, propertyKey)) {
                 const reactiveProperty = this.bindObjectProperty(this.component, propertyKey)
                 // not proxy to work "this" in setTimeout and etc inside constructor
                 this.bindComponentProperty(this.component, propertyKey, reactiveProperty)
