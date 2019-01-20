@@ -47,6 +47,7 @@ export class CompiledComponent {
             this.component.fireEvent(Event.Destroyed)
             if (this.virtualNode) {
                 this.virtualNode.detach()
+                this.virtualNode.beforeRender()
                 this.virtualNode.rerender()
             } else {
                 this.clearContent()
@@ -67,7 +68,7 @@ export class CompiledComponent {
         compiledComponent.hmrOptions = this.hmrOptions
         compiledComponent.rootElement = this.rootElement
         compiledComponent.virtualNode = this.virtualNode
-        compiledComponent.bindSystemEvents()
+        compiledComponent.beforeRender()
 
         return compiledComponent
     }
@@ -90,6 +91,8 @@ export class CompiledComponent {
 
     public setComponent(component: Component): void {
         this.component = component
+        this.component.setAttributes()
+        // todo: too much clones created after hmr
     }
 
     public setTemplateRenderer(templateRenderer: any): void {
