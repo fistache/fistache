@@ -44,7 +44,6 @@ export class VirtualElement extends VirtualNode {
         if (this.isPresent()) {
             super.render()
             this.afterRender()
-            this.bindData()
         }
     }
 
@@ -52,36 +51,39 @@ export class VirtualElement extends VirtualNode {
         super.afterRender()
         this.attibuteContainer.renderStaticAttributes()
         this.attibuteContainer.renderDynamicAttributes()
+        this.attibuteContainer.renderEventAttributes()
+        this.bindData()
     }
 
     public bindData() {
         if (this.bindExpression) {
             const isItContextVariable = this.bindExpression.startsWith('this.')
-            // 5 is 'this.'.length
-            const variableName = isItContextVariable ? this.bindExpression.slice(5) : this.bindExpression
+            const variableName = isItContextVariable
+                ? this.bindExpression.slice(5 /* 5 is length of 'this.' string */)
+                : this.bindExpression
             const node = this.getNode() as Element
 
             if (isItContextVariable) {
                 const tagName = node.tagName.toLowerCase()
-                let strategy: any
+                let strategyClass: any
 
                 if (tagName === 'textarea') {
-                    strategy = InputTextStrategy
+                    strategyClass = InputTextStrategy
                 } else if (tagName === 'input') {
                     const inputType = (node as HTMLInputElement).type.toLowerCase()
 
                     switch (inputType) {
                         case('text'):
-                            strategy = InputTextStrategy
+                            strategyClass = InputTextStrategy
                             break
                         case('checkbox'):
-                            strategy = InputCheckboxStrategy
+                            strategyClass = InputCheckboxStrategy
                             break
                     }
                 }
 
-                if (strategy) {
-                    strategy = new strategy(this.bindExpression, variableName, this)
+                if (strategyClass) {
+                    const strategy = new strategyClass(this.bindExpression, variableName, this)
                     strategy.handle()
                 }
             } else {

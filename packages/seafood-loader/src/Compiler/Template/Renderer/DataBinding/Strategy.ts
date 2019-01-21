@@ -17,7 +17,7 @@ export abstract class Strategy {
         this.virtualElement.getNode().addEventListener(eventName, (event: Event) => {
             const context = this.virtualElement.getScope().getContext()
 
-            if (context.hasOwnProperty(this.variableName)) {
+            if (this.variableName in context) {
                 context[this.variableName] = value(event)
             } else {
                 console.error(`Unknown variable '${this.variableName}' have to be data binded.`)

@@ -2,6 +2,7 @@ import { ParsedDataAttribs } from '../../../ParsedData'
 import { VirtualElement } from '../VirtualElement/VirtualElement'
 import { Attribute } from './Attribute'
 import { DynamicAttribute } from './DynamicAttribute'
+import { EventAttribute } from './EventAttribute'
 import { StaticAttribute } from './StaticAttribute'
 import { TechnicalAttribute } from './TechnicalAttribute'
 import { TechnicalDynamicAttribute } from './TechnicalDynamicAttribute'
@@ -13,6 +14,7 @@ export class AttributeContainer {
     private dynamicAttributes: Set<DynamicAttribute>
     private technicalAttributes: Set<TechnicalAttribute>
     private technicalDynamicAttributes: Set<TechnicalDynamicAttribute>
+    private eventAttributes: Set<EventAttribute>
 
     constructor(virtualElement: VirtualElement) {
         this.virtualElement = virtualElement
@@ -20,6 +22,7 @@ export class AttributeContainer {
         this.dynamicAttributes = new Set()
         this.technicalAttributes = new Set()
         this.technicalDynamicAttributes = new Set()
+        this.eventAttributes = new Set()
     }
 
     public getStaticAttributes(): Set<StaticAttribute> {
@@ -38,6 +41,10 @@ export class AttributeContainer {
         return this.technicalDynamicAttributes
     }
 
+    public getEventAttributes(): Set<EventAttribute> {
+        return this.eventAttributes
+    }
+
     public setStaticAttributes(attibutes: Set<StaticAttribute>) {
         this.staticAttributes = attibutes
     }
@@ -54,11 +61,16 @@ export class AttributeContainer {
         this.technicalDynamicAttributes = attibutes
     }
 
+    public setEventAttributes(attibutes: Set<EventAttribute>) {
+        this.eventAttributes = attibutes
+    }
+
     public extend(attributeContainer: AttributeContainer) {
         this.setStaticAttributes(attributeContainer.getStaticAttributes())
         this.setDynamicAttributes(attributeContainer.getDynamicAttributes())
         this.setTeachnicalAttributes(attributeContainer.getTeachnicalAttributes())
         this.setTechnicalDynamicAttributes(attributeContainer.getTechnicalDynamicAttributes())
+        this.setEventAttributes(attributeContainer.getEventAttributes())
     }
 
     public initialize(attribs?: ParsedDataAttribs) {
@@ -86,6 +98,12 @@ export class AttributeContainer {
                     this.technicalDynamicAttributes.add(new TechnicalDynamicAttribute(attribute))
                 }
             }
+
+            if (attribs.event) {
+                for (const attribute of attribs.event) {
+                    this.eventAttributes.add(new EventAttribute(attribute))
+                }
+            }
         }
     }
 
@@ -95,6 +113,10 @@ export class AttributeContainer {
 
     public renderDynamicAttributes() {
         this.renderAttributes(this.getDynamicAttributes())
+    }
+
+    public renderEventAttributes() {
+        this.renderAttributes(this.getEventAttributes())
     }
 
     public renderTechnicalAttributes() {

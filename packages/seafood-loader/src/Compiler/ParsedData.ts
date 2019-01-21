@@ -6,6 +6,7 @@ export interface ParsedDataAttrib {
 }
 
 export interface ParsedDataAttribs {
+    event?: ParsedDataAttrib[]
     dynamic?: ParsedDataAttrib[]
     technical?: ParsedDataAttrib[]
     technicalDynamic?: ParsedDataAttrib[]
