@@ -9,7 +9,15 @@ export enum VirtualElementPresentState {
     Missing
 }
 
+export enum VirtualElementElseResult {
+    None,
+    True,
+    False
+}
+
 export class VirtualElement extends VirtualNode {
+    public initialElseResult?: VirtualElementElseResult
+
     /**
      * Used for @if conditinal rendering.
      *
@@ -18,9 +26,14 @@ export class VirtualElement extends VirtualNode {
      */
     protected presentState: VirtualElementPresentState = VirtualElementPresentState.Present
 
+    protected elseResult: VirtualElementElseResult = VirtualElementElseResult.None
+    protected initiated = false
+
     protected attibuteContainer: AttributeContainer
 
     protected bindExpression?: string
+
+    protected nextVirtualNode?: VirtualNode | null
 
     private hasBeenIfAttributeValueChanged: boolean = false
 
@@ -36,14 +49,17 @@ export class VirtualElement extends VirtualNode {
     public beforeRender() {
         super.beforeRender()
         this.attibuteContainer.initialize(this.parsedData.attribs)
+        this.attibuteContainer.renderTechnicalAttributes()
+        this.nextVirtualNode = this.parentVirtualNode.getNextVirtualNode(this)
+        this.initiated = true
     }
 
     public render() {
-        this.attibuteContainer.renderTechnicalAttributes()
-
         if (this.isPresent()) {
-            super.render()
-            this.afterRender()
+            this.renderIfPresent()
+            this.setNextVirtualNodeElseResultToFalse()
+        } else {
+            this.setNextVirtualNodeElseResultToTrue()
         }
     }
 
@@ -105,19 +121,23 @@ export class VirtualElement extends VirtualNode {
 
         if (expressionValue) {
             presentState = VirtualElementPresentState.Present
+            this.setNextVirtualNodeElseResultToFalse()
         } else {
             presentState = VirtualElementPresentState.Missing
+            this.setNextVirtualNodeElseResultToTrue()
         }
 
         this.hasBeenIfAttributeValueChanged = presentState !== this.getPresentState()
-        if (this.hasBeenIfAttributeValueChanged) {
-            this.setPresentState(presentState)
+        this.setPresentState(presentState)
 
+        if (this.hasBeenIfAttributeValueChanged) {
             if (this.getNode()) {
                 if (this.isPresent()) {
                     this.attach()
                 } else {
-                    this.delete()
+                    if (this.getNode().parentNode) {
+                        this.detach()
+                    }
                 }
             }
         }
@@ -127,15 +147,53 @@ export class VirtualElement extends VirtualNode {
         this.presentState = presentState
     }
 
+    public setElseResult(elseResult: VirtualElementElseResult, force = false) {
+        if (force || this.initiated && this.elseResult !== VirtualElementElseResult.None) {
+            this.elseResult = elseResult
+
+            if (this.isPresent()) {
+                this.renderIfPresent()
+            } else if (this.elseResult === VirtualElementElseResult.False) {
+                if (this.getNode().parentNode) {
+                    this.detach()
+                }
+            }
+        } else {
+            this.initialElseResult = elseResult
+        }
+    }
+
     public getPresentState(): VirtualElementPresentState {
         return this.presentState
+    }
+
+    public getElseResult(): VirtualElementElseResult {
+        return this.elseResult
     }
 
     protected makeNode(): Element | void {
         return document.createElement(this.parsedData.name)
     }
 
+    protected setNextVirtualNodeElseResultToTrue() {
+        if (this.nextVirtualNode && this.nextVirtualNode instanceof VirtualElement) {
+            this.nextVirtualNode.setElseResult(VirtualElementElseResult.True)
+        }
+    }
+
+    protected setNextVirtualNodeElseResultToFalse() {
+        if (this.nextVirtualNode && this.nextVirtualNode instanceof VirtualElement) {
+            this.nextVirtualNode.setElseResult(VirtualElementElseResult.False)
+        }
+    }
+
     protected isPresent(): boolean {
         return this.getPresentState() === VirtualElementPresentState.Present
+        && this.elseResult !== VirtualElementElseResult.False
+    }
+
+    protected renderIfPresent() {
+        super.render()
+        this.afterRender()
     }
 }

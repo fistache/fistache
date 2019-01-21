@@ -11,6 +11,8 @@ export class EventAttribute extends NonStaticAttribute {
             ? this.value.slice(5 /* 5 is length of 'this.' string */)
             : this.value
 
+        // todo: remove code duplication in data binding and here
+
         if (isItContextVariable) {
             node.addEventListener(this.getName(), () => {
                 if (variableName in context) {

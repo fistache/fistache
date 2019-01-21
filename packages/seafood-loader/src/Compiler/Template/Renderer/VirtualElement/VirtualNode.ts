@@ -1,4 +1,4 @@
-import { ParsedData } from '../../../ParsedData'
+import { ParsedData, ParsedDataType } from '../../../ParsedData'
 import { Scope } from '../Reactivity/Scope'
 
 export interface VirtualNodePosition {
@@ -166,6 +166,27 @@ export abstract class VirtualNode {
 
     public getParentVirtualNode(): VirtualNode | undefined {
         return this.parentVirtualNode
+    }
+
+    public getNextVirtualNode(virtualNode: VirtualNode): VirtualNode | null {
+        let nextVirtualElement = null
+        const children = this.childVirtualNodes
+        const currentIndex = children.indexOf(virtualNode)
+
+        if (currentIndex !== -1 && children.hasOwnProperty(currentIndex + 1)) {
+            for (let i = currentIndex + 1; i < children.length; i++) {
+                if (children[i].parsedData.type === ParsedDataType.Text
+                    && !children[i].parsedData.data.trim().length
+                ) {
+                    continue
+                }
+
+                nextVirtualElement = children[i]
+                break
+            }
+        }
+
+        return nextVirtualElement
     }
 
     public setSecondaryPosition(position: number) {

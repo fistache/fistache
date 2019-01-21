@@ -176,7 +176,7 @@ export class Reactivity {
 
         reactiveProperty = this.bindObject(to, propertyKey, parentReactiveProperty, reactiveProperty)
 
-        if (typeof toValue === 'object') {
+        if (toValue !== null && typeof toValue === 'object') {
             for (const toValuePropertyKey in toValue) {
                 if (toValue.hasOwnProperty(toValuePropertyKey)) {
                     let toValueReactiveProperty

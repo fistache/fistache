@@ -1,4 +1,4 @@
-import { VirtualElement } from '../VirtualElement/VirtualElement'
+import { VirtualElement, VirtualElementElseResult } from '../VirtualElement/VirtualElement'
 import { NonStaticAttribute } from './NonStaticAttribute'
 
 export class TechnicalAttribute extends NonStaticAttribute {
@@ -11,8 +11,8 @@ export class TechnicalAttribute extends NonStaticAttribute {
             case('if'):
                 this.appendIfAttribute()
                 break
-            case ('for'):
-                // @for is a special attribute only for a package
+            case('else'):
+                this.appendElseAttribute()
                 break
             default:
                 console.warn(`Attribute ${this.name} is unknown.`)
@@ -30,5 +30,17 @@ export class TechnicalAttribute extends NonStaticAttribute {
         // примерно в 3 раза чаще чем нужно
 
         virtualElement.updateIfAttributeValue(expressionResult)
+    }
+
+    protected appendElseAttribute() {
+        const virtualElement = this.getVirtualElement() as VirtualElement
+        const elseResult = virtualElement.getElseResult()
+
+        if (elseResult === VirtualElementElseResult.None) {
+            virtualElement.setElseResult(virtualElement.initialElseResult
+                ? virtualElement.initialElseResult
+                : VirtualElementElseResult.False,
+            true)
+        }
     }
 }
