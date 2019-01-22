@@ -9,15 +9,7 @@ export enum VirtualElementPresentState {
     Missing
 }
 
-export enum VirtualElementElseResult {
-    None,
-    True,
-    False
-}
-
 export class VirtualElement extends VirtualNode {
-    public initialElseResult?: VirtualElementElseResult
-
     /**
      * Used for @if conditinal rendering.
      *
@@ -26,8 +18,7 @@ export class VirtualElement extends VirtualNode {
      */
     protected presentState: VirtualElementPresentState = VirtualElementPresentState.Present
 
-    protected elseResult: VirtualElementElseResult = VirtualElementElseResult.None
-    protected initiated = false
+    protected shouldListenToElse = false
 
     protected attibuteContainer: AttributeContainer
 
@@ -53,15 +44,15 @@ export class VirtualElement extends VirtualNode {
         this.attibuteContainer.renderTechnicalAttributes()
         this.nextVirtualNode = this.parentVirtualNode.getNextVirtualNode(this)
         this.prevVirtualNode = this.parentVirtualNode.getPrevVirtualNode(this)
-        this.initiated = true
     }
 
     public render() {
+        if (this.parsedData.attribs.technical && this.parsedData.attribs.technical.length) {
+            console.log(this.isPresent(), JSON.stringify(this.parsedData.attribs.technical))
+        }
+
         if (this.isPresent()) {
             this.renderIfPresent()
-            this.setNextVirtualNodeElseResultToFalse()
-        } else {
-            this.setNextVirtualNodeElseResultToTrue()
         }
     }
 
@@ -123,24 +114,33 @@ export class VirtualElement extends VirtualNode {
 
         if (expressionValue) {
             presentState = VirtualElementPresentState.Present
-            this.setNextVirtualNodeElseResultToFalse()
         } else {
             presentState = VirtualElementPresentState.Missing
-            if (!this.checkIfPrevNodesHasElseAndShouldRender()) {
-                this.setNextVirtualNodeElseResultToTrue()
-            }
         }
 
         this.hasBeenIfAttributeValueChanged = presentState !== this.getPresentState()
         this.setPresentState(presentState)
 
         if (this.hasBeenIfAttributeValueChanged) {
-            if (this.getNode()) {
-                if (this.isPresent()) {
-                    this.attach()
-                } else {
-                    this.detach()
-                }
+            this.update()
+
+            let nextVirtualNode = this.nextVirtualNode
+            while (nextVirtualNode
+                && nextVirtualNode instanceof VirtualElement
+                && nextVirtualNode.getShouldListenToElse()
+                ) {
+                nextVirtualNode.update()
+                nextVirtualNode = nextVirtualNode.nextVirtualNode
+            }
+        }
+    }
+
+    public update() {
+        if (this.getNode()) {
+            if (this.isPresent()) {
+                this.attach()
+            } else {
+                this.detach()
             }
         }
     }
@@ -149,51 +149,20 @@ export class VirtualElement extends VirtualNode {
         this.presentState = presentState
     }
 
-    public setElseResult(elseResult: VirtualElementElseResult, force = false) {
-        if (force || this.initiated && this.elseResult !== VirtualElementElseResult.None) {
-            this.elseResult = elseResult
-
-            if (this.isPresent()) {
-                this.renderIfPresent()
-            } else if (this.elseResult === VirtualElementElseResult.False) {
-                this.detach()
-            }
-
-            let nextVirtualNode = this.nextVirtualNode
-            while (nextVirtualNode
-                && nextVirtualNode instanceof VirtualElement
-                && nextVirtualNode.getElseResult() !== VirtualElementElseResult.None
-            ) {
-                nextVirtualNode.setElseResult(VirtualElementElseResult.False)
-                nextVirtualNode = nextVirtualNode.nextVirtualNode
-            }
-        } else {
-            this.initialElseResult = elseResult
-        }
-    }
-
     public getPresentState(): VirtualElementPresentState {
         return this.presentState
     }
 
-    public getElseResult(): VirtualElementElseResult {
-        return this.elseResult
+    public enableListeningToElse() {
+        this.shouldListenToElse = true
+    }
+
+    public getShouldListenToElse(): boolean {
+        return this.shouldListenToElse
     }
 
     protected makeNode(): Element | void {
         return document.createElement(this.parsedData.name)
-    }
-
-    protected setNextVirtualNodeElseResultToTrue() {
-        if (this.nextVirtualNode && this.nextVirtualNode instanceof VirtualElement) {
-            this.nextVirtualNode.setElseResult(VirtualElementElseResult.True)
-        }
-    }
-
-    protected setNextVirtualNodeElseResultToFalse() {
-        if (this.nextVirtualNode && this.nextVirtualNode instanceof VirtualElement) {
-            this.nextVirtualNode.setElseResult(VirtualElementElseResult.False)
-        }
     }
 
     protected isPresent(): boolean {
@@ -201,15 +170,8 @@ export class VirtualElement extends VirtualNode {
             return false
         }
 
-        if (this.elseResult === VirtualElementElseResult.True) {
-            console.log(this.checkIfPrevNodesHasElseAndShouldRender(), this.parsedData.attribs.technical)
-        }
-
-        if (this.elseResult === VirtualElementElseResult.False) {
-            return false
-        } else if (this.elseResult === VirtualElementElseResult.True
-            && this.checkIfPrevNodesHasElseAndShouldRender()) {
-            return false
+        if (this.shouldListenToElse) {
+            return !this.checkIfPrevNodesHasElseAndShouldRender()
         }
 
         return true
@@ -222,18 +184,25 @@ export class VirtualElement extends VirtualNode {
 
     protected checkIfPrevNodesHasElseAndShouldRender(): boolean {
         let prevVirtualNode = this.prevVirtualNode
-        while (prevVirtualNode && prevVirtualNode instanceof VirtualElement) {
-            const elseResult = prevVirtualNode.getElseResult()
+        let result = false
+        let distance = false
 
-            if (elseResult === VirtualElementElseResult.None) {
-                break
-            } else if (prevVirtualNode.isPresent()) {
-                return true
+        while (prevVirtualNode && prevVirtualNode instanceof VirtualElement) {
+            if (!prevVirtualNode.getShouldListenToElse()) {
+                if (distance) {
+                    break
+                } else {
+                    distance = true
+                }
+            }
+
+            if (prevVirtualNode.isPresent()) {
+                result = true
             }
 
             prevVirtualNode = prevVirtualNode.prevVirtualNode
         }
 
-        return false
+        return result
     }
 }

@@ -34,13 +34,6 @@ export class TechnicalAttribute extends NonStaticAttribute {
 
     protected appendElseAttribute() {
         const virtualElement = this.getVirtualElement() as VirtualElement
-        const elseResult = virtualElement.getElseResult()
-
-        if (elseResult === VirtualElementElseResult.None) {
-            virtualElement.setElseResult(virtualElement.initialElseResult
-                ? virtualElement.initialElseResult
-                : VirtualElementElseResult.False,
-            true)
-        }
+        virtualElement.enableListeningToElse()
     }
 }
