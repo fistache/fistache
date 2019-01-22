@@ -1,4 +1,4 @@
-import { VirtualElement, VirtualElementElseResult } from '../VirtualElement/VirtualElement'
+import { VirtualElement } from '../VirtualElement/VirtualElement'
 import { NonStaticAttribute } from './NonStaticAttribute'
 
 export class TechnicalAttribute extends NonStaticAttribute {
