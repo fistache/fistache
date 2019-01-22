@@ -189,6 +189,27 @@ export abstract class VirtualNode {
         return nextVirtualElement
     }
 
+    public getPrevVirtualNode(virtualNode: VirtualNode): VirtualNode | null {
+        let nextVirtualElement = null
+        const children = this.childVirtualNodes
+        const currentIndex = children.indexOf(virtualNode)
+
+        if (currentIndex !== -1 && children.hasOwnProperty(currentIndex - 1)) {
+            for (let i = currentIndex - 1; i >= 0; i--) {
+                if (children[i].parsedData.type === ParsedDataType.Text
+                    && !children[i].parsedData.data.trim().length
+                ) {
+                    continue
+                }
+
+                nextVirtualElement = children[i]
+                break
+            }
+        }
+
+        return nextVirtualElement
+    }
+
     public setSecondaryPosition(position: number) {
         this.position.secondary = position
     }

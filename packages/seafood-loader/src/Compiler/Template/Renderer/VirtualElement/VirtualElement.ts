@@ -34,6 +34,7 @@ export class VirtualElement extends VirtualNode {
     protected bindExpression?: string
 
     protected nextVirtualNode?: VirtualNode | null
+    protected prevVirtualNode?: VirtualNode | null
 
     private hasBeenIfAttributeValueChanged: boolean = false
 
@@ -51,6 +52,7 @@ export class VirtualElement extends VirtualNode {
         this.attibuteContainer.initialize(this.parsedData.attribs)
         this.attibuteContainer.renderTechnicalAttributes()
         this.nextVirtualNode = this.parentVirtualNode.getNextVirtualNode(this)
+        this.prevVirtualNode = this.parentVirtualNode.getPrevVirtualNode(this)
         this.initiated = true
     }
 
@@ -124,7 +126,9 @@ export class VirtualElement extends VirtualNode {
             this.setNextVirtualNodeElseResultToFalse()
         } else {
             presentState = VirtualElementPresentState.Missing
-            this.setNextVirtualNodeElseResultToTrue()
+            if (!this.checkIfPrevNodesHasElseAndShouldRender()) {
+                this.setNextVirtualNodeElseResultToTrue()
+            }
         }
 
         this.hasBeenIfAttributeValueChanged = presentState !== this.getPresentState()
@@ -135,9 +139,7 @@ export class VirtualElement extends VirtualNode {
                 if (this.isPresent()) {
                     this.attach()
                 } else {
-                    if (this.getNode().parentNode) {
-                        this.detach()
-                    }
+                    this.detach()
                 }
             }
         }
@@ -154,9 +156,16 @@ export class VirtualElement extends VirtualNode {
             if (this.isPresent()) {
                 this.renderIfPresent()
             } else if (this.elseResult === VirtualElementElseResult.False) {
-                if (this.getNode().parentNode) {
-                    this.detach()
-                }
+                this.detach()
+            }
+
+            let nextVirtualNode = this.nextVirtualNode
+            while (nextVirtualNode
+                && nextVirtualNode instanceof VirtualElement
+                && nextVirtualNode.getElseResult() !== VirtualElementElseResult.None
+            ) {
+                nextVirtualNode.setElseResult(VirtualElementElseResult.False)
+                nextVirtualNode = nextVirtualNode.nextVirtualNode
             }
         } else {
             this.initialElseResult = elseResult
@@ -188,12 +197,43 @@ export class VirtualElement extends VirtualNode {
     }
 
     protected isPresent(): boolean {
-        return this.getPresentState() === VirtualElementPresentState.Present
-        && this.elseResult !== VirtualElementElseResult.False
+        if (this.getPresentState() === VirtualElementPresentState.Missing) {
+            return false
+        }
+
+        if (this.elseResult === VirtualElementElseResult.True) {
+            console.log(this.checkIfPrevNodesHasElseAndShouldRender(), this.parsedData.attribs.technical)
+        }
+
+        if (this.elseResult === VirtualElementElseResult.False) {
+            return false
+        } else if (this.elseResult === VirtualElementElseResult.True
+            && this.checkIfPrevNodesHasElseAndShouldRender()) {
+            return false
+        }
+
+        return true
     }
 
     protected renderIfPresent() {
         super.render()
         this.afterRender()
+    }
+
+    protected checkIfPrevNodesHasElseAndShouldRender(): boolean {
+        let prevVirtualNode = this.prevVirtualNode
+        while (prevVirtualNode && prevVirtualNode instanceof VirtualElement) {
+            const elseResult = prevVirtualNode.getElseResult()
+
+            if (elseResult === VirtualElementElseResult.None) {
+                break
+            } else if (prevVirtualNode.isPresent()) {
+                return true
+            }
+
+            prevVirtualNode = prevVirtualNode.prevVirtualNode
+        }
+
+        return false
     }
 }
