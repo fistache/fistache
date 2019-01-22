@@ -110,6 +110,10 @@ export abstract class VirtualNode {
         this.delete()
     }
 
+    public setChildrenVirtualNodes(children: VirtualNode[]) {
+        this.childVirtualNodes = children
+    }
+
     public removeVirtualNode(virtualNode: VirtualNode) {
         const index = this.childVirtualNodes.indexOf(virtualNode)
 
@@ -208,6 +212,10 @@ export abstract class VirtualNode {
         }
 
         return nextVirtualElement
+    }
+
+    public setPrimaryPosition(position: number) {
+        this.position.primary = position
     }
 
     public setSecondaryPosition(position: number) {

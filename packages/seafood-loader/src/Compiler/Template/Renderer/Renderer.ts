@@ -12,9 +12,13 @@ import { VirtualTextNode } from './VirtualElement/VirtualTextNode'
 import { VirtualTree } from './VirtualElement/VirtualTree'
 
 export default class Renderer {
-    public static renderFragment(stack: VirtualNode[], context: any) {
+    public static renderFragment(stack: VirtualNode[], context: any, embeddedContent: VirtualNode[]) {
         while (stack.length) {
             const virtualNode = stack.pop() as VirtualNode
+
+            if (virtualNode instanceof VirtualEmbeddedContentNode) {
+                this.normalizeEmbeddedContentNode(virtualNode, embeddedContent)
+            }
 
             virtualNode.getScope().setContext(context)
             virtualNode.beforeRender()
@@ -30,7 +34,30 @@ export default class Renderer {
         }
     }
 
-    private virtualTree: VirtualTree
+    private static normalizeEmbeddedContentNode(
+        virtualEmbeddedContentNode: VirtualEmbeddedContentNode,
+        embeddedContent: VirtualNode[]
+    ) {
+        virtualEmbeddedContentNode.setChildrenVirtualNodes([])
+
+        if (embeddedContent.length) {
+            const parentVirtualNode = virtualEmbeddedContentNode.getParentVirtualNode() as VirtualNode
+            const position = virtualEmbeddedContentNode.getPosition().primary
+
+            for (const child of embeddedContent) {
+                const secondaryPosition = child.getPosition().primary
+
+                child.setParentVirtualNode(parentVirtualNode)
+                child.setPrimaryPosition(position)
+                child.setSecondaryPosition(secondaryPosition)
+                virtualEmbeddedContentNode.addChildVirtualNode(child)
+            }
+        }
+    }
+
+    public virtualTree: VirtualTree
+    public embeddedContent: VirtualNode[] = []
+    public embeddedContentCount = 0
 
     private parsedData: ParsedData[] = []
 
@@ -80,7 +107,11 @@ export default class Renderer {
         this.virtualTree.getScope().setContext(component)
         this.virtualTree.beforeRender()
 
-        Renderer.renderFragment(this.virtualTree.getChildVirtualNodes().slice().reverse(), component)
+        Renderer.renderFragment(
+            this.virtualTree.getChildVirtualNodes().slice().reverse(),
+            component,
+            this.embeddedContent
+        )
 
         return this.virtualTree.append(parentNode, beforeChild)
     }
@@ -120,6 +151,11 @@ export default class Renderer {
                     virtualNode = this.createVirtualElement(parsedData)
                 } else if (this.isItEmbedContentTag(parsedData)) {
                     virtualNode = this.createEmbedContentVirtualNode(parsedData)
+                    this.embeddedContentCount++
+
+                    if (this.embeddedContentCount > 1) {
+                        throw new Error(`Component cannot contain more than 1 <content> tag`)
+                    }
                 } else {
                     throw new Error(`Undefined component <${parsedData.name}>`)
                 }

@@ -71,8 +71,7 @@ export default class Hmr {
         try {
             rerender()
         } catch (exception) {
-            console.error(exception.message)
-            console.error(exception.stackTrace)
+            console.error(exception)
             console.warn('Something went wrong during hot-reload. Full reload required.')
         }
     }

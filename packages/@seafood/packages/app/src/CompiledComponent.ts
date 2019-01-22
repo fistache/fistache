@@ -65,6 +65,7 @@ export class CompiledComponent {
             false
         )
 
+        compiledComponent.renderer.embeddedContent = this.renderer.embeddedContent
         compiledComponent.hmrOptions = this.hmrOptions
         compiledComponent.rootElement = this.rootElement
         compiledComponent.virtualNode = this.virtualNode

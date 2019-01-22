@@ -29,6 +29,7 @@ export class VirtualComponent extends VirtualElement {
 
         if (this.isPresent()) {
             const parentNode = this.parentVirtualNode.getNode()
+            this.compiledComponent.renderer.embeddedContent = this.childVirtualNodes
             this.node = this.compiledComponent.render(parentNode)
             this.afterRender()
         }
@@ -39,10 +40,15 @@ export class VirtualComponent extends VirtualElement {
         // attributes before render, not after
     }
 
+    public shouldRenderChildVirtualNodes() {
+        return false
+    }
+
     public rerender() {
         if (this.isPresent()) {
             const parentNode = this.parentVirtualNode.getNode()
             const nextSibling = this.parentVirtualNode.getNextSiblingNode(this.getPosition())
+            this.compiledComponent.renderer.embeddedContent = this.childVirtualNodes
             this.node = this.compiledComponent.render(parentNode, nextSibling)
         }
     }

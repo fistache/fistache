@@ -26,6 +26,11 @@ export class Reactivity {
     }
 
     protected setObjectProperty(obj: any, propertyKey: PropertyKey, reactiveProperty: ReactiveProperty) {
+        while (obj[PROXY_TARGET_SYMBOL]) {
+            // todo: remove while
+            obj = obj[PROXY_TARGET_SYMBOL]
+        }
+
         let container = this.log.get(obj)
 
         if (!container) {
@@ -37,6 +42,10 @@ export class Reactivity {
     }
 
     protected getObjectProperty(obj: any, propertyKey: PropertyKey): ReactiveProperty {
+        while (obj[PROXY_TARGET_SYMBOL]) {
+            obj = obj[PROXY_TARGET_SYMBOL]
+        }
+
         const container = this.log.get(obj) as ObjectPropertyContainer
         return container.get(propertyKey) as ReactiveProperty
     }
@@ -171,6 +180,13 @@ export class Reactivity {
         reactiveProperty?: ReactiveProperty,
         parentReactiveProperty?: ReactiveProperty
     ): void {
+        if (from[PROXY_TARGET_SYMBOL]) {
+            from = from[PROXY_TARGET_SYMBOL]
+        }
+        if (to[PROXY_TARGET_SYMBOL]) {
+            to = to[PROXY_TARGET_SYMBOL]
+        }
+
         const fromValue = from && from[propertyKey]
         const toValue = to[propertyKey]
 
