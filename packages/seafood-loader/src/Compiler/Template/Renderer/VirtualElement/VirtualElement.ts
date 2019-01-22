@@ -47,10 +47,6 @@ export class VirtualElement extends VirtualNode {
     }
 
     public render() {
-        if (this.parsedData.attribs.technical && this.parsedData.attribs.technical.length) {
-            console.log(this.isPresent(), JSON.stringify(this.parsedData.attribs.technical))
-        }
-
         if (this.isPresent()) {
             this.renderIfPresent()
         }
