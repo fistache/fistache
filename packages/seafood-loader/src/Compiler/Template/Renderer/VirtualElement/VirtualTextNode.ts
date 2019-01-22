@@ -59,10 +59,10 @@ export class VirtualTextNode extends VirtualNode {
 
     private bindExpression(expression: string, index: number) {
         const value = this.getScope().executeExpression(expression, (updatedValue: any) => {
+            const node = this.node as Node
+
             this.expressions.set(index, updatedValue)
-            this.delete()
-            this.bindNode()
-            this.render()
+            node.textContent = this.getData()
 
             /**
              * todo: update reactive property notify for objects,

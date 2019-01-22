@@ -136,6 +136,7 @@ export class VirtualElement extends VirtualNode {
             if (this.isPresent()) {
                 this.attach()
             } else {
+                // this.delete()
                 this.detach()
             }
         }
