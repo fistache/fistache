@@ -4,13 +4,12 @@
 module.exports = (program, projectManager) => {
   program
     .command('build')
-    .description('run development server')
     .allowUnknownOption()
     .action(() => {
       const webpack = require('webpack')
       const config = projectManager.webpackConfigManager.getConfig()
 
-      const {console} = require('@seafood/project-manager')
+      const {console} = require('@seafood-app/webpack-kit')
 
       webpack(Object.assign(config, {
         mode: 'development',

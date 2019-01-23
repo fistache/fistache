@@ -29,15 +29,15 @@ module.exports = config => {
       .merge(['.ts', '.seafood', '.js', '.json'])
       .end()
     .modules
-      .add('node_modules')
       .add(path.resolve('node_modules'))
+      .add('node_modules')
       .add(path.resolve(__dirname, '../../node_modules'))
       .end()
 
   config.resolveLoader
     .modules
-      .add('node_modules')
       .add(path.resolve('node_modules'))
+      .add('node_modules')
       .add(path.resolve(__dirname, '../../node_modules'))
 
   config.module
@@ -49,6 +49,10 @@ module.exports = config => {
   config.module
     .rule('seafood')
       .test(/\.seafood$/)
+      .exclude
+        .add(path.resolve('node_modules'))
+        .add(path.resolve(__dirname, '../../node_modules'))
+        .end()
       .use('babel-loader')
         .loader('babel-loader')
         .options({
@@ -69,10 +73,10 @@ module.exports = config => {
   config.module
     .rule('typescript')
     .test(/\.ts$/)
-    // .exclude
-    //   .add(path.resolve('node_modules'))
-    //   .add(path.resolve(__dirname, '../../node_modules'))
-    //   .end()
+    .exclude
+      .add(path.resolve('node_modules'))
+      .add(path.resolve(__dirname, '../../node_modules'))
+      .end()
     // .use('cache-loader')
     //   .loader('cache-loader')
     //   .end()
@@ -93,10 +97,10 @@ module.exports = config => {
   config.module
     .rule('javascript')
     .test(/\.js$/)
-    // .exclude
-    //   .add(path.resolve('node_modules'))
-    //   .add(path.resolve(__dirname, '../../node_modules'))
-    //   .end()
+    .exclude
+      .add(path.resolve('node_modules'))
+      .add(path.resolve(__dirname, '../../node_modules'))
+      .end()
     .use('babel-loader')
       .loader('babel-loader')
       .options({
@@ -107,26 +111,8 @@ module.exports = config => {
   config
     .plugin('html')
     .use(require('html-webpack-plugin'), [{
-      template: path.resolve(__dirname, '../../index.html')
-    }])
-
-  config
-    .plugin('favicon')
-    .use(require('favicons-webpack-plugin'), [{
-      logo: path.resolve('resources/images/logo.svg'),
-      background: false,
-      icons: {
-        android: true,
-        appleIcon: true,
-        appleStartup: true,
-        favicons: true,
-        firefox: true,
-        coast: false,
-        opengraph: false,
-        twitter: false,
-        yandex: false,
-        windows: false
-      }
+      template: path.resolve(__dirname, '../../index.html'),
+      favicon: process.env.NODE_ENV === 'development' ? path.resolve('resources/images/logo/logo@32.png') : undefined,
     }])
 
   config

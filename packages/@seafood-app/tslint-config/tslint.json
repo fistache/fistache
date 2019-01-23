@@ -4,14 +4,16 @@
     "tslint:recommended"
   ],
   "rules": {
-    "max-line-length": {
-      "options": [120]
-    },
-    "no-console": false
-  },
-  "jsRules": {
-    "max-line-length": {
-      "options": [120]
-    }
+    "no-console": false,
+    "no-empty-interface": false,
+    "no-empty": false,
+    "object-literal-sort-keys": false,
+    "interface-name": [true, "never-prefix"],
+    "semicolon": [true, "never"],
+    "quotemark": [true, "single"],
+    "trailing-comma": [true, {
+      "multiline": "never",
+      "singleline": "never"
+    }]
   }
 }

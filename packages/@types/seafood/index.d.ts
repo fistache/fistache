@@ -1,6 +1,4 @@
-declare module "*.seafood" {
-    // import {Component} from "@seafood/component";
-    // const value: Component;
-    const value: any;
-    export default value;
+declare module '*.seafood' {
+    const value: any
+    export default value
 }

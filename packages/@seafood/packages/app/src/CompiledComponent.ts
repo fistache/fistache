@@ -1,43 +1,125 @@
-import {Component} from "@seafood/component";
+import { Component, Event } from '@seafood/component'
+// tslint:disable-next-line: max-line-length
+import { VirtualComponent } from '../../../../seafood-loader/src/Compiler/Template/Renderer/VirtualElement/VirtualComponent'
+import { HmrOptions } from './HmrOptions'
 
-export class CompiledComponent extends Component {
-    public parentNode = null;
+export class CompiledComponent {
+    public rootElement: any
+    public hmrOptions: HmrOptions
+    public component: Component
+    public renderer: any
+    public isItCompiledComponent = true
+    public isItMaquetteComponent = false
 
-    public hmrOptions: object = {};
-    public uncompiledTemplate = [];
+    private virtualNode?: VirtualComponent
+    private name?: string
 
-    private renderer = null;
-
-    public initHmrOptions() {
+    constructor(component: Component, renderer: any, shouldPrepare = true) {
         this.hmrOptions = {
-            events: {},
-        };
+            events: []
+        }
+        this.component = component
+        this.renderer = renderer
+
+        this.component.setAttributes()
+
+        if (shouldPrepare) {
+            this.renderer.prepare(this.component.getUsedComponents())
+        }
     }
 
-    public setContent(content: any) {
-        this.uncompiledTemplate = content;
+    public beforeRender() {
+        this.bindSystemEvents()
     }
 
-    public setRenderer(renderer: any) {
-        this.renderer = renderer;
-    }
+    public render(element?: any, beforeChild?: any): Node | null {
+        if (this.isItMaquetteComponent) {
+            return null
+        }
 
-    public render(parentNode: any) {
-        if (parentNode) {
-            this.parentNode = parentNode;
+        let node = null
+
+        if (element) {
+            this.rootElement = element
+            node = this.renderer.render(this.rootElement, this.component, beforeChild, this)
+            this.component.fireEvent(Event.Created)
         } else {
-            parentNode = this.parentNode;
+            this.component.fireEvent(Event.Destroyed)
+            if (this.virtualNode) {
+                this.virtualNode.detach()
+                this.virtualNode.beforeRender()
+                this.virtualNode.rerender()
+            } else {
+                this.clearContent()
+                this.renderer.render(this.rootElement, this.component)
+            }
+            this.component.fireEvent(Event.Created)
         }
+        return node
+    }
 
-        if (!parentNode) {
-            console.warn("Parent node for this component is not specified, cancelling rendering...");
-            return;
+    public clone(): CompiledComponent {
+        const compiledComponent = new CompiledComponent(
+            this.component.clone(),
+            this.renderer.clone(),
+            false
+        )
+
+        compiledComponent.renderer.embeddedContent = this.renderer.embeddedContent
+        compiledComponent.hmrOptions = this.hmrOptions
+        compiledComponent.rootElement = this.rootElement
+        compiledComponent.virtualNode = this.virtualNode
+        compiledComponent.beforeRender()
+
+        return compiledComponent
+    }
+
+    public getRenderer(): any {
+        return this.renderer
+    }
+
+    public setName(name: string) {
+        this.name = name
+    }
+
+    public getName(): string | undefined {
+        return this.name
+    }
+
+    public getComponent(): Component {
+        return this.component
+    }
+
+    public setComponent(component: Component): void {
+        this.component = component
+        this.component.setAttributes()
+        // todo: too much clones created after hmr
+    }
+
+    public setTemplateRenderer(templateRenderer: any): void {
+        this.renderer = templateRenderer
+    }
+
+    public setVirtualNode(virtualNode: VirtualComponent) {
+        this.virtualNode = virtualNode
+    }
+
+    public deleteVirtualNode() {
+        this.virtualNode = undefined
+    }
+
+    private clearContent() {
+        while (this.rootElement.hasChildNodes()) {
+            this.rootElement.removeChild(this.rootElement.lastChild)
         }
+    }
 
-        // @ts-ignore
-        this.renderer
-            .setContext(parentNode)
-            .setContent(this.uncompiledTemplate)
-            .render();
+    private bindSystemEvents() {
+        const events = this.hmrOptions.events[Event.Created]
+        this.component.unbindEvent(Event.Created)
+
+        if (events && events.length) {
+            this.component.bindEvent(Event.Created, events[0].bind(this))
+        }
     }
 }

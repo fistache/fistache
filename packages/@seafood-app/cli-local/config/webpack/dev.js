@@ -15,23 +15,6 @@ module.exports = config => {
         .globalObject('this')
 
     config
-      .plugin('favicon')
-      .tap(args => [merge(...args, {
-        icons: {
-          favicons: true,
-          android: false,
-          appleIcon: false,
-          appleStartup: false,
-          coast: false,
-          firefox: false,
-          opengraph: false,
-          twitter: false,
-          yandex: false,
-          windows: false
-        }
-      })])
-
-    config
       .plugin('hot')
         .use(require('webpack/lib/HotModuleReplacementPlugin'))
 
