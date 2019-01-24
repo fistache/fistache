@@ -11,6 +11,10 @@ module.exports = config => {
       .path(path.resolve('dist'))
       .filename('[name].js')
       .publicPath('/')
+      .end()
+    .node
+      .set('__dirname', true)
+      .set('__filename', true)
 
   config.node
     .merge({

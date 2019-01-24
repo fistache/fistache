@@ -19,7 +19,6 @@ export class VirtualComponent extends VirtualElement {
 
     public beforeRender() {
         super.beforeRender()
-        this.compiledComponent.setVirtualNode(this)
         this.attibuteContainer.renderDynamicAttributes()
         this.compiledComponent.getComponent().checkRequeredAttributesExistance()
     }
@@ -29,15 +28,13 @@ export class VirtualComponent extends VirtualElement {
 
         if (this.isPresent()) {
             const parentNode = this.parentVirtualNode.getNode()
-            this.compiledComponent.renderer.embeddedContent = this.childVirtualNodes
-            this.node = this.compiledComponent.render(parentNode)
-            this.afterRender()
-        }
-    }
 
-    public afterRender() {
-        // must be empty because component render
-        // attributes before render, not after
+            this.compiledComponent.renderer.embeddedContent = this.childVirtualNodes
+            this.compiledComponent.setVirtualNode(this)
+            this.compiledComponent.initialize()
+
+            this.node = this.compiledComponent.render(parentNode)
+        }
     }
 
     public shouldRenderChildVirtualNodes() {
@@ -48,8 +45,11 @@ export class VirtualComponent extends VirtualElement {
         if (this.isPresent()) {
             const parentNode = this.parentVirtualNode.getNode()
             const nextSibling = this.parentVirtualNode.getNextSiblingNode(this.getPosition())
-            this.compiledComponent.renderer.embeddedContent = this.childVirtualNodes
-            this.node = this.compiledComponent.render(parentNode, nextSibling)
+
+            this.detach()
+
+            this.compiledComponent.renderer.embeddedContent = this.clone().getChildVirtualNodes()
+            this.compiledComponent.render(parentNode, nextSibling)
         }
     }
 

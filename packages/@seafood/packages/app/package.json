@@ -6,8 +6,10 @@
   "author": "Aliaksandr Parfiankou <aliaksandr.parfiankou@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@types/node": "^10.12.12",
     "path": "^0.12.7",
     "reflect-metadata": "^0.1.12"
+  },
+  "devDependencies": {
+    "@types/node": "^10.12.18"
   }
 }
