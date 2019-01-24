@@ -29,6 +29,7 @@ export class VirtualComponent extends VirtualElement {
         if (this.isPresent()) {
             const parentNode = this.parentVirtualNode.getNode()
 
+            this.bindChildrenContext()
             this.compiledComponent.renderer.embeddedContent = this.childVirtualNodes
             this.compiledComponent.setVirtualNode(this)
             this.compiledComponent.initialize()
@@ -78,5 +79,17 @@ export class VirtualComponent extends VirtualElement {
         }
 
         return children
+    }
+
+    private bindChildrenContext(child?: VirtualNode) {
+        if (child) {
+            child.getScope().setContext(this.getScope().getContext())
+        } else {
+            child = this
+        }
+
+        for (const virtualNode of child.getChildVirtualNodes()) {
+            this.bindChildrenContext(virtualNode)
+        }
     }
 }

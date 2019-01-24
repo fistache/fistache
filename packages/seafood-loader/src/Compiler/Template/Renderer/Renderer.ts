@@ -20,7 +20,10 @@ export default class Renderer {
                 this.normalizeEmbeddedContentNode(virtualNode, embeddedContent)
             }
 
-            virtualNode.getScope().setContext(context)
+            if (virtualNode.getScope().getContext() === null) {
+                virtualNode.getScope().setContext(context)
+            }
+
             virtualNode.beforeRender()
             virtualNode.render()
 
@@ -41,7 +44,6 @@ export default class Renderer {
         const existsChildVirtualNodes = virtualEmbeddedContentNode.getChildVirtualNodes()
 
         for (const child of existsChildVirtualNodes) {
-            console.log(child)
             child.delete()
         }
 

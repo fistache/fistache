@@ -26,7 +26,7 @@ export class TechnicalAttribute extends NonStaticAttribute {
     protected appendIfAttribute(): void {
         const virtualElement = this.getVirtualElement() as VirtualElement
         const scope = virtualElement.getScope()
-        const expressionResult = scope.executeExpression(this.value, (value: any) => {
+        const expressionResult = scope.executeExpression(this.getValue(), (value: any) => {
             virtualElement.updateIfAttributeValue(value)
         })
         // todo: разобраться почему эта функция дёргается слишком много раз

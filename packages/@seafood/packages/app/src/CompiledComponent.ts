@@ -38,6 +38,7 @@ export class CompiledComponent {
     }
 
     public render(element?: any, beforeChild?: any): Node | null | undefined {
+        // todo: refactor
         if (this.isItMaquetteComponent) {
             return null
         }
