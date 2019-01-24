@@ -47,6 +47,8 @@ export default class Renderer {
             child.delete()
         }
 
+        virtualEmbeddedContentNode.setChildrenVirtualNodes([])
+
         if (embeddedContent.length) {
             const parentVirtualNode = virtualEmbeddedContentNode.getParentVirtualNode() as VirtualNode
             const position = virtualEmbeddedContentNode.getPosition().primary

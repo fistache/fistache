@@ -49,6 +49,7 @@ export class VirtualComponent extends VirtualElement {
             const parentNode = this.parentVirtualNode.getNode()
             const nextSibling = this.parentVirtualNode.getNextSiblingNode(this.getPosition())
 
+            this.bindChildrenContext()
             this.compiledComponent.renderer.embeddedContent = this.cloneVirtualChildNodes()
             this.node = this.compiledComponent.render(parentNode, nextSibling)
         }
