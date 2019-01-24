@@ -38,7 +38,12 @@ export default class Renderer {
         virtualEmbeddedContentNode: VirtualEmbeddedContentNode,
         embeddedContent: VirtualNode[]
     ) {
-        virtualEmbeddedContentNode.setChildrenVirtualNodes([])
+        const existsChildVirtualNodes = virtualEmbeddedContentNode.getChildVirtualNodes()
+
+        for (const child of existsChildVirtualNodes) {
+            console.log(child)
+            child.delete()
+        }
 
         if (embeddedContent.length) {
             const parentVirtualNode = virtualEmbeddedContentNode.getParentVirtualNode() as VirtualNode

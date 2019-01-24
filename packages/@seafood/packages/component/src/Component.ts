@@ -94,7 +94,12 @@ export class Component implements ComponentInterface, ComponentEventInterface {
     }
 
     public clone() {
-        return new (this.constructor as any)()
+        const component = new (this.constructor as any)()
+
+        component.usedStuff = this.usedStuff
+        component.usedComponents = this.usedComponents
+
+        return component
     }
 
     public setAttributes() {

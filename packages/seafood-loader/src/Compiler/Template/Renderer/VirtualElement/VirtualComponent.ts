@@ -42,14 +42,14 @@ export class VirtualComponent extends VirtualElement {
     }
 
     public rerender() {
+        this.delete()
+
         if (this.isPresent()) {
             const parentNode = this.parentVirtualNode.getNode()
             const nextSibling = this.parentVirtualNode.getNextSiblingNode(this.getPosition())
 
-            this.detach()
-
-            this.compiledComponent.renderer.embeddedContent = this.clone().getChildVirtualNodes()
-            this.compiledComponent.render(parentNode, nextSibling)
+            this.compiledComponent.renderer.embeddedContent = this.cloneVirtualChildNodes()
+            this.node = this.compiledComponent.render(parentNode, nextSibling)
         }
     }
 
@@ -68,5 +68,15 @@ export class VirtualComponent extends VirtualElement {
 
     public getComponent(): Component {
         return this.getCompiledComponent().component
+    }
+
+    private cloneVirtualChildNodes(): VirtualNode[] {
+        const children: VirtualNode[] = []
+
+        for (const child of this.childVirtualNodes) {
+            children.push(child.clone())
+        }
+
+        return children
     }
 }
