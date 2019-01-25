@@ -62,6 +62,11 @@ export class VirtualElement extends VirtualNode {
 
     public bindData() {
         if (this.bindExpression) {
+            const isItExpressionBind = this.bindExpression[0] === '{'
+                && this.bindExpression[this.bindExpression.length - 1] === '}'
+            this.bindExpression = isItExpressionBind
+                ? this.bindExpression.slice(1, -1)
+                : this.bindExpression
             const isItContextVariable = this.bindExpression.startsWith('this.')
             const variableName = isItContextVariable
                 ? this.bindExpression.slice(5 /* 5 is length of 'this.' string */)
@@ -92,7 +97,10 @@ export class VirtualElement extends VirtualNode {
                     strategy.handle()
                 }
             } else {
-                console.warn(`Data binding is not working with not component variables yet.`)
+                console.warn(`To bind a data to html element variable name must starts with 'this.'`)
+                console.warn(`Local variables is not working for data binding yet.`)
+                console.warn(`Or you passed wrong value or expression. Passed '${this.bindExpression}'`)
+                console.warn(`Must be just a variable name.`)
             }
         }
     }
