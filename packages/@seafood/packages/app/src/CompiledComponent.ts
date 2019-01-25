@@ -1,4 +1,5 @@
 import { Component, Event } from '@seafood/component'
+import Renderer from '../../../../seafood-loader/src/Compiler/Template/Renderer/Renderer'
 // tslint:disable-next-line: max-line-length
 import { VirtualComponent } from '../../../../seafood-loader/src/Compiler/Template/Renderer/VirtualElement/VirtualComponent'
 import { HmrOptions } from './HmrOptions'
@@ -7,14 +8,15 @@ export class CompiledComponent {
     public rootElement: any
     public hmrOptions: HmrOptions
     public component: Component
-    public renderer: any
+    public renderer: Renderer
     public isItCompiledComponent = true
     public isItMaquetteComponent = false
 
     private virtualNode?: VirtualComponent
     private name?: string
+    private initialized = false
 
-    constructor(component: Component, renderer: any, shouldPrepare = true) {
+    constructor(component: Component, renderer: any) {
         this.hmrOptions = {
             events: []
         }
@@ -22,9 +24,12 @@ export class CompiledComponent {
         this.renderer = renderer
 
         this.component.setAttributes()
+    }
 
-        if (shouldPrepare) {
+    public initialize() {
+        if (!this.initialized) {
             this.renderer.prepare(this.component.getUsedComponents())
+            this.initialized = true
         }
     }
 
@@ -32,7 +37,8 @@ export class CompiledComponent {
         this.bindSystemEvents()
     }
 
-    public render(element?: any, beforeChild?: any): Node | null {
+    public render(element?: any, beforeChild?: any): Node | null | undefined {
+        // todo: refactor
         if (this.isItMaquetteComponent) {
             return null
         }
@@ -41,13 +47,11 @@ export class CompiledComponent {
 
         if (element) {
             this.rootElement = element
-            node = this.renderer.render(this.rootElement, this.component, beforeChild, this)
+            node = this.renderer.render(this.rootElement, this.component, beforeChild)
             this.component.fireEvent(Event.Created)
         } else {
             this.component.fireEvent(Event.Destroyed)
             if (this.virtualNode) {
-                this.virtualNode.detach()
-                this.virtualNode.beforeRender()
                 this.virtualNode.rerender()
             } else {
                 this.clearContent()
@@ -61,8 +65,7 @@ export class CompiledComponent {
     public clone(): CompiledComponent {
         const compiledComponent = new CompiledComponent(
             this.component.clone(),
-            this.renderer.clone(),
-            false
+            this.renderer.clone()
         )
 
         compiledComponent.renderer.embeddedContent = this.renderer.embeddedContent

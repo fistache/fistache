@@ -1,7 +1,28 @@
 import { CompiledComponent } from '@seafood/app'
 import hyphenate from 'hyphenate'
 
+export interface ParsedArgs {
+    usedComponents: Map<string, CompiledComponent>
+    usedStuff: Set<any>
+}
+
 export function use(args: any) {
+    const parsedArgs = parseArgs(args)
+    const usedComponents = parsedArgs.usedComponents
+    const usedStuff = parsedArgs.usedStuff
+
+    return (target: () => void) => {
+        if (usedStuff.size) {
+            target.prototype.usedStuff = usedStuff
+        }
+
+        if (usedComponents.size) {
+            target.prototype.usedComponents = usedComponents
+        }
+    }
+}
+
+export function parseArgs(args: any): ParsedArgs {
     const usedComponents = new Map<string, CompiledComponent>()
     const usedStuff = new Set()
 
@@ -17,14 +38,9 @@ export function use(args: any) {
         }
     }
 
-    return (target: () => void) => {
-        if (usedStuff.size) {
-            target.prototype.usedStuff = usedStuff
-        }
-
-        if (usedComponents.size) {
-            target.prototype.usedComponents = usedComponents
-        }
+    return {
+        usedComponents,
+        usedStuff
     }
 }
 

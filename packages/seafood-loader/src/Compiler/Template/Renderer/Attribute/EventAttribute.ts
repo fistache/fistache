@@ -6,10 +6,10 @@ export class EventAttribute extends NonStaticAttribute {
         const virtualElement = this.getVirtualElement() as VirtualElement
         const node = virtualElement.getNode() as Element
         const context = virtualElement.getScope().getContext()
-        const isItContextVariable = this.value.startsWith('this.')
+        const isItContextVariable = this.getValue().startsWith('this.')
         const variableName = isItContextVariable
-            ? this.value.slice(5 /* 5 is length of 'this.' string */)
-            : this.value
+            ? this.getValue().slice(5 /* 5 is length of 'this.' string */)
+            : this.getValue()
 
         // todo: remove code duplication in data binding and here
 

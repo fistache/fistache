@@ -26,7 +26,7 @@ export default class Hmr {
         compiledComponent.beforeRender()
 
         this.data[id] = {
-            components: [],
+            components: new Set(),
             options: compiledComponent.hmrOptions
         }
     }
@@ -35,6 +35,7 @@ export default class Hmr {
         this.handleRerender(() => {
             const data = this.data[id]
             if (data) {
+                options.compiledComponent.initialize()
                 data.components.forEach((component: CompiledComponent) => {
                     component.setTemplateRenderer(
                         // compiledComponent is SeafoodLoader.EXPORT_COMPILED_COMPONENT_INSTANCE
@@ -52,7 +53,7 @@ export default class Hmr {
         const data = this.data
         // do not use arrow function cause we need to bind a context
         this.addComponentEventHandler(options, Event.Created, function(this: any) {
-            data[id].components.push(this)
+            data[id].components.add(this)
         })
         this.addComponentEventHandler(options, Event.Destroyed, function(this: any) {
             // todo: implement

@@ -1,6 +1,7 @@
 import { CompiledComponent } from '@seafood/app'
 import { AttributeProperties, DECORATOR_ATTRIBUTE_FLAG } from './Decorators/Attribute'
 import { unreactive } from './Decorators/Unreactive'
+import { parseArgs } from './Decorators/Use'
 
 export enum Event {
     Created,
@@ -72,8 +73,33 @@ export class Component implements ComponentInterface, ComponentEventInterface {
         return this.usedComponents
     }
 
+    public use(args: any) {
+        const parsedArgs = parseArgs(args)
+
+        if (this.usedComponents) {
+            for (const item of parsedArgs.usedComponents) {
+                this.usedComponents.set(item[0], item[1])
+            }
+        } else {
+            this.usedComponents = parsedArgs.usedComponents
+        }
+
+        if (this.usedStuff) {
+            for (const item of parsedArgs.usedStuff) {
+                this.usedStuff.add(item)
+            }
+        } else {
+            this.usedStuff = parsedArgs.usedStuff
+        }
+    }
+
     public clone() {
-        return new (this.constructor as any)()
+        const component = new (this.constructor as any)()
+
+        component.usedStuff = this.usedStuff
+        component.usedComponents = this.usedComponents
+
+        return component
     }
 
     public setAttributes() {

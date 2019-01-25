@@ -19,7 +19,6 @@ export class VirtualComponent extends VirtualElement {
 
     public beforeRender() {
         super.beforeRender()
-        this.compiledComponent.setVirtualNode(this)
         this.attibuteContainer.renderDynamicAttributes()
         this.compiledComponent.getComponent().checkRequeredAttributesExistance()
     }
@@ -29,15 +28,14 @@ export class VirtualComponent extends VirtualElement {
 
         if (this.isPresent()) {
             const parentNode = this.parentVirtualNode.getNode()
-            this.compiledComponent.renderer.embeddedContent = this.childVirtualNodes
-            this.node = this.compiledComponent.render(parentNode)
-            this.afterRender()
-        }
-    }
 
-    public afterRender() {
-        // must be empty because component render
-        // attributes before render, not after
+            this.bindChildrenContext()
+            this.compiledComponent.renderer.embeddedContent = this.childVirtualNodes
+            this.compiledComponent.setVirtualNode(this)
+            this.compiledComponent.initialize()
+
+            this.node = this.compiledComponent.render(parentNode)
+        }
     }
 
     public shouldRenderChildVirtualNodes() {
@@ -45,10 +43,14 @@ export class VirtualComponent extends VirtualElement {
     }
 
     public rerender() {
+        this.delete()
+
         if (this.isPresent()) {
             const parentNode = this.parentVirtualNode.getNode()
             const nextSibling = this.parentVirtualNode.getNextSiblingNode(this.getPosition())
-            this.compiledComponent.renderer.embeddedContent = this.childVirtualNodes
+
+            this.bindChildrenContext()
+            this.compiledComponent.renderer.embeddedContent = this.cloneVirtualChildNodes()
             this.node = this.compiledComponent.render(parentNode, nextSibling)
         }
     }
@@ -68,5 +70,27 @@ export class VirtualComponent extends VirtualElement {
 
     public getComponent(): Component {
         return this.getCompiledComponent().component
+    }
+
+    private cloneVirtualChildNodes(): VirtualNode[] {
+        const children: VirtualNode[] = []
+
+        for (const child of this.childVirtualNodes) {
+            children.push(child.clone())
+        }
+
+        return children
+    }
+
+    private bindChildrenContext(child?: VirtualNode) {
+        if (child) {
+            child.getScope().setContext(this.getScope().getContext())
+        } else {
+            child = this
+        }
+
+        for (const virtualNode of child.getChildVirtualNodes()) {
+            this.bindChildrenContext(virtualNode)
+        }
     }
 }

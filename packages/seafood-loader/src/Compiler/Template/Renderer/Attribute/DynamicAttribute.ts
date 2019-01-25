@@ -1,14 +1,14 @@
 import camelCase from 'camelcase'
 import { VirtualComponent } from '../VirtualElement/VirtualComponent'
 import { VirtualElement } from '../VirtualElement/VirtualElement'
-import { NonStaticAttribute } from './NonStaticAttribute'
+import { StaticAttribute } from './StaticAttribute'
 
-export class DynamicAttribute extends NonStaticAttribute {
+export class DynamicAttribute extends StaticAttribute {
     public append(): void {
         const virtualElement = this.getVirtualElement() as VirtualElement
         const attributeName = this.getName()
         const scope = virtualElement.getScope()
-        const expressionResult = scope.executeExpression(this.value, (value: any) => {
+        const expressionResult = scope.executeExpression(this.getValue(), (value: any) => {
             this.bindAttribute(attributeName, value)
         })
 

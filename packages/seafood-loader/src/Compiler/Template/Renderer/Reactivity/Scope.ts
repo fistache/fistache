@@ -12,7 +12,7 @@ export class Scope {
 
     constructor() {
         this.variables = {}
-        this.context = {}
+        this.context = null
     }
 
     public setContext(context: any): void {

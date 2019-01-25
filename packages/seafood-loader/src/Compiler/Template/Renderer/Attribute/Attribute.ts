@@ -24,4 +24,13 @@ export abstract class Attribute {
     public getVirtualElement(): VirtualElement | undefined {
         return this.virtualElement
     }
+
+    public getValue(): string {
+        if (this.value[0] === '{' && this.value[this.value.length - 1] === '}') {
+            // this.markValueAsExpression()
+            return this.value.slice(1, -1)
+        } else {
+            return this.value
+        }
+    }
 }

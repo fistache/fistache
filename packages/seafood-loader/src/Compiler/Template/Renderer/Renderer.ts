@@ -12,15 +12,18 @@ import { VirtualTextNode } from './VirtualElement/VirtualTextNode'
 import { VirtualTree } from './VirtualElement/VirtualTree'
 
 export default class Renderer {
-    public static renderFragment(stack: VirtualNode[], context: any, embeddedContent: VirtualNode[]) {
+    public static renderFragment(stack: VirtualNode[], context: any, embeddedContent?: VirtualNode[]) {
         while (stack.length) {
             const virtualNode = stack.pop() as VirtualNode
 
-            if (virtualNode instanceof VirtualEmbeddedContentNode) {
+            if (virtualNode instanceof VirtualEmbeddedContentNode && embeddedContent) {
                 this.normalizeEmbeddedContentNode(virtualNode, embeddedContent)
             }
 
-            virtualNode.getScope().setContext(context)
+            if (virtualNode.getScope().getContext() === null) {
+                virtualNode.getScope().setContext(context)
+            }
+
             virtualNode.beforeRender()
             virtualNode.render()
 
@@ -38,6 +41,12 @@ export default class Renderer {
         virtualEmbeddedContentNode: VirtualEmbeddedContentNode,
         embeddedContent: VirtualNode[]
     ) {
+        const existsChildVirtualNodes = virtualEmbeddedContentNode.getChildVirtualNodes()
+
+        for (const child of existsChildVirtualNodes) {
+            child.delete()
+        }
+
         virtualEmbeddedContentNode.setChildrenVirtualNodes([])
 
         if (embeddedContent.length) {

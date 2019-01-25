@@ -92,23 +92,17 @@ export class Parser {
         const event: ParsedDataAttrib[] = []
         const dynamic: ParsedDataAttrib[] = []
         const technical: ParsedDataAttrib[] = []
-        const technicalDynamic: ParsedDataAttrib[] = []
         const staticAttribs: ParsedDataAttrib[] = []
         const result: ParsedDataAttribs = {}
 
         for (const attribName in attribs) {
             if (attribs.hasOwnProperty(attribName)) {
-                const attribValue = attribs[attribName]
+                const attribValue: string = attribs[attribName]
 
-                if (attribName === ':') {
+                if (attribName === '&') {
                     result.bind = attribValue
                 } else if (this.testIsThisEventAttribute(attribName)) {
                     event.push({
-                        name: attribName,
-                        value: attribValue
-                     })
-                } else if (this.testIsThisDynamicAttribute(attribName)) {
-                    dynamic.push({
                         name: attribName,
                         value: attribValue
                      })
@@ -117,8 +111,8 @@ export class Parser {
                         name: attribName,
                         value: attribValue
                     })
-                } else if (this.testIsThisTechnicalDynamicAttribute(attribName)) {
-                    technicalDynamic.push({
+                } else if (this.testIsThisDynamicAttribute(attribName, attribValue)) {
+                    dynamic.push({
                         name: attribName,
                         value: attribValue
                     })
@@ -143,10 +137,6 @@ export class Parser {
             result.technical = technical
         }
 
-        if (technicalDynamic.length) {
-            result.technicalDynamic = technicalDynamic
-        }
-
         if (staticAttribs.length) {
             result.static = staticAttribs
         }
@@ -155,7 +145,7 @@ export class Parser {
     }
 
     private testIsThisEventAttribute(attributeName: string): boolean {
-        const regex = new RegExp(/^(&[a-zA-Z0-9_.-]+(?<!-))$/)
+        const regex = new RegExp(/^(:[a-zA-Z0-9_.-]+(?<!-))$/)
         return regex.test(attributeName)
     }
 
@@ -164,13 +154,9 @@ export class Parser {
         return regex.test(attributeName)
     }
 
-    private testIsThisDynamicAttribute(attributeName: string): boolean {
-        const regex = new RegExp(/^(:[a-zA-Z0-9_.-]+(?<!-))$/)
-        return regex.test(attributeName)
-    }
-
-    private testIsThisTechnicalDynamicAttribute(attributeName: string): boolean {
-        const regex = new RegExp(/^(@[a-zA-Z0-9_.-]+(?<!-))?(:[a-zA-Z0-9_.-]+(?<!-))$/)
-        return regex.test(attributeName)
+    private testIsThisDynamicAttribute(attributeName: string, attributeValue: string): boolean {
+        // @ts-ignore
+        this._attributeName = attributeName
+        return attributeValue[0] === '{' && attributeValue[attributeValue.length - 1] === '}'
     }
 }

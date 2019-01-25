@@ -65,10 +65,23 @@ export abstract class VirtualNode {
     public getNextSiblingNode(position: VirtualNodePosition): Node | null {
         let node = null
 
-        for (const child of this.childVirtualNodes) {
-            if (child.position.primary > position.primary) {
-                node = child.getAnchorNode()
-                break
+        if (typeof position.secondary === 'undefined') {
+            for (const child of this.childVirtualNodes) {
+                if (child.position.primary > position.primary) {
+                    node = child.getAnchorNode()
+                    break
+                }
+            }
+        } else {
+            for (const child of this.childVirtualNodes) {
+                if (child.position.primary === position.primary) {
+                    node = child.getAnchorNode()
+                } else if (!node && child.position.primary > position.primary) {
+                    node = child.getAnchorNode()
+                    break
+                } else if (child.position.primary > position.primary) {
+                    break
+                }
             }
         }
 
