@@ -41,9 +41,11 @@ export abstract class VirtualNode {
 
     public render() {
         const parentNode = this.parentVirtualNode.getNode()
-        const node = this.node as Node
+        const node = this.node
 
-        parentNode.appendChild(node)
+        if (node) {
+            parentNode.appendChild(node)
+        }
     }
 
     public afterRender() {
@@ -167,6 +169,8 @@ export abstract class VirtualNode {
         } else {
             this.childVirtualNodes.push(virtualNode)
         }
+
+        // todo: add to collection using position
     }
 
     public getChildVirtualNodes(): VirtualNode[] {

@@ -15,6 +15,7 @@ export class VirtualComponent extends VirtualElement {
     ) {
         super(parsedData, position, parentVirtualNode)
         this.compiledComponent = component
+        this.compiledComponent.initialize()
     }
 
     public beforeRender() {
@@ -71,6 +72,8 @@ export class VirtualComponent extends VirtualElement {
     public getComponent(): Component {
         return this.getCompiledComponent().component
     }
+
+    protected makeNode(): void {}
 
     private cloneVirtualChildNodes(): VirtualNode[] {
         const children: VirtualNode[] = []

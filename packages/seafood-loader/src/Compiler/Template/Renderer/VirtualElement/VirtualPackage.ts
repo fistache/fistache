@@ -295,12 +295,17 @@ export class VirtualPackage extends VirtualElement {
     private renderMaquette(secondaryPosition: number, expressionResult?: ForExpressionResult): VirtualNode {
         const clonedVirtualNode = this.maquetteVirtualElement.clone()
 
-        if (clonedVirtualNode instanceof VirtualElement || clonedVirtualNode instanceof VirtualComponent) {
-            clonedVirtualNode.getAttibuteContainer().extend(this.getAttibuteContainer())
-        }
-
         if (expressionResult && expressionResult.variable) {
             clonedVirtualNode.getScope().setVariable(expressionResult.variable, expressionResult.value)
+        }
+
+        // todo: replace instanceof with property check to improve performance
+        if (clonedVirtualNode instanceof VirtualComponent) {
+            clonedVirtualNode.getCompiledComponent().isItMaquetteComponent = false
+        }
+
+        if (clonedVirtualNode instanceof VirtualElement) {
+            clonedVirtualNode.getAttibuteContainer().extend(this.getAttibuteContainer())
         }
 
         clonedVirtualNode.setParentVirtualNode(this.parentVirtualNode)
