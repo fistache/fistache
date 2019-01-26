@@ -16,6 +16,8 @@ export class AttributeContainer {
     private technicalDynamicAttributes: Set<TechnicalDynamicAttribute>
     private eventAttributes: Set<EventAttribute>
 
+    private initialized = false
+
     constructor(virtualElement: VirtualElement) {
         this.virtualElement = virtualElement
         this.staticAttributes = new Set()
@@ -71,10 +73,11 @@ export class AttributeContainer {
         this.setTeachnicalAttributes(attributeContainer.getTeachnicalAttributes())
         this.setTechnicalDynamicAttributes(attributeContainer.getTechnicalDynamicAttributes())
         this.setEventAttributes(attributeContainer.getEventAttributes())
+        this.initialized = true
     }
 
     public initialize(attribs?: ParsedDataAttribs) {
-        if (attribs) {
+        if (!this.initialized && attribs) {
             if (attribs.static) {
                 for (const attribute of attribs.static) {
                     this.staticAttributes.add(new StaticAttribute(attribute))
@@ -104,6 +107,8 @@ export class AttributeContainer {
                     this.eventAttributes.add(new EventAttribute(attribute))
                 }
             }
+
+            this.initialized = true
         }
     }
 

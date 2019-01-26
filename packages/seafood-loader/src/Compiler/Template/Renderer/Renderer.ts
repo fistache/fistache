@@ -128,8 +128,10 @@ export default class Renderer {
     public clone() {
         const renderer = new Renderer()
 
+        renderer.embeddedContent = this.embeddedContent
         renderer.virtualTree = this.virtualTree.clone() as VirtualTree
         renderer.parsedData = this.parsedData
+        renderer.scopeId = this.scopeId
 
         return renderer
     }

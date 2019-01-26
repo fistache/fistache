@@ -1,6 +1,6 @@
 {
   "name": "@seafood/component",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "types": "./index.ts",
   "main": "./dist/index.js",
   "author": "Aliaksandr Parfiankou <aliaksandr.parfiankou@gmail.com>",
