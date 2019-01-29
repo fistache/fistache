@@ -53,7 +53,7 @@ export class SeafoodLoader {
 
     public resolveRequest(): void {
         if (this.isItScopingRequest()) {
-            this.resolveScopingRequest()
+             this.resolveScopingRequest()
         } else if (this.isItCompilationRequest()) {
             this.resolveCompilationRequest()
         } else {
