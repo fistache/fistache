@@ -21,5 +21,9 @@
     "tslint-loader": "^3.5.4",
     "typescript": "^3.2.4",
     "webpack": "^4.29.0"
+  },
+  "dependencies": {
+    "@types/htmlparser2": "^3.7.31",
+    "htmlparser2": "^3.10.0"
   }
 }
