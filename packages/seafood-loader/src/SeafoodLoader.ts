@@ -2,8 +2,6 @@ import rs from 'crypto-random-string'
 import hash from 'hash-sum'
 import path from 'path'
 import postcss from 'postcss'
-// @ts-ignore
-import prefixer from 'postcss-prefix-selector'
 import { CompactRequestQuery } from './CompactRequestQuery'
 import { CompilationFlag } from './CompilationFlag'
 import { ScriptCompiler } from './Compiler/Script/ScriptCompiler'
@@ -55,7 +53,7 @@ export class SeafoodLoader {
 
     public resolveRequest(): void {
         if (this.isItScopingRequest()) {
-             this.resolveScopingRequest()
+            this.resolveScopingRequest()
         } else if (this.isItCompilationRequest()) {
             this.resolveCompilationRequest()
         } else {
@@ -102,16 +100,16 @@ export class SeafoodLoader {
         return this.makeCompilationRequest(CompilationFlag.Script)
     }
 
-    private getStyleCompilationRequest() {
-        const query = new CompactRequestQuery({
-            [SeafoodLoader.REQUEST_COMPILATION_FLAG]: CompilationFlag.Style,
-            [SeafoodLoader.REQUEST_SCOPE_ID]: this.scopeId
-        })
-
-        return RequestGenerator.generate(this.loader, this.resourcePath, query, [
-            'style-loader', 'css-loader', `seafood-loader?scopeId=${this.scopeId}`, 'stylus-loader', 'seafood-loader'
-        ])
-    }
+    // private getStyleCompilationRequest() {
+    //     const query = new CompactRequestQuery({
+    //         [SeafoodLoader.REQUEST_COMPILATION_FLAG]: CompilationFlag.Style,
+    //         [SeafoodLoader.REQUEST_SCOPE_ID]: this.scopeId
+    //     })
+    //
+    //     return RequestGenerator.generate(this.loader, this.resourcePath, query, [
+    //         'style-loader', 'css-loader', `seafood-loader?scopeId=${this.scopeId}`, 'stylus-loader', 'seafood-loader'
+    //     ])
+    // }
 
     private getTemplateCompilationRequest() {
         const query = new CompactRequestQuery({
@@ -149,58 +147,15 @@ export class SeafoodLoader {
     }
 
     private exportCompiledComponentInstance(): void {
-        const templateContentRequest = this.getTemplateCompilationRequest()
+        const scriptRequest = this.getScriptCompilationRequest()
+        const templateRequest = this.getTemplateCompilationRequest()
 
-        this.loader.loadModule(
-            JSON.parse(templateContentRequest),
-            (templateError: any, templateContent: string) => {
-                if (templateError) {
-                    this.loader.callback(templateError)
-                    return
-                }
+        this.loader.callback(null, `
+            import ComponentUnit from '@seafood/app'
+            import script from ${scriptRequest}
+            import template from ${templateRequest}
 
-                const scriptRequest = this.getScriptCompilationRequest()
-                const styleRequest = this.getStyleCompilationRequest()
-                const templateRequest = RequestGenerator.generate(
-                    this.loader,
-                    path.resolve(__dirname, '../src/Compiler/Template/Renderer/Renderer.ts')
-                )
-                const hmrRequest = RequestGenerator.generate(
-                    this.loader,
-                    path.resolve(__dirname, '../src/Hmr/Hmr.ts')
-                )
-
-                this.hmrPlugin.setTemplateRequest(templateContentRequest)
-
-                // todo: check if script loads parser
-                this.loader.callback(null, `
-                    import {default as ${SeafoodLoader.EXPORT_SCRIPT_CLASS}} from ${scriptRequest}
-                    import {default as ${SeafoodLoader.EXPORT_TEMPLATE_BUILDER_CLASS}} from ${templateRequest}
-                    import {default as ${SeafoodLoader.EXPORT_HMR_CLASS}} from ${hmrRequest}
-                    import ${SeafoodLoader.EXPORT_STYLE_STRING} from ${styleRequest}
-                    import {CompiledComponent} from '@seafood/app'
-
-                    // append css styles
-                    ${SeafoodLoader.EXPORT_STYLE_STRING}.className
-
-                    const ${SeafoodLoader.EXPORT_TEMPLATE_INSTANCE} =
-                    new ${SeafoodLoader.EXPORT_TEMPLATE_BUILDER_CLASS}()
-                    ${SeafoodLoader.EXPORT_TEMPLATE_INSTANCE}.setParsedData(${templateContent})
-                    ${SeafoodLoader.EXPORT_TEMPLATE_INSTANCE}.setScopeId('${this.scopeId}')
-
-                    const ${SeafoodLoader.EXPORT_SCRIPT_INSTANCE} = new ${SeafoodLoader.EXPORT_SCRIPT_CLASS}()
-                    const ${SeafoodLoader.EXPORT_COMPILED_COMPONENT_INSTANCE} =
-                    new CompiledComponent(
-                        ${SeafoodLoader.EXPORT_SCRIPT_INSTANCE},
-                        ${SeafoodLoader.EXPORT_TEMPLATE_INSTANCE}
-                    )
-
-                    ${this.getHmrCode()}
-
-                    export const Component = ${SeafoodLoader.EXPORT_SCRIPT_CLASS}
-                    export default ${SeafoodLoader.EXPORT_COMPILED_COMPONENT_INSTANCE}
-                `)
-            }
-        )
+            console.log(script, template, ComponentUnit)
+        `)
     }
 }

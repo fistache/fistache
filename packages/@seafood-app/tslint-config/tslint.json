@@ -4,6 +4,7 @@
     "tslint:recommended"
   ],
   "rules": {
+    "max-line-length": [true, 80],
     "no-console": false,
     "no-empty-interface": false,
     "no-empty": false,
