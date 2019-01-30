@@ -14,7 +14,9 @@ export function attribute(properties?: AttributeProperties) {
     }
 
     return (target: any, propertyKey: string | symbol) => {
-        Reflect.defineMetadata(DECORATOR_ATTRIBUTE_FLAG, properties, target, propertyKey)
+        Reflect.defineMetadata(
+            DECORATOR_ATTRIBUTE_FLAG, properties, target, propertyKey
+        )
         target[propertyKey] = null
     }
 }

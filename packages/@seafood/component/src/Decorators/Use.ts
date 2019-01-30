@@ -1,8 +1,7 @@
-import { CompiledComponent } from '@seafood/app'
-import hyphenate from 'hyphenate'
+import { Component } from '../Component'
 
 export interface ParsedArgs {
-    usedComponents: Map<string, CompiledComponent>
+    usedComponents: Map<string, Component>
     usedStuff: Set<any>
 }
 
@@ -23,7 +22,7 @@ export function use(args: any) {
 }
 
 export function parseArgs(args: any): ParsedArgs {
-    const usedComponents = new Map<string, CompiledComponent>()
+    const usedComponents = new Map<string, Component>()
     const usedStuff = new Set()
 
     for (const argName in args) {
@@ -49,7 +48,5 @@ export const computeComponentName = (name: string): string => {
         name = name.slice(0, name.lastIndexOf('Component'))
     }
 
-    return hyphenate(name, {
-        lowerCase: true
-    })
+    return name
 }

@@ -23,7 +23,6 @@
     "webpack": "^4.29.0"
   },
   "dependencies": {
-    "hyphenate": "^0.2.4",
     "reflect-metadata": "^0.1.13"
   }
 }

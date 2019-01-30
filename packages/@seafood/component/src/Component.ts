@@ -42,8 +42,14 @@ export class Component implements ComponentInterface, ComponentEventInterface {
     public checkRequeredAttributesExistance(this: any): void {
         // todo: disable for production
         for (const attribute of this.attributes) {
-            if (attribute && attribute[1].required && this[attribute[0]] === null || this[attribute[0]] === undefined) {
-                throw new Error(`Required attribute '${attribute[0]}' had not been set.`)
+            if (attribute[1]!.required
+                && this[attribute[0]] === null
+                || this[attribute[0]] === undefined
+            ) {
+                throw new Error(
+                    `Required attribute '${attribute[0]}' had not ` +
+                    `been set.`
+                )
             }
         }
     }
@@ -62,13 +68,15 @@ export class Component implements ComponentInterface, ComponentEventInterface {
 
     public fireEvent(eventName: Event) {
         if (this.eventHandlers.hasOwnProperty(eventName)) {
-            (this.eventHandlers as any)[eventName].forEach((event: () => void) => {
-                event()
-            })
+            (this.eventHandlers as any)[eventName].forEach(
+                (event: () => void) => {
+                    event()
+                }
+            )
         }
     }
 
-    public getUsedComponents(): Map<string, CompiledComponent> | undefined {
+    public getUsedComponents(): Map<string, Component> | undefined {
         return this.usedComponents
     }
 
@@ -104,7 +112,10 @@ export class Component implements ComponentInterface, ComponentEventInterface {
     public setAttributes() {
         // tslint:disable-next-line: forin
         for (const propertyKey in this) {
-            const properties: AttributeProperties = Reflect.getMetadata(DECORATOR_ATTRIBUTE_FLAG, this, propertyKey)
+            const properties: AttributeProperties = Reflect.getMetadata(
+                DECORATOR_ATTRIBUTE_FLAG, this, propertyKey
+            )
+
             if (properties) {
                 this.attributes.set(propertyKey, properties)
             }
