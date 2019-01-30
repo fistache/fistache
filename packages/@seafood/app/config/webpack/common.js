@@ -3,12 +3,12 @@ const path = require('path')
 module.exports = config => {
   config
     .cache(true)
-    .target('node')
     .entry('index')
-      .add(path.resolve(__dirname, `../../index.ts`))
+      .add(path.resolve(__dirname, '../../index.ts'))
       .end()
+    .target('node')
     .output
-      .path(path.resolve(__dirname, `../../dist`))
+      .path(path.resolve(__dirname, '../../dist'))
       .libraryTarget('commonjs2')
       .filename('[name].js')
       .end()
@@ -34,11 +34,6 @@ module.exports = config => {
   config.module
     .rule('seafood')
       .test(/\.seafood$/)
-      .exclude
-        .add(path.resolve('node_modules'))
-        .add(path.resolve(__dirname, '../../dist'))
-        .add(path.resolve(__dirname, '../../node_modules'))
-        .end()
       .use('babel-loader')
         .loader('babel-loader')
         .options({
@@ -61,7 +56,6 @@ module.exports = config => {
       .test(/\.ts$/)
       .exclude
         .add(path.resolve('node_modules'))
-        .add(path.resolve(__dirname, '../../dist'))
         .add(path.resolve(__dirname, '../../node_modules'))
         .end()
       // .use('cache-loader')
@@ -83,11 +77,10 @@ module.exports = config => {
   config.module
     .rule('javascript')
     .test(/\.js$/)
-    .exclude
-      .add(path.resolve('node_modules'))
-      .add(path.resolve(__dirname, '../../dist'))
-      .add(path.resolve(__dirname, '../../node_modules'))
-      .end()
+    // .exclude
+    //   .add(path.resolve('node_modules'))
+    //   .add(path.resolve(__dirname, '../../node_modules'))
+    //   .end()
     .use('babel-loader')
     .loader('babel-loader')
     .options({

@@ -14,7 +14,7 @@ module.exports = (program, projectManager) => {
 
       webpack(config.map(config => {
         return Object.assign(config, {
-          // mode: 'development',
+          mode: 'development',
         })
       })).watch({
         hot: false,

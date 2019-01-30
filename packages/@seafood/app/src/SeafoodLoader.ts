@@ -73,12 +73,11 @@ export class SeafoodLoader {
         const templateRequest = this.makeTemplateCompileRequest()
 
         this.loaderContext.callback(null, `
+            import ComponentUnit from '@seafood/app'
             import script from ${scriptRequest}
             import template from ${templateRequest}
 
-            script.prototype.__render = template
-
-            export default script
+            console.log(script, template, ComponentUnit)
         `)
     }
 

@@ -1,5 +1,5 @@
 {
-  "name": "@seafood/component",
+  "name": "@seafood/app",
   "version": "1.0.0",
   "types": "./index.ts",
   "main": "./dist/index.js",
@@ -21,9 +21,5 @@
     "tslint-loader": "^3.5.4",
     "typescript": "^3.2.4",
     "webpack": "^4.29.0"
-  },
-  "dependencies": {
-    "hyphenate": "^0.2.4",
-    "reflect-metadata": "^0.1.13"
   }
 }
