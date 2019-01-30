@@ -42,6 +42,13 @@ export enum AttributeKeyword {
     Injection
 }
 
+export interface ComponentAttributes {
+    [AttributeKeyword.Special]: TagAttrib[]
+    [AttributeKeyword.Static]: TagAttrib[]
+    [AttributeKeyword.Dynamic]: TagAttrib[]
+    [AttributeKeyword.Injection]: TagAttrib[]
+}
+
 interface ComponentDependency {
     componentName: string
     varName: string
@@ -96,13 +103,13 @@ export class Compiler {
                             `('${dependency.componentName}')`
                     }
                 ).join('\n')
-            };${
+            };return ${
                 (firstChild as TagInfo).renderString as string
             }`
         } else if ((firstChild as TextNode).text) {
-            renderFunction = this.makeTextRenderFunction(
+            renderFunction = `return ${this.makeTextRenderFunction(
                 (firstChild as TextNode).text
-            )
+            )}`
         }
 
         return `export default function(` +

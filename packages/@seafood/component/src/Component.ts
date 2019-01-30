@@ -1,16 +1,12 @@
+import { ComponentAttributes } from '../../compiler'
 import { AttributeProperties, DECORATOR_ATTRIBUTE_FLAG } from './Decorators/Attribute'
 import { unreactive } from './Decorators/Unreactive'
 import { parseArgs } from './Decorators/Use'
+import { VirtualNode } from './VirtualNode/VirtualNode'
 
 export enum Event {
     Created,
     Destroyed
-}
-
-export interface ComponentInterface {
-    setAttribute(name: string, value: any): void
-
-    checkRequeredAttributesExistance(): void
 }
 
 export interface ComponentEventInterface {
@@ -19,7 +15,7 @@ export interface ComponentEventInterface {
     fireEvent(eventName: Event): void
 }
 
-export class Component implements ComponentInterface, ComponentEventInterface {
+export class Component implements ComponentEventInterface {
     @unreactive()
     protected attributes = new Map<string | symbol, AttributeProperties>()
 
@@ -31,6 +27,20 @@ export class Component implements ComponentInterface, ComponentEventInterface {
 
     @unreactive()
     protected usedComponents?: Map<string, Component>
+
+    // tslint:disable-next-line: variable-name
+    private __render!: (element: any, text: any, include: any) => VirtualNode
+
+    public render(element: Element) {
+        const virtualNode = this.__render(
+            this.renderElement, this.renderText, this.resolveComponent
+        )
+        const node = virtualNode.getNode()
+
+        if (node) {
+            element.appendChild(node)
+        }
+    }
 
     public setAttribute(this: any, name: string, value: any): void {
         if (this.attributes.has(name)) {
@@ -120,5 +130,22 @@ export class Component implements ComponentInterface, ComponentEventInterface {
                 this.attributes.set(propertyKey, properties)
             }
         }
+    }
+
+    private renderElement(
+        element: string | Component,
+        attributes: ComponentAttributes,
+        children: VirtualNode[]
+    ): VirtualNode {
+        // tmp
+        return new VirtualNode()
+    }
+
+    private renderText() {
+        //
+    }
+
+    private resolveComponent() {
+        //
     }
 }
