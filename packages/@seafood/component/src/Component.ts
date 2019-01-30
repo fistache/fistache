@@ -1,4 +1,3 @@
-import { CompiledComponent } from '@seafood/app'
 import { AttributeProperties, DECORATOR_ATTRIBUTE_FLAG } from './Decorators/Attribute'
 import { unreactive } from './Decorators/Unreactive'
 import { parseArgs } from './Decorators/Use'
@@ -31,7 +30,7 @@ export class Component implements ComponentInterface, ComponentEventInterface {
     protected usedStuff?: Set<any>
 
     @unreactive()
-    protected usedComponents?: Map<string, CompiledComponent>
+    protected usedComponents?: Map<string, Component>
 
     public setAttribute(this: any, name: string, value: any): void {
         if (this.attributes.has(name)) {
