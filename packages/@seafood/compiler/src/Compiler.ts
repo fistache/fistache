@@ -29,10 +29,22 @@ interface TagAttrib {
     value?: string
 }
 
-export enum RenderKeyword {
-    Element =  'element',
-    Text = 'text',
-    Include = 'include'
+export enum FunctionKeyword {
+    Element =  '_e',
+    Text = '_t',
+    Include = '_i'
+}
+
+export enum AttributeKeyword {
+    Special,
+    Static,
+    Dynamic,
+    Injection
+}
+
+interface ComponentDependency {
+    componentName: string
+    varName: string
 }
 
 export class Compiler {
@@ -48,7 +60,8 @@ export class Compiler {
         children: []
     }
     private lastTag = this.rootTag
-    private dependencies: string[] = []
+    private dependencyCount = 0
+    private dependencies = new Map<string, ComponentDependency>()
 
     private parser!: Parser
 
@@ -76,7 +89,13 @@ export class Compiler {
 
         if ((firstChild as TagInfo)!.renderString) {
             renderFunction = `${
-                this.dependencies.join('\n')
+                [...this.dependencies.values()].map(
+                    (dependency: ComponentDependency) => {
+                        return `const ${dependency.varName} = ` +
+                            FunctionKeyword.Include +
+                            `('${dependency.componentName}')`
+                    }
+                ).join('\n')
             }\n${
                 (firstChild as TagInfo).renderString as string
             }`
@@ -87,8 +106,8 @@ export class Compiler {
         }
 
         return `export default function(` +
-            `${Object.values(RenderKeyword).join(',')}` +
-            `) {\n` + renderFunction + `\n}`
+            `${Object.values(FunctionKeyword).join(',')}` +
+            `) {` + renderFunction + `}`
     }
 
     private handleOpenTagName(name: string) {
@@ -226,13 +245,20 @@ export class Compiler {
         })
 
         if (tag.isComponent) {
-            this.dependencies.push(
-                `const ${tag.name} = ${RenderKeyword.Include}('${tag.name}')`
-            )
+            this.dependencyCount++
+
+            if (!this.dependencies.has(tag.name)) {
+                this.dependencies.set(tag.name, {
+                    componentName: tag.name,
+                    varName: `_${this.dependencyCount}`
+                })
+            }
         }
 
-        return `${RenderKeyword.Element}(` +
-            `${tag.isComponent ? tag.name : `'${tag.name}'`},` +
+        return `${FunctionKeyword.Element}(` +
+            `${tag.isComponent
+                ? this.dependencies.get(tag.name)!.varName
+                : `'${tag.name}'`},` +
             `${JSON.stringify(
                 tag.attributes
                     ? this.filterAttributes(tag.attributes)
@@ -247,12 +273,7 @@ export class Compiler {
         const staticAttributes: TagAttrib[] = []
         const dynamicAttributes: TagAttrib[] = []
         const specialAttributes: TagAttrib[] = []
-        const result: {
-            injections?: string[]
-            staticAttributes?: TagAttrib[]
-            dynamicAttributes?: TagAttrib[]
-            specialAttributes?: TagAttrib[]
-        } = {}
+        const result: any = {}
 
         for (const attribute of attributes) {
             if (attribute.name.startsWith('{')) {
@@ -312,16 +333,16 @@ export class Compiler {
         }
 
         if (injections.length) {
-            result.injections = injections
+            result[AttributeKeyword.Injection] = injections
         }
         if (specialAttributes.length) {
-            result.specialAttributes = specialAttributes
+            result[AttributeKeyword.Special] = specialAttributes
         }
         if (dynamicAttributes.length) {
-            result.dynamicAttributes = dynamicAttributes
+            result[AttributeKeyword.Dynamic] = dynamicAttributes
         }
         if (staticAttributes.length) {
-            result.staticAttributes = staticAttributes
+            result[AttributeKeyword.Static] = staticAttributes
         }
 
         return result
@@ -339,11 +360,42 @@ export class Compiler {
             return null
         }
 
-        return text
+        // "str {{ text }} str"
+        //      ^^^^^^^^^^
+
+        const injectionRegex = new RegExp('{{([\\s\\S]*?)}}', 'g')
+        const result: string[] = []
+        let execResult
+        let lastIndex = 0
+
+        // tslint:disable-next-line: no-conditional-assignment
+        while ((execResult = injectionRegex.exec(text)) !== null) {
+            const expression = execResult[1].trim()
+
+            if (execResult.index !== lastIndex) {
+                const slice = text.slice(lastIndex, execResult.index).trim()
+                if (slice.length) {
+                    result.push(`'${slice}'`)
+                }
+            }
+
+            result.push(`(${expression})`)
+
+            lastIndex = injectionRegex.lastIndex
+        }
+
+        if (lastIndex !== text.length) {
+            const slice = text.slice(lastIndex).trim()
+            if (slice.length) {
+                result.push(`'${slice}'`)
+            }
+        }
+
+        return result.join('+')
     }
 
     private makeTextRenderFunction(text: string) {
-        return `${RenderKeyword.Text}(${JSON.stringify(text)})`
+        return `${FunctionKeyword.Text}(${text})`
     }
 
     private isItComponentName(name: string): boolean {
