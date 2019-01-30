@@ -91,12 +91,12 @@ export class Compiler {
             renderFunction = `${
                 [...this.dependencies.values()].map(
                     (dependency: ComponentDependency) => {
-                        return `const ${dependency.varName} = ` +
+                        return `const ${dependency.varName}=` +
                             FunctionKeyword.Include +
                             `('${dependency.componentName}')`
                     }
                 ).join('\n')
-            }\n${
+            };${
                 (firstChild as TagInfo).renderString as string
             }`
         } else if ((firstChild as TextNode).text) {
@@ -107,7 +107,7 @@ export class Compiler {
 
         return `export default function(` +
             `${Object.values(FunctionKeyword).join(',')}` +
-            `) {` + renderFunction + `}`
+            `){` + renderFunction + `}`
     }
 
     private handleOpenTagName(name: string) {
