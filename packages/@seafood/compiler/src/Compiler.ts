@@ -1,3 +1,4 @@
+import { AttributeKeyword, FunctionKeyword } from '@seafood/component'
 import { Parser } from 'htmlparser2'
 import { HtmlTags } from './HtmlTags'
 
@@ -24,29 +25,9 @@ interface TextNode {
     parent?: TagInfo
 }
 
-interface TagAttrib {
+export interface TagAttrib {
     name: string
     value?: string
-}
-
-export enum FunctionKeyword {
-    Element =  '_e',
-    Text = '_t',
-    Include = '_i'
-}
-
-export enum AttributeKeyword {
-    Special,
-    Static,
-    Dynamic,
-    Injection
-}
-
-export interface ComponentAttributes {
-    [AttributeKeyword.Special]: TagAttrib[]
-    [AttributeKeyword.Static]: TagAttrib[]
-    [AttributeKeyword.Dynamic]: TagAttrib[]
-    [AttributeKeyword.Injection]: TagAttrib[]
 }
 
 interface ComponentDependency {
@@ -262,7 +243,10 @@ export class Compiler {
             }
         }
 
-        return `${FunctionKeyword.Element}(` +
+        return `${tag.isComponent
+            ? FunctionKeyword.Component
+            : FunctionKeyword.Element
+        }(` +
             `${tag.isComponent
                 ? this.dependencies.get(tag.name)!.varName
                 : `'${tag.name}'`},` +
@@ -276,18 +260,19 @@ export class Compiler {
     }
 
     private filterAttributes(attributes: TagAttrib[]) {
-        const injections: string[] = []
+        const injectionAttributes: TagAttrib[] = []
         const staticAttributes: TagAttrib[] = []
         const dynamicAttributes: TagAttrib[] = []
         const specialAttributes: TagAttrib[] = []
-        const result: any = {}
+        const eventAttributes: TagAttrib[] = []
+        const result: any = Object.create(null)
 
         for (const attribute of attributes) {
             if (attribute.name.startsWith('{')) {
                 const injection = attribute.name.slice(1, -1).trim()
 
                 if (injection.length) {
-                    injections.push(injection)
+                    injectionAttributes.push({ name: injection })
                 }
             } else if (attribute.name.startsWith('@')) {
                 const specialAttribute: TagAttrib = {
@@ -319,6 +304,36 @@ export class Compiler {
                 }
 
                 specialAttributes.push(specialAttribute)
+            } else if (attribute.name.startsWith(':')) {
+                const eventAttribute: TagAttrib = {
+                    name: attribute.name.slice(1)
+                }
+
+                if (attribute!.value!.length &&
+                    !attribute.value!.startsWith('{')
+                ) {
+                    throw new Error(
+                        `Value of attribute '${attribute.name}' ` +
+                        `must be not static. Use {} instead of "" to set ` +
+                        `attribute value.`
+                    )
+                }
+
+                let hasInjection = false
+
+                if (attribute.value!.length) {
+                    hasInjection = true
+                    eventAttribute.value = attribute.value!
+                        .slice(1, -1).trim()
+                }
+
+                if (hasInjection && !eventAttribute.value!.length) {
+                    throw new Error(
+                        `Invalid value passed for '${attribute.name}'.`
+                    )
+                }
+
+                eventAttributes.push(eventAttribute)
             } else if (attribute.value!.startsWith('{')) {
                 const dynamicAttribute: TagAttrib = {
                     name: attribute.name,
@@ -339,8 +354,8 @@ export class Compiler {
             }
         }
 
-        if (injections.length) {
-            result[AttributeKeyword.Injection] = injections
+        if (injectionAttributes.length) {
+            result[AttributeKeyword.Injection] = injectionAttributes
         }
         if (specialAttributes.length) {
             result[AttributeKeyword.Special] = specialAttributes
@@ -350,6 +365,9 @@ export class Compiler {
         }
         if (staticAttributes.length) {
             result[AttributeKeyword.Static] = staticAttributes
+        }
+        if (eventAttributes.length) {
+            result[AttributeKeyword.Event] = eventAttributes
         }
 
         return result

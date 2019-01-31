@@ -1,8 +1,11 @@
-import { ComponentAttributes } from '../../compiler'
 import { AttributeProperties, DECORATOR_ATTRIBUTE_FLAG } from './Decorators/Attribute'
 import { unreactive } from './Decorators/Unreactive'
 import { parseArgs } from './Decorators/Use'
+import { ComponentAttributes } from './interfaces'
+import { VirtualComponent } from './VirtualNode/VirtualComponent'
+import { VirtualElement } from './VirtualNode/VirtualElement'
 import { VirtualNode } from './VirtualNode/VirtualNode'
+import { VirtualTextNode } from './VirtualNode/VirtualTextNode'
 
 export enum Event {
     Created,
@@ -28,12 +31,18 @@ export class Component implements ComponentEventInterface {
     @unreactive()
     protected usedComponents?: Map<string, Component>
 
+    @unreactive()
     // tslint:disable-next-line: variable-name
-    private __render!: (element: any, text: any, include: any) => VirtualNode
+    private __render!: (
+        element: any, component: any, text: any, include: any
+    ) => VirtualNode
 
     public render(element: Element) {
         const virtualNode = this.__render(
-            this.renderElement, this.renderText, this.resolveComponent
+            this.renderElement,
+            this.renderComponent,
+            this.renderText,
+            this.resolveComponent
         )
         const node = virtualNode.getNode()
 
@@ -132,20 +141,45 @@ export class Component implements ComponentEventInterface {
         }
     }
 
-    private renderElement(
-        element: string | Component,
-        attributes: ComponentAttributes,
-        children: VirtualNode[]
-    ): VirtualNode {
-        // tmp
-        return new VirtualNode()
+    private renderElement = (
+        element: string,
+        attributes?: ComponentAttributes,
+        children?: VirtualNode[]
+    ): VirtualElement => {
+        const virtualElement = new VirtualElement(element, attributes)
+
+        virtualElement.render()
+
+        return virtualElement
     }
 
-    private renderText() {
-        //
+    private renderComponent = (
+        component: Component,
+        attributes?: ComponentAttributes,
+        embeddedContent?: VirtualNode[]
+    ): VirtualComponent => {
+        return new VirtualComponent(component, attributes)
     }
 
-    private resolveComponent() {
-        //
+    private renderText = (expression: string): VirtualTextNode => {
+        return new VirtualTextNode(expression)
+    }
+
+    private resolveComponent = (name: string): Component => {
+        if (!this.usedComponents) {
+            return this.throwComponentNotFoundException(name)
+        }
+
+        const component = this.usedComponents.get(name)
+
+        if (!component) {
+            return this.throwComponentNotFoundException(name)
+        }
+
+        return component
+    }
+
+    private throwComponentNotFoundException(name: string): never {
+        throw new Error(`Component with name '${name}' not found.`)
     }
 }
