@@ -8,6 +8,11 @@ export class VirtualTextNode extends VirtualNode {
         this.expression = expression
     }
 
+    public render() {
+        console.log('render text', this.expression)
+        super.render()
+    }
+
     protected makeNode(): Node | void | null {
         // todo: resolve expression
         return document.createTextNode(this.expression)

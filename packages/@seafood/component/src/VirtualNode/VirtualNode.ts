@@ -3,7 +3,7 @@ import { VirtualElement } from './VirtualElement'
 export abstract class VirtualNode {
     private node: Node | null = null
 
-    private parentVirtualNode?: VirtualElement
+    private parentVirtualElement?: VirtualElement
 
     public render() {
         this.beforeRender()
@@ -15,14 +15,22 @@ export abstract class VirtualNode {
         return this.node
     }
 
+    public setParentVirtualElement(virtualElement: VirtualElement) {
+        this.parentVirtualElement = virtualElement
+    }
+
+    public shouldRenderChildVirtualNodes(): boolean {
+        return false
+    }
+
     protected beforeRender() {
         this.bindNode()
     }
 
     protected renderNode() {
-        if (this.parentVirtualNode) {
+        if (this.parentVirtualElement) {
             const node = this.getNode()
-            const parentNode = this.parentVirtualNode.getNode()
+            const parentNode = this.parentVirtualElement.getNode()
 
             if (node && parentNode) {
                 parentNode.appendChild(node)

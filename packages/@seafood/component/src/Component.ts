@@ -18,7 +18,27 @@ export interface ComponentEventInterface {
     fireEvent(eventName: Event): void
 }
 
+// todo: make a seperate class implemented render functionality
 export class Component implements ComponentEventInterface {
+    public static renderFragment(stack: VirtualNode[]) {
+        while (stack.length) {
+            const virtualNode = stack.pop() as VirtualNode
+
+            virtualNode.render()
+
+            // shouldRenderChildVirtualNodes instead of instanceof check
+            // to improve performance
+            if (virtualNode.shouldRenderChildVirtualNodes()) {
+                // Get child nodes only after render because virtual
+                // package can create a new one.
+                const childVirtualNodes = (virtualNode as VirtualElement)
+                    .getChildVirtualNodes().slice().reverse()
+
+                stack.push(...childVirtualNodes)
+            }
+        }
+    }
+
     @unreactive()
     protected attributes = new Map<string | symbol, AttributeProperties>()
 
@@ -44,6 +64,9 @@ export class Component implements ComponentEventInterface {
             this.renderText,
             this.resolveComponent
         )
+
+        Component.renderFragment([virtualNode])
+
         const node = virtualNode.getNode()
 
         if (node) {
@@ -148,7 +171,12 @@ export class Component implements ComponentEventInterface {
     ): VirtualElement => {
         const virtualElement = new VirtualElement(element, attributes)
 
-        virtualElement.render()
+        if (children) {
+            for (const child of children) {
+                virtualElement.addChildVirtualNode(child)
+                child.setParentVirtualElement(virtualElement)
+            }
+        }
 
         return virtualElement
     }
@@ -158,10 +186,12 @@ export class Component implements ComponentEventInterface {
         attributes?: ComponentAttributes,
         embeddedContent?: VirtualNode[]
     ): VirtualComponent => {
+        // todo: render embedded content
         return new VirtualComponent(component, attributes)
     }
 
     private renderText = (expression: string): VirtualTextNode => {
+        // todo: render if text is a root node
         return new VirtualTextNode(expression)
     }
 

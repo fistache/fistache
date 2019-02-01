@@ -1,5 +1,5 @@
 import { AttributeContainer } from '../Attribute/AttributeContainer'
-import { AttributeKeyword, ComponentAttributes } from '../interfaces'
+import { ComponentAttributes } from '../interfaces'
 import { VirtualNode } from './VirtualNode'
 
 export enum VirtualElementPresentState {
@@ -9,7 +9,7 @@ export enum VirtualElementPresentState {
 
 export class VirtualElement extends VirtualNode {
     protected attributes?: ComponentAttributes
-    protected attributesContainer?: AttributeContainer
+    protected attributesContainer: AttributeContainer
 
     protected readonly childVirtualNodes: VirtualNode[] = []
 
@@ -20,23 +20,42 @@ export class VirtualElement extends VirtualNode {
         super()
         this.tagName = tagName
         this.attributes = attributes
-
-        if (this.shouldRenderAttributes()) {
-            this.attributesContainer = new AttributeContainer(this)
-        }
+        this.attributesContainer = new AttributeContainer(this)
     }
 
     public addChildVirtualNode(virtualNode: VirtualNode) {
         this.childVirtualNodes.push(virtualNode)
     }
 
+    public getChildVirtualNodes(): VirtualNode[] {
+        return this.childVirtualNodes
+    }
+
+    public shouldRenderChildVirtualNodes(): boolean {
+        return true
+    }
+
     protected beforeRender() {
+        this.attributesContainer.initialize(this.attributes)
+
         if (this.shouldRenderAttributes()) {
-            this.attributesContainer!.renderSpecialAttributes()
+            this.attributesContainer.renderSpecialAttributes()
         }
 
         if (this.shouldRender()) {
             super.beforeRender()
+        }
+    }
+
+    protected afterRender() {
+        if (this.shouldRender()) {
+            super.afterRender()
+
+            if (this.shouldRenderAttributes()) {
+                this.attributesContainer.renderStaticAttributes()
+                this.attributesContainer.renderDynamicAttributes()
+                this.attributesContainer.renderEventAttributes()
+            }
         }
     }
 
@@ -51,13 +70,6 @@ export class VirtualElement extends VirtualNode {
     }
 
     protected shouldRenderAttributes(): boolean {
-        if (!this.attributes) {
-            return false
-        }
-
-        return AttributeKeyword.Special in this.attributes
-            || AttributeKeyword.Static in this.attributes
-            || AttributeKeyword.Dynamic in this.attributes
-            || AttributeKeyword.Injection in this.attributes
+        return !!this.attributes
     }
 }

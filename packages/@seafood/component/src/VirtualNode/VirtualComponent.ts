@@ -1,4 +1,3 @@
-import { AttributeContainer } from '../Attribute/AttributeContainer'
 import { Component } from '../Component'
 import { ComponentAttributes } from '../interfaces'
 import { VirtualElement } from './VirtualElement'
@@ -10,9 +9,11 @@ export class VirtualComponent extends VirtualElement {
         super()
         this.component = component
         this.attributes = attributes
+    }
 
-        if (this.shouldRenderAttributes()) {
-            this.attributesContainer = new AttributeContainer(this)
-        }
+    public shouldRenderChildVirtualNodes(): boolean {
+        // children of a component is an embedded content
+        // so it's not should be rendered here
+        return false
     }
 }
