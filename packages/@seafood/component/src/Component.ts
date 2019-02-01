@@ -1,4 +1,7 @@
-import { AttributeProperties, DECORATOR_ATTRIBUTE_FLAG } from './Decorators/Attribute'
+import {
+    AttributeProperties,
+    DECORATOR_ATTRIBUTE_FLAG
+} from './Decorators/Attribute'
 import { unreactive } from './Decorators/Unreactive'
 import { parseArgs } from './Decorators/Use'
 import { ComponentAttributes } from './interfaces'
@@ -20,6 +23,8 @@ export interface ComponentEventInterface {
 }
 
 export const ComponentSymbol = Symbol('ComponentSymbol')
+export const ParentComponentSymbol = Symbol('ParentComponentSymbol')
+export const ParentRenderSymbol = Symbol('ParentRenderSymbol')
 
 // todo: make a seperate class implemented render functionality
 export class Component implements ComponentEventInterface {
@@ -210,6 +215,17 @@ export class Component implements ComponentEventInterface {
     }
 
     private resolveComponent = (name: string): Component => {
+        if (name === 'parent') {
+            try {
+                const parent: any = Reflect.getPrototypeOf(
+                    Reflect.getPrototypeOf(this)
+                )
+                return new parent.constructor()
+            } catch (e) {
+                this.throwComponentNotFoundException(name)
+            }
+        }
+
         if (!this.usedComponents) {
             return this.throwComponentNotFoundException(name)
         }
@@ -224,6 +240,14 @@ export class Component implements ComponentEventInterface {
     }
 
     private throwComponentNotFoundException(name: string): never {
-        throw new Error(`Component with name '${name}' not found.`)
+        if (name === 'parent') {
+            throw new Error(
+                `Cannot find parent component template. ` +
+                `Please make sure you are extending this component of a ` +
+                `component with a template.`
+            )
+        } else {
+            throw new Error(`Component with name '${name}' not found.`)
+        }
     }
 }

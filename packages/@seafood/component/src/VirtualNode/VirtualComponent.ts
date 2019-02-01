@@ -5,7 +5,7 @@ import { VirtualNode } from './VirtualNode'
 
 export class VirtualComponent extends VirtualElement {
     private component: Component
-    private embeddedContent?: VirtualNode[]
+    private readonly embeddedContent?: VirtualNode[]
 
     constructor(
         component: Component,

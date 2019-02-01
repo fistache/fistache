@@ -1,5 +1,5 @@
 {
-  "name": "@seafood/compiler",
+  "name": "@seafood/template-compiler",
   "version": "1.0.0",
   "types": "./index.ts",
   "main": "./dist/index.js",

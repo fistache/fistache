@@ -77,8 +77,8 @@ export class SeafoodLoader {
             import script from ${scriptRequest}
             import template from ${templateRequest}
 
-            script.prototype[ComponentSymbol] = true
             script.prototype.__render = template
+            script.prototype[ComponentSymbol] = true
 
             export default script
         `)
