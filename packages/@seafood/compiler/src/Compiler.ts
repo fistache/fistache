@@ -220,15 +220,11 @@ export class Compiler {
     private computeRenderString(tag: TagInfo): string {
         const children = tag.children.map((info: NodeInfo) => {
             if ((info as TextNode).text) {
-                const text = this.filterText((info as TextNode).text)
-
-                if (text) {
-                    return this.makeTextRenderFunction(text)
-                }
+                return this.makeTextRenderFunction((info as TextNode).text)
             }
 
             return (info as TagInfo).renderString
-        }).filter((result: string | undefined) => {
+        }).filter((result: string | null | undefined) => {
             return !!result
         })
 
@@ -245,17 +241,25 @@ export class Compiler {
 
         return `${tag.isComponent
             ? FunctionKeyword.Component
-            : FunctionKeyword.Element
+            : tag.name === 'content'
+                ? FunctionKeyword.EmbeddedContent
+                : FunctionKeyword.Element
         }(` +
             `${tag.isComponent
                 ? this.dependencies.get(tag.name)!.varName
                 : `'${tag.name}'`},` +
             `${JSON.stringify(
-                tag.attributes
-                    ? this.filterAttributes(tag.attributes)
-                    : null
+                tag.name === 'content'
+                    ? null
+                    : tag.attributes
+                        ? this.filterAttributes(tag.attributes)
+                        : null
             )},` +
-            `${children!.length ? `[${children}]` : null}` +
+            `${tag.name === 'content'
+                ? null
+                : children!.length
+                    ? `[${children}]`
+                    : null}` +
         `)`
     }
 
@@ -419,12 +423,18 @@ export class Compiler {
         return result.join('+')
     }
 
-    private makeTextRenderFunction(text: string) {
-        return `${FunctionKeyword.Text}(${text})`
+    private makeTextRenderFunction(text: string | null): string | null {
+        text = this.filterText(text)
+
+        if (text) {
+            return `${FunctionKeyword.Text}(${text})`
+        }
+
+        return null
     }
 
     private isItComponentName(name: string): boolean {
-        return !HtmlTags.includes(name)
+        return !HtmlTags.includes(name) && name !== 'content'
     }
 }
 

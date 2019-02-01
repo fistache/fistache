@@ -1,7 +1,7 @@
-import { Component } from '../Component'
+import { Component, ComponentSymbol } from '../Component'
 
 export interface ParsedArgs {
-    usedComponents: Map<string, Component>
+    usedComponents: Map<string, new () => Component>
     usedStuff: Set<any>
 }
 
@@ -22,14 +22,17 @@ export function use(args: any) {
 }
 
 export function parseArgs(args: any): ParsedArgs {
-    const usedComponents = new Map<string, Component>()
+    const usedComponents = new Map<string, new () => Component>()
     const usedStuff = new Set()
 
     for (const argName in args) {
         if (args.hasOwnProperty(argName)) {
             const argValue = args[argName]
 
-            if (argValue.isItCompiledComponent) {
+            if (argValue
+                && argValue.prototype
+                && argValue.prototype[ComponentSymbol]
+            ) {
                 usedComponents.set(computeComponentName(argName), argValue)
             } else {
                 usedStuff.add(argValue)

@@ -60,7 +60,7 @@ export class VirtualElement extends VirtualNode {
     }
 
     protected makeNode(): Element | void {
-        if (this.tagName) {
+        if (this.tagName && this.shouldRender()) {
             return document.createElement(this.tagName)
         }
     }

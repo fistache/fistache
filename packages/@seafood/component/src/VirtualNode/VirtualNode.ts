@@ -1,9 +1,9 @@
 import { VirtualElement } from './VirtualElement'
 
 export abstract class VirtualNode {
-    private node: Node | null = null
+    protected parentVirtualElement?: VirtualElement
 
-    private parentVirtualElement?: VirtualElement
+    private node: Node | null = null
 
     public render() {
         this.beforeRender()

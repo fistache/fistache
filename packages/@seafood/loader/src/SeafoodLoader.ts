@@ -73,9 +73,11 @@ export class SeafoodLoader {
         const templateRequest = this.makeTemplateCompileRequest()
 
         this.loaderContext.callback(null, `
+            import { ComponentSymbol } from '@seafood/component'
             import script from ${scriptRequest}
             import template from ${templateRequest}
 
+            script.prototype[ComponentSymbol] = true
             script.prototype.__render = template
 
             export default script

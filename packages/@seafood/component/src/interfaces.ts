@@ -3,6 +3,7 @@ import { TagAttrib } from '@seafood/compiler'
 export enum FunctionKeyword {
     Element =  '_e',
     Component = '_c',
+    EmbeddedContent = '_k',
     Text = '_t',
     Include = '_i'
 }

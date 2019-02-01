@@ -4,6 +4,7 @@ import { parseArgs } from './Decorators/Use'
 import { ComponentAttributes } from './interfaces'
 import { VirtualComponent } from './VirtualNode/VirtualComponent'
 import { VirtualElement } from './VirtualNode/VirtualElement'
+import { VirtualEmbeddedContent } from './VirtualNode/VirtualEmbeddedContent'
 import { VirtualNode } from './VirtualNode/VirtualNode'
 import { VirtualTextNode } from './VirtualNode/VirtualTextNode'
 
@@ -17,6 +18,8 @@ export interface ComponentEventInterface {
 
     fireEvent(eventName: Event): void
 }
+
+export const ComponentSymbol = Symbol('ComponentSymbol')
 
 // todo: make a seperate class implemented render functionality
 export class Component implements ComponentEventInterface {
@@ -49,18 +52,26 @@ export class Component implements ComponentEventInterface {
     protected usedStuff?: Set<any>
 
     @unreactive()
-    protected usedComponents?: Map<string, Component>
+    protected usedComponents?: Map<string, new () => Component>
 
     @unreactive()
     // tslint:disable-next-line: variable-name
     private __render!: (
-        element: any, component: any, text: any, include: any
+        element: any,
+        component: any,
+        embeddedContent: any,
+        text: any,
+        include: any
     ) => VirtualNode
+    private embeddedContent?: VirtualNode[]
 
-    public render(element: Element) {
+    public render(element: Element, embeddedContent?: VirtualNode[]) {
+        this.embeddedContent = embeddedContent
+
         const virtualNode = this.__render(
             this.renderElement,
             this.renderComponent,
+            this.renderEmbeddedContent,
             this.renderText,
             this.resolveComponent
         )
@@ -118,7 +129,7 @@ export class Component implements ComponentEventInterface {
         }
     }
 
-    public getUsedComponents(): Map<string, Component> | undefined {
+    public getUsedComponents(): Map<string, new () => Component> | undefined {
         return this.usedComponents
     }
 
@@ -186,8 +197,11 @@ export class Component implements ComponentEventInterface {
         attributes?: ComponentAttributes,
         embeddedContent?: VirtualNode[]
     ): VirtualComponent => {
-        // todo: render embedded content
-        return new VirtualComponent(component, attributes)
+        return new VirtualComponent(component, attributes, embeddedContent)
+    }
+
+    private renderEmbeddedContent = () => {
+        return new VirtualEmbeddedContent(this.embeddedContent)
     }
 
     private renderText = (expression: string): VirtualTextNode => {
@@ -206,7 +220,7 @@ export class Component implements ComponentEventInterface {
             return this.throwComponentNotFoundException(name)
         }
 
-        return component
+        return new component()
     }
 
     private throwComponentNotFoundException(name: string): never {
