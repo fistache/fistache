@@ -1,4 +1,4 @@
-import { AttributeKeyword, FunctionKeyword } from '@seafood/component'
+import { AttributeKeyword, FunctionKeyword, TagAttrib } from '@seafood/component'
 import { Parser } from 'htmlparser2'
 import { HtmlTags } from './HtmlTags'
 
@@ -23,11 +23,6 @@ interface TagInfo {
 interface TextNode {
     text: string
     parent?: TagInfo
-}
-
-export interface TagAttrib {
-    name: string
-    value?: string
 }
 
 interface ComponentDependency {
@@ -239,6 +234,50 @@ export class Compiler {
             }
         }
 
+        if (tag.name === 'slot') {
+            let slotId = null
+
+            if (tag.attributes) {
+                const idAttribs = tag.attributes.filter((attrib: TagAttrib) => {
+                    return attrib.name === 'id'
+                })
+
+                if (idAttribs.length > 1) {
+                    throw new Error(`Slot cannot have more than one "id"`)
+                }
+
+                if (idAttribs[0]) {
+                    slotId = idAttribs[0].value
+                }
+            }
+
+            if (!slotId) {
+                throw new Error(`Slot must have a unique "id"`)
+            }
+
+            return `${FunctionKeyword.Slot}('${slotId}', ${children!.length
+                ? `[${children}]`
+                : null})`
+        } else if (tag.name === 'content') {
+            let contentId = null
+
+            if (tag.attributes) {
+                const idAttribs = tag.attributes.filter((attrib: TagAttrib) => {
+                    return attrib.name === 'id'
+                })
+
+                if (idAttribs.length > 1) {
+                    throw new Error(`Content cannot have more than one "id"`)
+                }
+
+                if (idAttribs[0]) {
+                    contentId = idAttribs[0].value
+                }
+            }
+
+            return `${FunctionKeyword.EmbeddedContent}('${contentId}')`
+        }
+
         return `${tag.isComponent
             ? FunctionKeyword.Component
             : tag.name === 'content'
@@ -249,17 +288,13 @@ export class Compiler {
                 ? this.dependencies.get(tag.name)!.varName
                 : `'${tag.name}'`},` +
             `${JSON.stringify(
-                tag.name === 'content'
-                    ? null
-                    : tag.attributes
-                        ? this.filterAttributes(tag.attributes)
-                        : null
+                tag.attributes
+                    ? this.filterAttributes(tag.attributes)
+                    : null
             )},` +
-            `${tag.name === 'content'
-                ? null
-                : children!.length
-                    ? `[${children}]`
-                    : null}` +
+            `${children!.length
+                ? `[${children}]`
+                : null}` +
         `)`
     }
 
@@ -434,7 +469,7 @@ export class Compiler {
     }
 
     private isItComponentName(name: string): boolean {
-        return !HtmlTags.includes(name) && name !== 'content'
+        return !HtmlTags.includes(name) && name !== 'content' && name !== 'slot'
     }
 }
 

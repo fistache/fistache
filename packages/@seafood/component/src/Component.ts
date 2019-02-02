@@ -9,6 +9,7 @@ import { VirtualComponent } from './VirtualNode/VirtualComponent'
 import { VirtualElement } from './VirtualNode/VirtualElement'
 import { VirtualEmbeddedContent } from './VirtualNode/VirtualEmbeddedContent'
 import { VirtualNode } from './VirtualNode/VirtualNode'
+import { VirtualSlot } from './VirtualNode/VirtualSlot'
 import { VirtualTextNode } from './VirtualNode/VirtualTextNode'
 
 export enum Event {
@@ -65,6 +66,7 @@ export class Component implements ComponentEventInterface {
         element: any,
         component: any,
         embeddedContent: any,
+        slot: any,
         text: any,
         include: any
     ) => VirtualNode
@@ -77,6 +79,7 @@ export class Component implements ComponentEventInterface {
             this.renderElement,
             this.renderComponent,
             this.renderEmbeddedContent,
+            this.renderSlot,
             this.renderText,
             this.resolveComponent
         )
@@ -205,8 +208,27 @@ export class Component implements ComponentEventInterface {
         return new VirtualComponent(component, attributes, embeddedContent)
     }
 
-    private renderEmbeddedContent = () => {
-        return new VirtualEmbeddedContent(this.embeddedContent)
+    // content
+    private renderEmbeddedContent = (id: string | null) => {
+        let embeddedContent: VirtualNode[] | null | undefined
+            = this.embeddedContent
+
+        if (id) {
+            const slot = this.getEmbeddedContentSlot(id)
+            if (slot) {
+                embeddedContent = slot.getEmbeddedContent()
+            }
+        }
+
+        return new VirtualEmbeddedContent(embeddedContent)
+    }
+
+    // slot
+    private renderSlot = (
+        id: string,
+        embeddedContent: VirtualNode[] | null
+    ) => {
+        return new VirtualSlot(id, embeddedContent)
     }
 
     private renderText = (expression: string): VirtualTextNode => {
@@ -249,5 +271,20 @@ export class Component implements ComponentEventInterface {
         } else {
             throw new Error(`Component with name '${name}' not found.`)
         }
+    }
+
+    private getEmbeddedContentSlot(id: string): VirtualSlot | null {
+        if (this.embeddedContent) {
+            for (const child of this.embeddedContent) {
+                // getEmbeddedContent instead of instanceof check
+                // to improve performance
+                if ((child as VirtualSlot).getEmbeddedContent
+                    && (child as VirtualSlot).getId() === id) {
+                    return child as VirtualSlot
+                }
+            }
+        }
+
+        return null
     }
 }

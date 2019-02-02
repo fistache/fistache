@@ -1,9 +1,13 @@
-import { TagAttrib } from '@seafood/compiler'
+export interface TagAttrib {
+    name: string
+    value?: string
+}
 
 export enum FunctionKeyword {
     Element =  '_e',
     Component = '_c',
     EmbeddedContent = '_k',
+    Slot = '_s',
     Text = '_t',
     Include = '_i'
 }

@@ -3,9 +3,9 @@ import { VirtualElement } from './VirtualElement'
 import { VirtualNode } from './VirtualNode'
 
 export class VirtualEmbeddedContent extends VirtualElement {
-    private readonly embeddedContent?: VirtualNode[]
+    private readonly embeddedContent?: VirtualNode[] | null
 
-    constructor(embeddedContent?: VirtualNode[]) {
+    constructor(embeddedContent?: VirtualNode[] | null) {
         super()
         this.embeddedContent = embeddedContent
     }
