@@ -70,8 +70,8 @@ module.exports = config => {
           appendTsSuffixTo: ['\\.seafood$']
         })
         .end()
-      .use('seafood-loader')
-        .loader('seafood-loader')
+      .use('@seafood/loader')
+        .loader('@seafood/loader')
         .end()
 
   config.module
