@@ -1,3 +1,4 @@
+import { VirtualElement } from '../VirtualNode/VirtualElement'
 import { DynamicAttribute } from './DynamicAttribute'
 
 export class SpecialAttribute extends DynamicAttribute {
@@ -16,6 +17,15 @@ export class SpecialAttribute extends DynamicAttribute {
     }
 
     private appendIfAttribute() {
-        console.log('@if', this.value)
+        const virtualElement = this.getVirtualElement() as VirtualElement
+        const scope = virtualElement.getScope()
+        const expressionResult = scope.executeExpression(
+            this.value as string,
+            (value: any) => {
+                virtualElement.updateIfAttributeValue(value)
+            }
+        )
+
+        virtualElement.updateIfAttributeValue(expressionResult)
     }
 }

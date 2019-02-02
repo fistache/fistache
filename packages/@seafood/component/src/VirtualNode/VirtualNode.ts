@@ -1,9 +1,25 @@
+import { Scope } from '@seafood/reactivity'
 import { VirtualElement } from './VirtualElement'
+
+export interface VirtualNodePosition {
+    primary: number
+    secondary?: number
+}
 
 export abstract class VirtualNode {
     protected parentVirtualElement?: VirtualElement
 
     private node: Node | null = null
+    private scope: Scope = new Scope()
+
+    private anchorNode = document.createTextNode('')
+    private position: VirtualNodePosition
+
+    protected constructor(position: number = 0) {
+        this.position = {
+            primary: position
+        }
+    }
 
     public render() {
         this.beforeRender()
@@ -23,7 +39,55 @@ export abstract class VirtualNode {
         return false
     }
 
+    public getScope(): Scope {
+        return this.scope
+    }
+
+    public getAnchorNode(): Text {
+        return this.anchorNode
+    }
+
+    public attach(nextSiblingNode?: Node | null) {
+        if (this.node && this.parentVirtualElement) {
+            if (!nextSiblingNode) {
+                nextSiblingNode = this.parentVirtualElement.getNextSiblingNode(
+                    this.position
+                )
+            }
+
+            if (nextSiblingNode && nextSiblingNode.parentNode) {
+                nextSiblingNode.parentNode.insertBefore(
+                    this.node, nextSiblingNode
+                )
+                this.afterRender()
+            }
+        }
+    }
+
+    public detach() {
+        if (this.node && this.node.parentNode) {
+            this.node.parentNode.removeChild(this.node)
+        }
+    }
+
+    public delete() {
+        this.detach()
+
+        if (this.parentVirtualElement) {
+            this.parentVirtualElement.removeChildVirtualNode(this)
+        }
+    }
+
+    public setPrimaryPosition(position: number) {
+        this.position.primary = position
+    }
+
+    public setSecondaryPosition(position: number) {
+        this.position.secondary = position
+    }
+
     protected beforeRender() {
+        this.attachAnchorNode()
         this.bindNode()
     }
 
@@ -51,6 +115,16 @@ export abstract class VirtualNode {
 
         if (node) {
             this.node = node
+        }
+    }
+
+    private attachAnchorNode() {
+        if (this.parentVirtualElement) {
+            const parentNode = this.parentVirtualElement.getNode()
+
+            if (parentNode) {
+                parentNode.appendChild(this.anchorNode)
+            }
         }
     }
 }

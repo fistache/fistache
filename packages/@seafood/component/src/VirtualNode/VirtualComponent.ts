@@ -1,5 +1,5 @@
+import { ComponentAttributes } from '@seafood/shared'
 import { Component } from '../Component'
-import { ComponentAttributes } from '../interfaces'
 import { VirtualElement } from './VirtualElement'
 import { VirtualNode } from './VirtualNode'
 

@@ -13,3 +13,42 @@ focusing only on it.
 
 # Installation
 Coming soon.
+
+# Example component
+```XML
+<script>
+    import { Component, use, attribute } from '@seafood/component'
+    import Product from '../../Entity/Product'
+    import ProductPriceComponent from '../Components/ProductPrice.seafood'
+
+    @use({
+        ProductPriceComponent
+    })
+    export default class ProductComponent extends Component {
+        @attribute({
+            required: true
+        })
+        private product: Product
+    }
+</script>
+
+<div class="product">
+    <div class="product__name">{{ this.product.name }}</div>
+    <div class="product__body">
+        <ProductPrice price={ this.product.price } />
+    </div>
+</div>
+
+<style>
+    .product
+        background-color floralwhite
+
+    .product__name
+        font-size 2em
+        color darkblue
+
+    .product__body
+        background-color ghostwhite
+</style>
+
+```

@@ -1,4 +1,4 @@
-import { AttributeKeyword, FunctionKeyword, TagAttrib } from '@seafood/component'
+import { AttributeKeyword, FunctionKeyword, TagAttrib } from '@seafood/shared'
 import { Parser } from 'htmlparser2'
 import { HtmlTags } from './HtmlTags'
 

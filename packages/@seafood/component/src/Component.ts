@@ -1,10 +1,10 @@
+import { ComponentAttributes } from '@seafood/shared'
 import {
     AttributeProperties,
     DECORATOR_ATTRIBUTE_FLAG
 } from './Decorators/Attribute'
 import { unreactive } from './Decorators/Unreactive'
 import { parseArgs } from './Decorators/Use'
-import { ComponentAttributes } from './interfaces'
 import { VirtualComponent } from './VirtualNode/VirtualComponent'
 import { VirtualElement } from './VirtualNode/VirtualElement'
 import { VirtualEmbeddedContent } from './VirtualNode/VirtualEmbeddedContent'
@@ -208,7 +208,6 @@ export class Component implements ComponentEventInterface {
         return new VirtualComponent(component, attributes, embeddedContent)
     }
 
-    // content
     private renderEmbeddedContent = (id: string | null) => {
         let embeddedContent: VirtualNode[] | null | undefined
             = this.embeddedContent
@@ -223,7 +222,6 @@ export class Component implements ComponentEventInterface {
         return new VirtualEmbeddedContent(embeddedContent)
     }
 
-    // slot
     private renderSlot = (
         id: string,
         embeddedContent: VirtualNode[] | null

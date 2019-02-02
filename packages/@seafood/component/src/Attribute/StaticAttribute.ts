@@ -1,4 +1,4 @@
-import { TagAttrib } from '@seafood/compiler'
+import { TagAttrib } from '@seafood/shared'
 import { VirtualElement } from '../VirtualNode/VirtualElement'
 
 export class StaticAttribute {

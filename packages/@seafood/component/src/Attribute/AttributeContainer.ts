@@ -1,4 +1,4 @@
-import { AttributeKeyword, ComponentAttributes } from '../interfaces'
+import { AttributeKeyword, ComponentAttributes } from '@seafood/shared'
 import { VirtualElement } from '../VirtualNode/VirtualElement'
 import { DynamicAttribute } from './DynamicAttribute'
 import { EventAttribute } from './EventAttribute'
