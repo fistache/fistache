@@ -1,5 +1,9 @@
 import { Reactivity } from '@seafood/reactivity'
-import { ComponentAttributes } from '@seafood/shared'
+import {
+    AttributeKeyword,
+    ComponentAttributes,
+    TagAttrib
+} from '@seafood/shared'
 import { AttributeProperties, DECORATOR_ATTRIBUTE_FLAG } from './Decorators/Attribute'
 import { DECORATOR_UNREACTIVE_FLAG, unreactive } from './Decorators/Unreactive'
 import { parseArgs } from './Decorators/Use'
@@ -7,6 +11,7 @@ import { VirtualComponent } from './VirtualNode/VirtualComponent'
 import { VirtualElement } from './VirtualNode/VirtualElement'
 import { VirtualEmbeddedContent } from './VirtualNode/VirtualEmbeddedContent'
 import { VirtualNode } from './VirtualNode/VirtualNode'
+import { VirtualPackage } from './VirtualNode/VirtualPackage'
 import { VirtualSlot } from './VirtualNode/VirtualSlot'
 import { VirtualTextNode } from './VirtualNode/VirtualTextNode'
 
@@ -22,8 +27,6 @@ export interface ComponentEventInterface {
 }
 
 export const ComponentSymbol = Symbol('ComponentSymbol')
-export const ParentComponentSymbol = Symbol('ParentComponentSymbol')
-export const ParentRenderSymbol = Symbol('ParentRenderSymbol')
 
 // todo: make a seperate class implemented render functionality
 export class Component implements ComponentEventInterface {
@@ -193,6 +196,7 @@ export class Component implements ComponentEventInterface {
         children?: VirtualNode[]
     ): VirtualElement => {
         const virtualElement = new VirtualElement(element, attributes)
+        const forExpression = this.extractForExpressionIfExists(attributes)
         let position = 0
 
         if (children) {
@@ -208,29 +212,33 @@ export class Component implements ComponentEventInterface {
             }
         }
 
-        return virtualElement
+        return forExpression
+            ? new VirtualPackage(virtualElement, forExpression)
+            : virtualElement
     }
 
     private renderComponent = (
         component: Component,
         attributes?: ComponentAttributes,
         embeddedContent?: VirtualNode[]
-    ): VirtualComponent => {
+    ): VirtualElement => {
         const virtualComponent = new VirtualComponent(
             component, attributes, embeddedContent
         )
+        const forExpression = this.extractForExpressionIfExists(attributes)
         let position = 0
 
         if (embeddedContent) {
             for (const child of embeddedContent) {
                 child.setPrimaryPosition(position)
                 child.getScope().setParentScope(virtualComponent.getScope())
-                child.getScope().setContext(this)
                 position++
             }
         }
 
-        return virtualComponent
+        return forExpression
+            ? new VirtualPackage(virtualComponent, forExpression)
+            : virtualComponent
     }
 
     private renderEmbeddedContent = (id: string | null) => {
@@ -313,5 +321,23 @@ export class Component implements ComponentEventInterface {
 
     private makeReactive() {
         this.reactivity.bindComponent(DECORATOR_UNREACTIVE_FLAG)
+    }
+
+    private extractForExpressionIfExists(
+        attributes?: ComponentAttributes
+    ): string | false {
+        if (attributes && attributes[AttributeKeyword.Special]) {
+            const specialAttributes =
+                attributes[AttributeKeyword.Special] as TagAttrib[]
+            const forAttrib = specialAttributes.find((attrib: TagAttrib) => {
+                return attrib.name === 'for'
+            })
+
+            if (forAttrib) {
+                return forAttrib.value as string
+            }
+        }
+
+        return false
     }
 }

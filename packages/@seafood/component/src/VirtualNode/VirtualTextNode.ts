@@ -8,6 +8,12 @@ export class VirtualTextNode extends VirtualNode {
         this.expression = expression
     }
 
+    public clone(): VirtualNode {
+        return super.clone(new (this.constructor as any)(
+            this.expression
+        ) as VirtualTextNode)
+    }
+
     protected makeNode(): Node | void | null {
         const scope = this.getScope()
         const expressionResult = scope.executeExpression(

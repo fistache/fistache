@@ -16,7 +16,7 @@ export class VirtualElement extends VirtualNode {
     protected attributes?: ComponentAttributes
     protected attributesContainer: AttributeContainer
 
-    protected readonly childVirtualNodes: VirtualNode[] = []
+    protected childVirtualNodes: VirtualNode[] = []
 
     private presentState = VirtualElementPresentState.Present
     private readonly tagName?: string
@@ -26,15 +26,23 @@ export class VirtualElement extends VirtualNode {
 
     private isItMaquetteInstance = false
 
-    constructor(tagName?: string, attributes?: ComponentAttributes) {
+    constructor(
+        tagName?: string,
+        attributes?: ComponentAttributes
+    ) {
         super()
         this.tagName = tagName
         this.attributes = attributes
         this.attributesContainer = new AttributeContainer(this)
     }
 
-    public addChildVirtualNode(virtualNode: VirtualNode) {
-        this.childVirtualNodes.push(virtualNode)
+    public addChildVirtualNode(virtualNode: VirtualNode, index?: number) {
+        // todo: when attaching a virtual node add it to
+        // array of children using it's position
+
+        index
+            ? this.childVirtualNodes[index] = virtualNode
+            : this.childVirtualNodes.push(virtualNode)
     }
 
     public getChildVirtualNodes(): VirtualNode[] {
@@ -47,6 +55,10 @@ export class VirtualElement extends VirtualNode {
 
     public markAsMaquetteInstance() {
         this.isItMaquetteInstance = true
+    }
+
+    public getAttributeContainer(): AttributeContainer {
+        return this.attributesContainer
     }
 
     public updateIfAttributeValue(expressionValue: any, isItUpdate = true) {
@@ -73,9 +85,7 @@ export class VirtualElement extends VirtualNode {
                 ? this.attach()
                 : this.detach()
         } else if (this.shouldRender()) {
-            if (!this.isItMaquetteInstance) {
-                this.bindNode()
-            }
+            this.bindNode()
 
             this.renderNode()
             Component.renderFragment(this.childVirtualNodes)
@@ -180,17 +190,45 @@ export class VirtualElement extends VirtualNode {
         return true
     }
 
+    public clone(virtualElement?: VirtualElement): VirtualNode {
+        const parentScope = this.getScope().getParentScope()
+        if (!virtualElement) {
+            virtualElement = new (this.constructor as any)(
+                this.tagName,
+                this.attributes
+            ) as VirtualElement
+        }
+
+        virtualElement.setPosition(this.getPosition())
+        virtualElement.getScope().setContext(this.getScope().getContext())
+
+        if (parentScope) {
+            virtualElement.getScope().setParentScope(parentScope)
+        }
+
+        for (const childVirtualNode of this.getChildVirtualNodes()) {
+            const clonedVirtualNode = childVirtualNode.clone()
+            virtualElement.addChildVirtualNode(clonedVirtualNode)
+            clonedVirtualNode.setParentVirtualElement(virtualElement)
+            clonedVirtualNode.getScope().setParentScope(
+                virtualElement.getScope()
+            )
+        }
+
+        return virtualElement
+    }
+
     protected beforeRender() {
-        this.attachAnchorNode()
+        if (!this.isItMaquetteInstance) {
+            this.attachAnchorNode()
+        }
         this.attributesContainer.initialize(this.attributes)
 
         if (this.shouldRenderAttributes()) {
             this.attributesContainer.renderSpecialAttributes()
         }
 
-        if (!this.isItMaquetteInstance) {
-            this.bindNode()
-        }
+        this.bindNode()
     }
 
     protected afterRender() {
@@ -206,8 +244,8 @@ export class VirtualElement extends VirtualNode {
     }
 
     protected makeNode(): Element | void {
-        if (this.tagName && this.shouldRender()) {
-            return document.createElement(this.tagName)
+        if (this.shouldRender()) {
+            return document.createElement(this.tagName as string)
         }
     }
 

@@ -35,6 +35,10 @@ export abstract class VirtualNode {
         this.parentVirtualElement = virtualElement
     }
 
+    public getParentVirtualElement(): VirtualElement | undefined {
+        return this.parentVirtualElement
+    }
+
     public shouldRenderChildVirtualNodes(): boolean {
         return false
     }
@@ -81,12 +85,35 @@ export abstract class VirtualNode {
         }
     }
 
+    public setPosition(position: VirtualNodePosition) {
+        this.position.primary = position.primary
+        this.position.secondary = position.secondary
+    }
+
     public setPrimaryPosition(position: number) {
         this.position.primary = position
     }
 
     public setSecondaryPosition(position: number) {
         this.position.secondary = position
+    }
+
+    public clone(virtualNode?: VirtualNode): VirtualNode {
+        const parentScope = this.getScope().getParentScope()
+        if (!virtualNode) {
+            virtualNode = new (this.constructor as any)(
+                this.position.primary
+            ) as VirtualNode
+        }
+
+        virtualNode.setPosition(this.getPosition())
+        virtualNode.getScope().setContext(this.getScope().getContext())
+
+        if (parentScope) {
+            virtualNode.getScope().setParentScope(parentScope)
+        }
+
+        return virtualNode
     }
 
     protected beforeRender() {

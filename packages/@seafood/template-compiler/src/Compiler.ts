@@ -333,13 +333,29 @@ export class Compiler {
                 if (attribute.value!.length) {
                     hasInjection = true
                     specialAttribute.value = attribute.value!
-                        .slice(1, -1).trim()
+                        .slice(1, -1).trim().replace(/  +/g, ' ')
                 }
 
                 if (hasInjection && !specialAttribute.value!.length) {
                     throw new Error(
                         `Invalid value passed for '${attribute.name}'.`
                     )
+                }
+
+                if (specialAttribute.name === 'for') {
+                    const expressionParts = specialAttribute.value!.split(' ')
+
+                    if (specialAttribute.value!.includes(' of ')
+                        || specialAttribute.value!.includes(' in ')) {
+                        if (expressionParts[0] !== 'let') {
+                            throw new Error(`Variable must be declared using ` +
+                                                `'let' keyword.`
+                            )
+                        }
+
+                        expressionParts.shift()
+                        specialAttribute.value = expressionParts.join(' ')
+                    }
                 }
 
                 specialAttributes.push(specialAttribute)
@@ -413,7 +429,7 @@ export class Compiler {
     }
 
     private filterText(text: string | null | undefined): string | null {
-        if (!text) {
+        if (typeof text === 'undefined' || text === null) {
             return null
         }
 
@@ -437,7 +453,9 @@ export class Compiler {
             const expression = execResult[1].trim()
 
             if (execResult.index !== lastIndex) {
-                const slice = text.slice(lastIndex, execResult.index)
+                const slice = text
+                    .slice(lastIndex, execResult.index)
+                    .replace(/  +/g, ' ')
                 if (slice.trim().length) {
                     result.push(`'${slice}'`)
                 }
@@ -449,7 +467,7 @@ export class Compiler {
         }
 
         if (lastIndex !== text.length) {
-            const slice = text.slice(lastIndex)
+            const slice = text.slice(lastIndex).replace(/  +/g, ' ')
             if (slice.trim().length) {
                 result.push(`'${slice}'`)
             }

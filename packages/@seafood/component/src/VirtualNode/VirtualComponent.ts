@@ -1,10 +1,10 @@
 import { ComponentAttributes } from '@seafood/shared'
 import { Component } from '../Component'
-import { VirtualElement } from './VirtualElement'
+import { ElementSymbol, VirtualElement } from './VirtualElement'
 import { VirtualNode } from './VirtualNode'
 
 export class VirtualComponent extends VirtualElement {
-    private component: Component
+    private readonly component: Component
     private readonly embeddedContent?: VirtualNode[]
 
     constructor(
@@ -24,6 +24,21 @@ export class VirtualComponent extends VirtualElement {
         return false
     }
 
+    public clone(): VirtualNode {
+        return super.clone(new VirtualComponent(
+            this.component,
+            this.attributes,
+            this.embeddedContent
+        ))
+    }
+
+    protected beforeRender() {
+        super.beforeRender()
+        if (this.embeddedContent) {
+            this.bindChildrenContext(this.embeddedContent)
+        }
+    }
+
     protected makeNode(): Element | void {
         if (this.shouldRender() && this.parentVirtualElement) {
             const node = this.parentVirtualElement.getNode()
@@ -31,6 +46,19 @@ export class VirtualComponent extends VirtualElement {
             if (node) {
                 return this.component.render(
                     node as Element, this.embeddedContent
+                )
+            }
+        }
+    }
+
+    // todo: refactor context binding
+    private bindChildrenContext(children: VirtualNode[]) {
+        for (const child of children) {
+            child.getScope().setContext(this.getScope().getContext())
+
+            if ((child as VirtualElement)[ElementSymbol]) {
+                this.bindChildrenContext(
+                    (child as VirtualElement).getChildVirtualNodes()
                 )
             }
         }
