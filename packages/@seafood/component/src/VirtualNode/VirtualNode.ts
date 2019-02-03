@@ -13,7 +13,7 @@ export abstract class VirtualNode {
     private scope: Scope = new Scope()
 
     private anchorNode = document.createTextNode('')
-    private position: VirtualNodePosition
+    private readonly position: VirtualNodePosition
 
     protected constructor(position: number = 0) {
         this.position = {
@@ -47,6 +47,10 @@ export abstract class VirtualNode {
         return this.anchorNode
     }
 
+    public getPosition(): VirtualNodePosition {
+        return this.position
+    }
+
     public attach(nextSiblingNode?: Node | null) {
         if (this.node && this.parentVirtualElement) {
             if (!nextSiblingNode) {
@@ -59,7 +63,6 @@ export abstract class VirtualNode {
                 nextSiblingNode.parentNode.insertBefore(
                     this.node, nextSiblingNode
                 )
-                this.afterRender()
             }
         }
     }
@@ -110,7 +113,7 @@ export abstract class VirtualNode {
         // empty by default
     }
 
-    private bindNode() {
+    protected bindNode() {
         const node = this.makeNode()
 
         if (node) {
@@ -118,7 +121,7 @@ export abstract class VirtualNode {
         }
     }
 
-    private attachAnchorNode() {
+    protected attachAnchorNode() {
         if (this.parentVirtualElement) {
             const parentNode = this.parentVirtualElement.getNode()
 

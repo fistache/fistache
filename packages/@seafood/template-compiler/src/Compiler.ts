@@ -437,8 +437,8 @@ export class Compiler {
             const expression = execResult[1].trim()
 
             if (execResult.index !== lastIndex) {
-                const slice = text.slice(lastIndex, execResult.index).trim()
-                if (slice.length) {
+                const slice = text.slice(lastIndex, execResult.index)
+                if (slice.trim().length) {
                     result.push(`'${slice}'`)
                 }
             }
@@ -449,13 +449,13 @@ export class Compiler {
         }
 
         if (lastIndex !== text.length) {
-            const slice = text.slice(lastIndex).trim()
-            if (slice.length) {
+            const slice = text.slice(lastIndex)
+            if (slice.trim().length) {
                 result.push(`'${slice}'`)
             }
         }
 
-        return result.join('+')
+        return JSON.stringify(result.join('+'))
     }
 
     private makeTextRenderFunction(text: string | null): string | null {

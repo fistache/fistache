@@ -1,13 +1,18 @@
 import { ComponentAttributes } from '@seafood/shared'
 import { AttributeContainer } from '../Attribute/AttributeContainer'
-import { VirtualNode } from './VirtualNode'
+import { Component } from '../Component'
+import { VirtualNode, VirtualNodePosition } from './VirtualNode'
 
 export enum VirtualElementPresentState {
     Present,
     Missing
 }
 
+export const ElementSymbol = Symbol('VirtualElement')
+
 export class VirtualElement extends VirtualNode {
+    public [ElementSymbol] = true
+
     protected attributes?: ComponentAttributes
     protected attributesContainer: AttributeContainer
 
@@ -18,6 +23,8 @@ export class VirtualElement extends VirtualNode {
 
     private shouldListenToElse = false
     private hasBeenIfAttributeValueChanged = false
+
+    private isItMaquetteInstance = false
 
     constructor(tagName?: string, attributes?: ComponentAttributes) {
         super()
@@ -35,10 +42,14 @@ export class VirtualElement extends VirtualNode {
     }
 
     public shouldRenderChildVirtualNodes(): boolean {
-        return true
+        return this.shouldRender()
     }
 
-    public updateIfAttributeValue(expressionValue: any) {
+    public markAsMaquetteInstance() {
+        this.isItMaquetteInstance = true
+    }
+
+    public updateIfAttributeValue(expressionValue: any, isItUpdate = true) {
         const presentState = expressionValue
             ? VirtualElementPresentState.Present
             : VirtualElementPresentState.Missing
@@ -47,31 +58,46 @@ export class VirtualElement extends VirtualNode {
             = presentState !== this.getPresentState()
         this.setPresentState(presentState)
 
-        if (this.hasBeenIfAttributeValueChanged) {
+        if (isItUpdate && this.hasBeenIfAttributeValueChanged) {
             this.update()
-            this.updateNextVirtualNodesIfShouldListenToElse()
+            if (this.parentVirtualElement) {
+                this.parentVirtualElement
+                    .updateNextVirtualNodesIfShouldListenToElse(this)
+            }
         }
     }
 
     public update() {
         if (this.getNode()) {
-            this.isPresent()
+            this.shouldRender()
                 ? this.attach()
                 : this.detach()
+        } else if (this.shouldRender()) {
+            if (!this.isItMaquetteInstance) {
+                this.bindNode()
+            }
+
+            this.renderNode()
+            Component.renderFragment(this.childVirtualNodes)
         }
     }
 
-    public updateNextVirtualNodesIfShouldListenToElse() {
-        // todo: implement
+    public updateNextVirtualNodesIfShouldListenToElse(
+        virtualElement: VirtualElement
+    ) {
+        const maxIndex = this.childVirtualNodes.length - 1
+        let index = this.childVirtualNodes.indexOf(virtualElement)
 
-        // let nextVirtualNode = this.nextVirtualNode
-        // while (nextVirtualNode
-        //     && nextVirtualNode instanceof VirtualElement
-        //     && nextVirtualNode.getShouldListenToElse()
-        //     ) {
-        //     nextVirtualNode.update()
-        //     nextVirtualNode = nextVirtualNode.nextVirtualNode
-        // }
+        if (index >= 0 && index < maxIndex) {
+            let child
+            do {
+                child = this.childVirtualNodes[++index] as VirtualElement
+                child.update()
+            } while (index < maxIndex
+                && child[ElementSymbol]
+                && child.getShouldListenToElse()
+            )
+        }
     }
 
     public enableListeningToElse() {
@@ -109,15 +135,61 @@ export class VirtualElement extends VirtualNode {
         return null
     }
 
+    public getNextSiblingNode(position: VirtualNodePosition): Node | null {
+        let node = null
+
+        if (typeof position.secondary === 'undefined') {
+            for (const child of this.childVirtualNodes) {
+                if (child.getPosition().primary > position.primary) {
+                    node = child.getAnchorNode()
+                    break
+                }
+            }
+        } else {
+            for (const child of this.childVirtualNodes) {
+                if (child.getPosition().primary === position.primary) {
+                    node = child.getAnchorNode()
+                } else if (!node
+                    && child.getPosition().primary > position.primary
+                ) {
+                    node = child.getAnchorNode()
+                    break
+                } else if (child.getPosition().primary > position.primary) {
+                    break
+                }
+            }
+        }
+
+        if (!node && this.childVirtualNodes.length) {
+            node = this.childVirtualNodes[0].getAnchorNode()
+        }
+
+        return node
+    }
+
+    public shouldRender(): boolean {
+        if (this.getPresentState() === VirtualElementPresentState.Missing) {
+            return false
+        }
+
+        if (this.shouldListenToElse && this.parentVirtualElement) {
+            return !this.parentVirtualElement
+                .checkIfPrevNodesHasElseAndShouldRender(this)
+        }
+
+        return true
+    }
+
     protected beforeRender() {
+        this.attachAnchorNode()
         this.attributesContainer.initialize(this.attributes)
 
         if (this.shouldRenderAttributes()) {
             this.attributesContainer.renderSpecialAttributes()
         }
 
-        if (this.shouldRender()) {
-            super.beforeRender()
+        if (!this.isItMaquetteInstance) {
+            this.bindNode()
         }
     }
 
@@ -139,48 +211,29 @@ export class VirtualElement extends VirtualNode {
         }
     }
 
-    protected shouldRender(): boolean {
-        return this.presentState === VirtualElementPresentState.Present
-    }
-
     protected shouldRenderAttributes(): boolean {
         return !!this.attributes
     }
 
-    protected isPresent(): boolean {
-        if (this.getPresentState() === VirtualElementPresentState.Missing) {
-            return false
+    // todo: cache result
+    protected checkIfPrevNodesHasElseAndShouldRender(
+        virtualElement: VirtualElement
+    ): boolean {
+        let index = this.childVirtualNodes.indexOf(virtualElement)
+
+        if (index > 0) {
+            let child
+            do {
+                child = this.childVirtualNodes[--index] as VirtualElement
+                if (child.shouldRender()) {
+                    return true
+                }
+            } while (index >= 0
+                && child[ElementSymbol]
+                && child.getShouldListenToElse()
+            )
         }
 
-        if (this.shouldListenToElse) {
-            return !this.checkIfPrevNodesHasElseAndShouldRender()
-        }
-
-        return true
-    }
-
-    protected checkIfPrevNodesHasElseAndShouldRender(): boolean {
-        // let prevVirtualNode = this.prevVirtualNode
-        let result = false
-        // let distance = false
-        //
-        // while (prevVirtualNode && prevVirtualNode instanceof
-        // VirtualElement) {
-        //     if (!prevVirtualNode.getShouldListenToElse()) {
-        //         if (distance) {
-        //             break
-        //         } else {
-        //             distance = true
-        //         }
-        //     }
-        //
-        //     if (prevVirtualNode.isPresent()) {
-        //         result = true
-        //     }
-        //
-        //     prevVirtualNode = prevVirtualNode.prevVirtualNode
-        // }
-
-        return result
+        return false
     }
 }

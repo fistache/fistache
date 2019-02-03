@@ -11,6 +11,9 @@ export class SpecialAttribute extends DynamicAttribute {
             case('if'):
                 this.appendIfAttribute()
                 break
+            case('else'):
+                this.appendElseAttribute()
+                break
             // ignore for cause it's package-specific attribute
             case('for'): break
         }
@@ -26,6 +29,11 @@ export class SpecialAttribute extends DynamicAttribute {
             }
         )
 
-        virtualElement.updateIfAttributeValue(expressionResult)
+        virtualElement.updateIfAttributeValue(expressionResult, false)
+    }
+
+    private appendElseAttribute() {
+        const virtualElement = this.getVirtualElement() as VirtualElement
+        virtualElement.enableListeningToElse()
     }
 }

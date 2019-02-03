@@ -1,19 +1,9 @@
 import { ReactivityWatcher } from './ReactivityWatcher'
 
 export class Scope {
-    /**
-     * Array of objects which properties the element will use
-     * to bind a data.
-     */
-    protected variables: any
-
-    protected context: any
-    protected parentScope?: Scope
-
-    constructor() {
-        this.variables = {}
-        this.context = null
-    }
+    private variables: any = {}
+    private context: any = null
+    private parentScope?: Scope
 
     public setContext(context: any): void {
         this.context = context

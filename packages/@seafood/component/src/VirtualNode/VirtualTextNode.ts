@@ -9,7 +9,15 @@ export class VirtualTextNode extends VirtualNode {
     }
 
     protected makeNode(): Node | void | null {
-        // todo: resolve expression
-        return document.createTextNode(this.expression)
+        const scope = this.getScope()
+        const expressionResult = scope.executeExpression(
+            this.expression,
+            (value: any) => {
+                const node = this.getNode() as Text
+                node.textContent = value
+            }
+        )
+
+        return document.createTextNode(expressionResult)
     }
 }

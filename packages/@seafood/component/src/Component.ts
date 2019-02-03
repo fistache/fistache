@@ -1,9 +1,7 @@
+import { Reactivity } from '@seafood/reactivity'
 import { ComponentAttributes } from '@seafood/shared'
-import {
-    AttributeProperties,
-    DECORATOR_ATTRIBUTE_FLAG
-} from './Decorators/Attribute'
-import { unreactive } from './Decorators/Unreactive'
+import { AttributeProperties, DECORATOR_ATTRIBUTE_FLAG } from './Decorators/Attribute'
+import { DECORATOR_UNREACTIVE_FLAG, unreactive } from './Decorators/Unreactive'
 import { parseArgs } from './Decorators/Use'
 import { VirtualComponent } from './VirtualNode/VirtualComponent'
 import { VirtualElement } from './VirtualNode/VirtualElement'
@@ -32,6 +30,8 @@ export class Component implements ComponentEventInterface {
     public static renderFragment(stack: VirtualNode[]) {
         while (stack.length) {
             const virtualNode = stack.pop() as VirtualNode
+
+            // todo: normalize embedded content
 
             virtualNode.render()
 
@@ -72,7 +72,11 @@ export class Component implements ComponentEventInterface {
     ) => VirtualNode
     private embeddedContent?: VirtualNode[]
 
+    @unreactive()
+    private reactivity = new Reactivity(this)
+
     public render(element: Element, embeddedContent?: VirtualNode[]) {
+        this.makeReactive()
         this.embeddedContent = embeddedContent
 
         const virtualNode = this.__render(
@@ -189,11 +193,18 @@ export class Component implements ComponentEventInterface {
         children?: VirtualNode[]
     ): VirtualElement => {
         const virtualElement = new VirtualElement(element, attributes)
+        let position = 0
 
         if (children) {
             for (const child of children) {
                 virtualElement.addChildVirtualNode(child)
                 child.setParentVirtualElement(virtualElement)
+                child.setPrimaryPosition(position)
+
+                child.getScope().setParentScope(virtualElement.getScope())
+                child.getScope().setContext(this)
+
+                position++
             }
         }
 
@@ -205,7 +216,21 @@ export class Component implements ComponentEventInterface {
         attributes?: ComponentAttributes,
         embeddedContent?: VirtualNode[]
     ): VirtualComponent => {
-        return new VirtualComponent(component, attributes, embeddedContent)
+        const virtualComponent = new VirtualComponent(
+            component, attributes, embeddedContent
+        )
+        let position = 0
+
+        if (embeddedContent) {
+            for (const child of embeddedContent) {
+                child.setPrimaryPosition(position)
+                child.getScope().setParentScope(virtualComponent.getScope())
+                child.getScope().setContext(this)
+                position++
+            }
+        }
+
+        return virtualComponent
     }
 
     private renderEmbeddedContent = (id: string | null) => {
@@ -284,5 +309,9 @@ export class Component implements ComponentEventInterface {
         }
 
         return null
+    }
+
+    private makeReactive() {
+        this.reactivity.bindComponent(DECORATOR_UNREACTIVE_FLAG)
     }
 }
