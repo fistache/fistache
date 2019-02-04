@@ -359,7 +359,26 @@ export class Compiler {
                 }
 
                 specialAttributes.push(specialAttribute)
-            } else if (attribute.name.startsWith(':')) {
+            } else if (attribute.name === ':') {
+                if (!attribute!.value!.length ||
+                    !attribute.value!.startsWith('{')
+                ) {
+                    throw new Error(
+                        `Value of bind expression ` +
+                        `must be not static. Use {} instead of "" to set ` +
+                        `expression.`
+                    )
+                }
+
+                result.bindExpression = attribute!.value!.slice(1, -1)
+                    .trim()
+                    .replace(/  +/g, ' ')
+
+                if (result === '') {
+                    throw new Error(`Value of bind expression cannot ` +
+                                        `be empty.`)
+                }
+            } else if (attribute.name.startsWith('&')) {
                 const eventAttribute: TagAttrib = {
                     name: attribute.name.slice(1)
                 }
@@ -424,6 +443,7 @@ export class Compiler {
         if (eventAttributes.length) {
             result[AttributeKeyword.Event] = eventAttributes
         }
+        // bindExpression
 
         return result
     }

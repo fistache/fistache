@@ -26,4 +26,5 @@ export interface ComponentAttributes {
     [AttributeKeyword.Dynamic]: TagAttrib[]
     [AttributeKeyword.Injection]: TagAttrib[]
     [AttributeKeyword.Event]: TagAttrib[]
+    bindExpression?: string
 }

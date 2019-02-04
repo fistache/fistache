@@ -1,6 +1,8 @@
 import { ComponentAttributes } from '@seafood/shared'
 import { AttributeContainer } from '../Attribute/AttributeContainer'
 import { Component } from '../Component'
+import { InputCheckboxStrategy } from '../DataBinding/InputCheckboxStrategy'
+import { InputTextStrategy } from '../DataBinding/InputTextStrategy'
 import { VirtualNode, VirtualNodePosition } from './VirtualNode'
 
 export enum VirtualElementPresentState {
@@ -26,6 +28,8 @@ export class VirtualElement extends VirtualNode {
 
     private isItMaquetteInstance = false
 
+    private bindExpression?: string | null
+
     constructor(
         tagName?: string,
         attributes?: ComponentAttributes
@@ -34,6 +38,10 @@ export class VirtualElement extends VirtualNode {
         this.tagName = tagName
         this.attributes = attributes
         this.attributesContainer = new AttributeContainer(this)
+
+        if (attributes) {
+            this.bindExpression = attributes.bindExpression
+        }
     }
 
     public addChildVirtualNode(virtualNode: VirtualNode, index?: number) {
@@ -246,6 +254,58 @@ export class VirtualElement extends VirtualNode {
                 this.attributesContainer.renderStaticAttributes()
                 this.attributesContainer.renderDynamicAttributes()
                 this.attributesContainer.renderEventAttributes()
+            }
+            this.bindData()
+        }
+    }
+
+    protected bindData() {
+        if (this.bindExpression) {
+            const isItExpressionBind = this.bindExpression[0] === '{'
+                && this.bindExpression[this.bindExpression.length - 1] === '}'
+            this.bindExpression = isItExpressionBind
+                ? this.bindExpression.slice(1, -1)
+                : this.bindExpression
+            const isItContextVariable = this.bindExpression.startsWith('this.')
+            const variableName = isItContextVariable
+                ? this.bindExpression.slice(5 /* 5 is length of 'this.' */)
+                : this.bindExpression
+            const node = this.getNode() as Element
+
+            if (isItContextVariable) {
+                const tagName = node.tagName.toLowerCase()
+                let strategyClass: any
+
+                if (tagName === 'textarea') {
+                    strategyClass = InputTextStrategy
+                } else if (tagName === 'input') {
+                    const inputType = (node as HTMLInputElement).type
+                        .toLowerCase()
+
+                    switch (inputType) {
+                        case('text'):
+                            strategyClass = InputTextStrategy
+                            break
+                        case('checkbox'):
+                            strategyClass = InputCheckboxStrategy
+                            break
+                    }
+                }
+
+                if (strategyClass) {
+                    const strategy = new strategyClass(
+                        this.bindExpression, variableName, this
+                    )
+                    strategy.handle()
+                }
+            } else {
+                console.warn(`To bind a data to html element ` +
+                                 `variable name must starts with 'this.'`)
+                console.warn(`Local variables is not working for ` +
+                                 `data binding yet.`)
+                console.warn(`Or you passed wrong value or ` +
+                                 `expression. Passed '${this.bindExpression}'`)
+                console.warn(`Must be just a variable name.`)
             }
         }
     }
