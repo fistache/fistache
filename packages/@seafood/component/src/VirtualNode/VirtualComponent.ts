@@ -3,7 +3,11 @@ import { Component } from '../Component'
 import { ElementSymbol, VirtualElement } from './VirtualElement'
 import { VirtualNode } from './VirtualNode'
 
+export const VirtualComponentSymbol = Symbol('VirtualComponentSymbol')
+
 export class VirtualComponent extends VirtualElement {
+    public [VirtualComponentSymbol] = true
+
     private readonly component: Component
 
     constructor(
@@ -23,9 +27,13 @@ export class VirtualComponent extends VirtualElement {
 
     public clone(): VirtualNode {
         return super.clone(new VirtualComponent(
-            this.component,
+            this.component.clone(),
             this.attributes
         ))
+    }
+
+    public getComponent(): Component {
+        return this.component
     }
 
     protected beforeRender() {

@@ -1,9 +1,10 @@
 import hash from 'hash-sum'
-import { OptionObject } from 'loader-utils'
+import { OptionObject, stringifyRequest } from 'loader-utils'
 import path from 'path'
 import { OutputParams } from 'query-string'
 import {loader as WepbackLoader} from 'webpack'
 import { compileScript, compileStyle, compileTemplate } from './compile'
+import { HmrPlugin } from './Hmr/HmrPlugin'
 import { generateRequest } from './utils'
 import LoaderContext = WepbackLoader.LoaderContext
 
@@ -24,6 +25,9 @@ export class SeafoodLoader {
     private readonly query: OutputParams
     private readonly source: string
 
+    private readonly requestId: string
+    private readonly hmrPlugin: HmrPlugin
+
     constructor(
         loaderContext: LoaderContext,
         cwd: string,
@@ -36,6 +40,8 @@ export class SeafoodLoader {
         this.options = options
         this.query = query
         this.source = source
+        this.requestId = this.generateRequestId()
+        this.hmrPlugin = new HmrPlugin(this.requestId)
     }
 
     public resolveRequest() {
@@ -71,14 +77,23 @@ export class SeafoodLoader {
     private packUp() {
         const scriptRequest = this.makeScriptCompileRequest()
         const templateRequest = this.makeTemplateCompileRequest()
+        const hmrRequest = stringifyRequest(
+            this.loaderContext,
+            path.resolve(__dirname, '../src/Hmr/Hmr.ts')
+        )
+
+        this.hmrPlugin.setTemplateRequest(templateRequest)
 
         this.loaderContext.callback(null, `
             import { ComponentSymbol } from '@seafood/component'
             import script from ${scriptRequest}
             import template from ${templateRequest}
+            import Hmr from ${hmrRequest}
 
             script.prototype.__render = template
             script.prototype[ComponentSymbol] = true
+
+            ${this.hmrPlugin.generateCode()}
 
             export default script
         `)

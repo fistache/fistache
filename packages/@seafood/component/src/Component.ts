@@ -1,9 +1,5 @@
 import { Reactivity } from '@seafood/reactivity'
-import {
-    AttributeKeyword,
-    ComponentAttributes,
-    TagAttrib
-} from '@seafood/shared'
+import { AttributeKeyword, ComponentAttributes, Event, TagAttrib } from '@seafood/shared'
 import { AttributeProperties, DECORATOR_ATTRIBUTE_FLAG } from './Decorators/Attribute'
 import { DECORATOR_UNREACTIVE_FLAG, unreactive } from './Decorators/Unreactive'
 import { parseArgs } from './Decorators/Use'
@@ -15,10 +11,7 @@ import { VirtualPackage } from './VirtualNode/VirtualPackage'
 import { VirtualSlot } from './VirtualNode/VirtualSlot'
 import { VirtualTextNode } from './VirtualNode/VirtualTextNode'
 
-export enum Event {
-    Created,
-    Destroyed
-}
+export { Event } from '@seafood/shared'
 
 export interface ComponentEventInterface {
     bindEvent(eventName: Event, callback: () => void): void
@@ -33,8 +26,6 @@ export class Component implements ComponentEventInterface {
     public static renderFragment(stack: VirtualNode[]) {
         while (stack.length) {
             const virtualNode = stack.pop() as VirtualNode
-
-            // todo: normalize embedded content
 
             virtualNode.render()
 
@@ -65,6 +56,10 @@ export class Component implements ComponentEventInterface {
 
     @unreactive()
     // tslint:disable-next-line: variable-name
+    private __hmr: any
+
+    @unreactive()
+    // tslint:disable-next-line: variable-name
     private __render!: (
         element: any,
         component: any,
@@ -80,11 +75,28 @@ export class Component implements ComponentEventInterface {
     @unreactive()
     private reactivity = new Reactivity(this)
 
+    @unreactive()
+    private element!: Element
+
+    @unreactive()
+    private virtualNode!: VirtualNode
+
+    @unreactive()
+    private initialized = false
+
     public render(element: Element, embeddedContent?: VirtualNode[]) {
-        this.makeReactive()
+        if (!this.initialized) {
+            // todo: if dev env
+            this.enableHmr()
+            this.fireEvent(Event.Created)
+            this.makeReactive()
+            this.initialized = true
+        }
+
+        this.element = element
         this.embeddedContent = embeddedContent
 
-        const virtualNode = this.__render(
+        this.virtualNode = this.__render(
             this.renderElement,
             this.renderComponent,
             this.renderEmbeddedContent,
@@ -93,13 +105,17 @@ export class Component implements ComponentEventInterface {
             this.resolveComponent
         )
 
-        Component.renderFragment([virtualNode])
-
-        const node = virtualNode.getNode()
+        Component.renderFragment([this.virtualNode])
+        const node = this.virtualNode.getNode()
 
         if (node) {
             element.appendChild(node)
         }
+    }
+
+    public rerender() {
+        this.virtualNode.delete()
+        this.render(this.element, this.embeddedContent)
     }
 
     public setAttribute(this: any, name: string, value: any): void {
@@ -259,7 +275,11 @@ export class Component implements ComponentEventInterface {
             }
         }
 
-        return new VirtualEmbeddedContent(embeddedContent)
+        return new VirtualEmbeddedContent(
+            embeddedContent
+                ? embeddedContent.slice()
+                : undefined
+        )
     }
 
     private renderSlot = (
@@ -346,5 +366,19 @@ export class Component implements ComponentEventInterface {
         }
 
         return false
+    }
+
+    private enableHmr() {
+        this.bindHmrEvents()
+    }
+
+    private bindHmrEvents() {
+        if (this.__hmr && this.__hmr.events) {
+            const events = this.__hmr.events[Event.Created]
+
+            if (events && events.length) {
+                this.bindEvent(Event.Created, events[0].bind(this))
+            }
+        }
     }
 }
