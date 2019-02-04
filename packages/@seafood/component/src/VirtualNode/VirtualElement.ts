@@ -79,13 +79,12 @@ export class VirtualElement extends VirtualNode {
     }
 
     public update() {
-        if (this.getNode()) {
+        if (this.wasRendered) {
             this.shouldRender()
                 ? this.attach()
                 : this.detach()
         } else if (this.shouldRender()) {
             this.bindNode()
-
             this.renderNode()
             Component.renderFragment(this.childVirtualNodes)
         }
@@ -149,25 +148,33 @@ export class VirtualElement extends VirtualNode {
         secondaryPosition?: number,
         isUpdate = false
     ) {
+        const children = this.childVirtualNodes.slice().reverse()
+
         if (isUpdate) {
             const position = virtualNode.getPosition()
             let index = null
 
             if (typeof position.secondary === 'undefined') {
-                for (const child of this.childVirtualNodes) {
+                for (const child of children) {
                     if (child.getPosition().primary > position.primary) {
-                        index = this.childVirtualNodes.indexOf(child)
+                        index = children.indexOf(child)
                         break
                     }
                 }
             } else {
-                for (const child of this.childVirtualNodes) {
+                for (const child of children) {
+                    if (child.getPosition().primary === position.primary
+                        && child.getPosition().secondary === position.secondary
+                    ) {
+                        break
+                    }
+
                     if (child.getPosition().primary === position.primary) {
-                        index = this.childVirtualNodes.indexOf(child)
+                        index = children.indexOf(child)
                     } else if (index === null
                         && child.getPosition().primary > position.primary
                     ) {
-                        index = this.childVirtualNodes.indexOf(child)
+                        index = children.indexOf(child)
                         break
                     } else if (child.getPosition().primary > position.primary) {
                         break
@@ -179,7 +186,7 @@ export class VirtualElement extends VirtualNode {
                 this.childVirtualNodes.push(virtualNode)
             } else {
                 this.childVirtualNodes.splice(
-                    index + 1,
+                    index,
                     0,
                     virtualNode
                 )
@@ -192,17 +199,18 @@ export class VirtualElement extends VirtualNode {
     }
 
     public getNextSiblingNode(position: VirtualNodePosition): Node | null {
+        const children = this.childVirtualNodes.slice().reverse()
         let node = null
 
         if (typeof position.secondary === 'undefined' || position === null) {
-            for (const child of this.childVirtualNodes) {
+            for (const child of children) {
                 if (child.getPosition().primary > position.primary) {
                     node = child.getAnchorNode()
                     break
                 }
             }
         } else {
-            for (const child of this.childVirtualNodes) {
+            for (const child of children) {
                 if (child.getPosition().primary === position.primary
                     && child.getPosition().secondary === position.secondary) {
                     break
@@ -227,8 +235,8 @@ export class VirtualElement extends VirtualNode {
             }
         }
 
-        if (!node && this.childVirtualNodes.length) {
-            node = this.childVirtualNodes[0].getAnchorNode()
+        if (!node && children.length) {
+            node = children[0].getAnchorNode()
         }
 
         return node

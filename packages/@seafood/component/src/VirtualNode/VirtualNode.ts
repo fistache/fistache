@@ -10,6 +10,8 @@ export abstract class VirtualNode {
     protected parentVirtualElement?: VirtualElement
     protected anchorNode: Text | null = null
 
+    protected wasRendered = false
+
     private node: Node | null = null
     private scope: Scope = new Scope()
 
@@ -79,8 +81,13 @@ export abstract class VirtualNode {
     public delete() {
         this.detach()
 
+        this.getScope().removeParentScope()
+        // todo: remove depended function in reactive property
+        // todo: for virtual element remove event listeners and etc
+
         if (this.parentVirtualElement) {
             this.parentVirtualElement.removeChildVirtualNode(this)
+            this.parentVirtualElement = undefined
         }
     }
 
@@ -144,6 +151,7 @@ export abstract class VirtualNode {
 
         if (node) {
             this.node = node
+            this.wasRendered = true
         }
     }
 

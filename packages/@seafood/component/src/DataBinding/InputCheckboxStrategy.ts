@@ -18,12 +18,6 @@ export class InputCheckboxStrategy extends Strategy {
 
     private setValue(value: any) {
         const node = this.virtualElement.getNode() as Element
-        const attributeName = 'checked'
-
-        if (value) {
-            node.setAttribute(attributeName, attributeName)
-        } else {
-            node.removeAttribute(attributeName)
-        }
+        (node as HTMLInputElement).checked = !!value
     }
 }

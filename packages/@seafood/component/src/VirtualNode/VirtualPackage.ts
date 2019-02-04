@@ -1,6 +1,6 @@
 import { PROXY_TARGET_SYMBOL } from '@seafood/reactivity'
 import { Component } from '../Component'
-import { ElementSymbol, VirtualElement } from './VirtualElement'
+import { VirtualElement } from './VirtualElement'
 import { VirtualNode } from './VirtualNode'
 
 export interface ForExpressionResult {
@@ -24,6 +24,7 @@ export class VirtualPackage extends VirtualElement {
     }
 
     public render() {
+        this.attachAnchorNode()
         this.resolveExpression()
     }
 
@@ -325,10 +326,6 @@ export class VirtualPackage extends VirtualElement {
         }
 
         clonedVirtualNode.markAsMaquetteInstance()
-        clonedVirtualNode.getAttributeContainer().extend(
-            this.getAttributeContainer()
-        )
-
         clonedVirtualNode.setParentVirtualElement(
             this.parentVirtualElement as VirtualElement
         )
@@ -341,22 +338,15 @@ export class VirtualPackage extends VirtualElement {
     }
 
     private renderFragmentOnTree(virtualNode: VirtualNode) {
-        // const context = virtualNode.getScope().getContext()
-        const parentVirtualNode = this.getParentVirtualElement()
+        let nextSibling = this.getNextSiblingNode(
+            virtualNode.getPosition()
+        )
 
-        if (parentVirtualNode) {
-            let nextSibling = this.getNextSiblingNode(
-                virtualNode.getPosition()
-            )
-
-            if (parentVirtualNode && !nextSibling) {
-                nextSibling = parentVirtualNode.getNextSiblingNode(
-                    this.getPosition()
-                )
-            }
-
-            // todo: render to document fragment to improve performance
-            Component.renderFragment([virtualNode], nextSibling)
+        if (!nextSibling) {
+            nextSibling = this.getAnchorNode()
         }
+
+        // todo: render to document fragment to improve performance
+        Component.renderFragment([virtualNode], nextSibling)
     }
 }

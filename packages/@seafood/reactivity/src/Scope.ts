@@ -25,6 +25,10 @@ export class Scope {
         this.parentScope = scope
     }
 
+    public removeParentScope() {
+        this.parentScope = undefined
+    }
+
     public getParentScope(): Scope | undefined {
         return this.parentScope
     }
