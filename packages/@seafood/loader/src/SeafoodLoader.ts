@@ -6,7 +6,12 @@ import postcss from 'postcss'
 import { OutputParams } from 'query-string'
 import {loader as WepbackLoader} from 'webpack'
 import { LoadersArrayItem } from '../interfaces'
-import { compileScript, compileStyle, compileTemplate } from './compile'
+import {
+    compileScript,
+    compileStyle,
+    compileTemplate,
+    isStyleGlobal
+} from './compile'
 import { HmrPlugin } from './Hmr/HmrPlugin'
 import ScopeStyles from './ScopeStyles'
 import { generateRequest } from './utils'
@@ -77,7 +82,11 @@ export class SeafoodLoader {
                 compileTemplate(this.source, this.loaderContext, this.scopeId)
                 break
             case(SeafoodLoaderCompileSection.Style):
-                compileStyle(this.source, this.loaderContext)
+                compileStyle(
+                    this.source,
+                    this.getStyleResourcesFileImport(),
+                    this.loaderContext
+                )
                 break
         }
     }
@@ -186,16 +195,20 @@ export class SeafoodLoader {
         const indexOfStylus = userLoaders.findIndex((loader: any) => {
             return loader.loader === 'stylus-loader'
         })
-        userLoaders.splice(
-            indexOfStylus,
-            0,
-            {
-                loader: '@seafood/loader',
-                options: {
-                    scopeId: this.scopeId
+
+        if (!isStyleGlobal(this.source)) {
+            userLoaders.splice(
+                indexOfStylus,
+                0,
+                {
+                    loader: '@seafood/loader',
+                    options: {
+                        scopeId: this.scopeId
+                    }
                 }
-            }
-        )
+            )
+        }
+
         userLoaders.push({
             loader: '@seafood/loader'
         })
@@ -223,5 +236,19 @@ export class SeafoodLoader {
         }
 
         return result
+    }
+
+    private getStyleResourcesFileImport(): string {
+        return `@import "${this.getStyleResourcesFile()}"`
+    }
+
+    private getStyleResourcesFile(): string {
+        if (this.options
+            && this.options.styleResourcesFile
+        ) {
+            return this.options.styleResourcesFile
+        }
+
+        return path.resolve(this.cwd, 'resources/style/resources.styl')
     }
 }

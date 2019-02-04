@@ -83,7 +83,8 @@ module.exports = config => {
       .use('@seafood/loader')
         .loader('@seafood/loader')
         .options({
-          styleRules: config.module.rule('style').toConfig()
+          styleRules: config.module.rule('style').toConfig(),
+          styleResourcesFile: path.resolve('resources/style/resources.styl')
         })
         .end()
 

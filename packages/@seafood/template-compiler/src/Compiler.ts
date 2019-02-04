@@ -294,7 +294,7 @@ export class Compiler {
                 ? this.dependencies.get(tag.name)!.varName
                 : `'${tag.name}'`},` +
             `${JSON.stringify(
-                this.filterAttributes(tag.attributes)
+                this.filterAttributes(tag.attributes, tag.isComponent)
             )},` +
             `${children!.length
                 ? `[${children}]`
@@ -302,7 +302,7 @@ export class Compiler {
         `)`
     }
 
-    private filterAttributes(attributes: TagAttrib[]) {
+    private filterAttributes(attributes: TagAttrib[], isComponent = false) {
         const injectionAttributes: TagAttrib[] = []
         const staticAttributes: TagAttrib[] = []
         const dynamicAttributes: TagAttrib[] = []
@@ -432,9 +432,11 @@ export class Compiler {
             }
         }
 
-        staticAttributes.push({
-            name: this.scopeId
-        })
+        if (!isComponent) {
+            staticAttributes.push({
+                name: this.scopeId
+            })
+        }
 
         if (injectionAttributes.length) {
             result[AttributeKeyword.Injection] = injectionAttributes
