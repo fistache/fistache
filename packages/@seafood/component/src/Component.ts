@@ -23,11 +23,14 @@ export const ComponentSymbol = Symbol('ComponentSymbol')
 
 // todo: make a seperate class implemented render functionality
 export class Component implements ComponentEventInterface {
-    public static renderFragment(stack: VirtualNode[]) {
+    public static renderFragment(
+        stack: VirtualNode[],
+        attachBefore?: Node | null
+    ) {
         while (stack.length) {
             const virtualNode = stack.pop() as VirtualNode
 
-            virtualNode.render()
+            virtualNode.render(attachBefore)
 
             // shouldRenderChildVirtualNodes instead of instanceof check
             // to improve performance

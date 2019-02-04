@@ -44,15 +44,6 @@ export class VirtualElement extends VirtualNode {
         }
     }
 
-    public addChildVirtualNode(virtualNode: VirtualNode, index?: number) {
-        // todo: when attaching a virtual node add it to
-        // array of children using it's position
-
-        index
-            ? this.childVirtualNodes[index] = virtualNode
-            : this.childVirtualNodes.push(virtualNode)
-    }
-
     public getChildVirtualNodes(): VirtualNode[] {
         return this.childVirtualNodes
     }
@@ -153,10 +144,57 @@ export class VirtualElement extends VirtualNode {
         return null
     }
 
+    public addChildVirtualNode(
+        virtualNode: VirtualNode,
+        secondaryPosition?: number,
+        isUpdate = false
+    ) {
+        if (isUpdate) {
+            const position = virtualNode.getPosition()
+            let index = null
+
+            if (typeof position.secondary === 'undefined') {
+                for (const child of this.childVirtualNodes) {
+                    if (child.getPosition().primary > position.primary) {
+                        index = this.childVirtualNodes.indexOf(child)
+                        break
+                    }
+                }
+            } else {
+                for (const child of this.childVirtualNodes) {
+                    if (child.getPosition().primary === position.primary) {
+                        index = this.childVirtualNodes.indexOf(child)
+                    } else if (index === null
+                        && child.getPosition().primary > position.primary
+                    ) {
+                        index = this.childVirtualNodes.indexOf(child)
+                        break
+                    } else if (child.getPosition().primary > position.primary) {
+                        break
+                    }
+                }
+            }
+
+            if (index === null) {
+                this.childVirtualNodes.push(virtualNode)
+            } else {
+                this.childVirtualNodes.splice(
+                    index + 1,
+                    0,
+                    virtualNode
+                )
+            }
+        } else {
+            secondaryPosition
+                ? this.childVirtualNodes[secondaryPosition] = virtualNode
+                : this.childVirtualNodes.push(virtualNode)
+        }
+    }
+
     public getNextSiblingNode(position: VirtualNodePosition): Node | null {
         let node = null
 
-        if (typeof position.secondary === 'undefined') {
+        if (typeof position.secondary === 'undefined' || position === null) {
             for (const child of this.childVirtualNodes) {
                 if (child.getPosition().primary > position.primary) {
                     node = child.getAnchorNode()
@@ -165,12 +203,23 @@ export class VirtualElement extends VirtualNode {
             }
         } else {
             for (const child of this.childVirtualNodes) {
+                if (child.getPosition().primary === position.primary
+                    && child.getPosition().secondary === position.secondary) {
+                    break
+                }
+
                 if (child.getPosition().primary === position.primary) {
                     node = child.getAnchorNode()
+                    if (!node) {
+                        node = child.getNode()
+                    }
                 } else if (!node
                     && child.getPosition().primary > position.primary
                 ) {
                     node = child.getAnchorNode()
+                    if (!node) {
+                        node = child.getNode()
+                    }
                     break
                 } else if (child.getPosition().primary > position.primary) {
                     break
@@ -234,9 +283,7 @@ export class VirtualElement extends VirtualNode {
     }
 
     protected beforeRender() {
-        if (!this.isItMaquetteInstance) {
-            this.attachAnchorNode()
-        }
+        this.attachAnchorNode()
         this.attributesContainer.initialize(this.attributes)
 
         if (this.shouldRenderAttributes()) {
@@ -244,6 +291,12 @@ export class VirtualElement extends VirtualNode {
         }
 
         this.bindNode()
+    }
+
+    protected attachAnchorNode() {
+        if (!this.isItMaquetteInstance) {
+            super.attachAnchorNode()
+        }
     }
 
     protected afterRender() {

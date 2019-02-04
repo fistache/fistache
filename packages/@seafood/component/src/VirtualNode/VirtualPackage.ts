@@ -130,7 +130,7 @@ export class VirtualPackage extends VirtualElement {
                             return this.forExpressionResult.value[index]
                         }
                     }
-                })
+                }, isItUpdate)
 
                 if (isItUpdate) {
                     this.renderFragmentOnTree(virtualNode)
@@ -156,7 +156,7 @@ export class VirtualPackage extends VirtualElement {
                         value: () => {
                             return index
                         }
-                    })
+                    }, isItUpdate)
                     if (isItUpdate) {
                         this.renderFragmentOnTree(virtualNode)
                     }
@@ -180,9 +180,13 @@ export class VirtualPackage extends VirtualElement {
                         value: () => {
                             return i
                         }
-                    })
+                    }, isItUpdate)
                 } else {
-                    virtualNode = this.renderMaquette(+i)
+                    virtualNode = this.renderMaquette(
+                        +i,
+                        undefined,
+                        isItUpdate
+                    )
                 }
                 if (isItUpdate) {
                     this.renderFragmentOnTree(virtualNode)
@@ -309,7 +313,8 @@ export class VirtualPackage extends VirtualElement {
 
     private renderMaquette(
         secondaryPosition: number,
-        expressionResult?: ForExpressionResult
+        expressionResult?: ForExpressionResult,
+        isUpdate = false
     ): VirtualElement {
         const clonedVirtualNode = this.maquette.clone() as VirtualElement
 
@@ -319,12 +324,10 @@ export class VirtualPackage extends VirtualElement {
             )
         }
 
-        if (clonedVirtualNode[ElementSymbol]) {
-            clonedVirtualNode.markAsMaquetteInstance()
-            clonedVirtualNode.getAttributeContainer().extend(
-                this.getAttributeContainer()
-            )
-        }
+        clonedVirtualNode.markAsMaquetteInstance()
+        clonedVirtualNode.getAttributeContainer().extend(
+            this.getAttributeContainer()
+        )
 
         clonedVirtualNode.setParentVirtualElement(
             this.parentVirtualElement as VirtualElement
@@ -332,24 +335,28 @@ export class VirtualPackage extends VirtualElement {
 
         clonedVirtualNode.setPrimaryPosition(this.getPosition().primary)
         clonedVirtualNode.setSecondaryPosition(secondaryPosition)
-        this.addChildVirtualNode(clonedVirtualNode, secondaryPosition)
+        this.addChildVirtualNode(clonedVirtualNode, secondaryPosition, isUpdate)
 
         return clonedVirtualNode
     }
 
     private renderFragmentOnTree(virtualNode: VirtualNode) {
         // const context = virtualNode.getScope().getContext()
-        const parentVirtualNode = virtualNode.getParentVirtualElement()
-        let nextSibling = this.getNextSiblingNode(virtualNode.getPosition())
+        const parentVirtualNode = this.getParentVirtualElement()
 
-        if (parentVirtualNode && !nextSibling) {
-            nextSibling = parentVirtualNode.getNextSiblingNode(
-                this.getPosition()
+        if (parentVirtualNode) {
+            let nextSibling = this.getNextSiblingNode(
+                virtualNode.getPosition()
             )
-        }
 
-        // todo: render to document fragment to improve performance
-        Component.renderFragment([virtualNode])
-        virtualNode.attach(nextSibling)
+            if (parentVirtualNode && !nextSibling) {
+                nextSibling = parentVirtualNode.getNextSiblingNode(
+                    this.getPosition()
+                )
+            }
+
+            // todo: render to document fragment to improve performance
+            Component.renderFragment([virtualNode], nextSibling)
+        }
     }
 }

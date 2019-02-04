@@ -3,27 +3,26 @@ import { VirtualElement } from './VirtualElement'
 
 export interface VirtualNodePosition {
     primary: number
-    secondary?: number
+    secondary?: number | null
 }
 
 export abstract class VirtualNode {
     protected parentVirtualElement?: VirtualElement
+    protected anchorNode: Text | null = null
 
     private node: Node | null = null
     private scope: Scope = new Scope()
 
-    private anchorNode = document.createTextNode('')
-    private readonly position: VirtualNodePosition
-
-    protected constructor(position: number = 0) {
-        this.position = {
-            primary: position
-        }
+    private readonly position: VirtualNodePosition = {
+        primary: 0,
+        secondary: null
     }
 
-    public render() {
+    public render(attachBefore?: Node | null) {
         this.beforeRender()
-        this.renderNode()
+        attachBefore
+            ? this.attach(attachBefore)
+            : this.renderNode()
         this.afterRender()
     }
 
@@ -47,7 +46,7 @@ export abstract class VirtualNode {
         return this.scope
     }
 
-    public getAnchorNode(): Text {
+    public getAnchorNode(): Text | null {
         return this.anchorNode
     }
 
@@ -149,6 +148,7 @@ export abstract class VirtualNode {
     }
 
     protected attachAnchorNode() {
+        this.anchorNode = document.createTextNode('')
         if (this.parentVirtualElement) {
             const parentNode = this.parentVirtualElement.getNode()
 

@@ -22,6 +22,7 @@ export class VirtualEmbeddedContent extends VirtualElement {
         if (this.parentVirtualElement && this.embeddedContent) {
             for (const virtualNode of this.embeddedContent) {
                 virtualNode.setParentVirtualElement(this.parentVirtualElement)
+                virtualNode.setPrimaryPosition(this.getPosition().primary)
             }
         }
     }
