@@ -16,11 +16,15 @@ export function compileScript(source: string, loaderContext: LoaderContext) {
     loaderContext.callback(null, script)
 }
 
-export function compileTemplate(source: string, loaderContext: LoaderContext) {
+export function compileTemplate(
+    source: string,
+    loaderContext: LoaderContext,
+    scopeId: string
+) {
     source = stripScriptTag(source).trim()
     source = stripStyleTag(source).trim()
 
-    compile(source, (result: string) => {
+    compile(source, scopeId, (result: string) => {
         loaderContext.callback(null, result)
     })
 }

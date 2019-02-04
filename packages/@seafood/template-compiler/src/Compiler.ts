@@ -32,6 +32,7 @@ interface ComponentDependency {
 
 export class Compiler {
     private readonly source: string
+    private readonly scopeId: string
 
     private doneCallback?: () => void
     private errorCallback?: (error: any) => void
@@ -48,8 +49,9 @@ export class Compiler {
 
     private parser!: Parser
 
-    constructor(source: string) {
+    constructor(source: string, scopeId: string) {
         this.source = source
+        this.scopeId = scopeId
         this.configureParser()
     }
 
@@ -278,6 +280,10 @@ export class Compiler {
             return `${FunctionKeyword.EmbeddedContent}('${contentId}')`
         }
 
+        if (!tag.attributes) {
+            tag.attributes = []
+        }
+
         return `${tag.isComponent
             ? FunctionKeyword.Component
             : tag.name === 'content'
@@ -288,9 +294,7 @@ export class Compiler {
                 ? this.dependencies.get(tag.name)!.varName
                 : `'${tag.name}'`},` +
             `${JSON.stringify(
-                tag.attributes
-                    ? this.filterAttributes(tag.attributes)
-                    : null
+                this.filterAttributes(tag.attributes)
             )},` +
             `${children!.length
                 ? `[${children}]`
@@ -428,6 +432,10 @@ export class Compiler {
             }
         }
 
+        staticAttributes.push({
+            name: this.scopeId
+        })
+
         if (injectionAttributes.length) {
             result[AttributeKeyword.Injection] = injectionAttributes
         }
@@ -511,8 +519,12 @@ export class Compiler {
     }
 }
 
-export function compile(source: string, callback: (result: string) => void) {
-    const compiler = new Compiler(source)
+export function compile(
+    source: string,
+    scopeId: string,
+    callback: (result: string) => void
+) {
+    const compiler = new Compiler(source, scopeId)
 
     compiler.error((error: any) => {
         throw error

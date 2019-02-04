@@ -1,10 +1,14 @@
+import rs from 'crypto-random-string'
 import hash from 'hash-sum'
 import { OptionObject, stringifyRequest } from 'loader-utils'
 import path from 'path'
+import postcss from 'postcss'
 import { OutputParams } from 'query-string'
 import {loader as WepbackLoader} from 'webpack'
+import { LoadersArrayItem } from '../interfaces'
 import { compileScript, compileStyle, compileTemplate } from './compile'
 import { HmrPlugin } from './Hmr/HmrPlugin'
+import ScopeStyles from './ScopeStyles'
 import { generateRequest } from './utils'
 import LoaderContext = WepbackLoader.LoaderContext
 
@@ -21,10 +25,11 @@ export enum SeafoodLoaderCompileSection {
 export class SeafoodLoader {
     private readonly loaderContext: LoaderContext
     private cwd: string
-    private options: OptionObject
+    private readonly options: OptionObject
     private readonly query: OutputParams
     private readonly source: string
 
+    private readonly scopeId: string
     private readonly requestId: string
     private readonly hmrPlugin: HmrPlugin
 
@@ -42,10 +47,13 @@ export class SeafoodLoader {
         this.source = source
         this.requestId = this.generateRequestId()
         this.hmrPlugin = new HmrPlugin(this.requestId)
+        this.scopeId = this.computeScopeId()
     }
 
     public resolveRequest() {
-        if (this.shouldCompile()) {
+        if (this.shouldScopeStyle()) {
+            this.appendStyleScope()
+        } else if (this.shouldCompile()) {
             this.compile()
         } else {
             this.packUp()
@@ -56,18 +64,29 @@ export class SeafoodLoader {
         return SeafoodLoaderQueryFlag.Compile in this.query
     }
 
+    private shouldScopeStyle(): boolean {
+        return this.options && this.options.scopeId
+    }
+
     private compile() {
         switch (this.query[SeafoodLoaderQueryFlag.Compile]) {
             case(SeafoodLoaderCompileSection.Script):
                 compileScript(this.source, this.loaderContext)
                 break
             case(SeafoodLoaderCompileSection.Template):
-                compileTemplate(this.source, this.loaderContext)
+                compileTemplate(this.source, this.loaderContext, this.scopeId)
                 break
             case(SeafoodLoaderCompileSection.Style):
                 compileStyle(this.source, this.loaderContext)
                 break
         }
+    }
+
+    private appendStyleScope() {
+        const scopeId = this.options && this.options.scopeId
+        this.loaderContext.callback(null, postcss(
+            [ScopeStyles(scopeId)]
+        ).process(this.source).css)
     }
 
     /**
@@ -77,6 +96,7 @@ export class SeafoodLoader {
     private packUp() {
         const scriptRequest = this.makeScriptCompileRequest()
         const templateRequest = this.makeTemplateCompileRequest()
+        const styleRequest = this.makeStyleCompileRequest()
         const hmrRequest = stringifyRequest(
             this.loaderContext,
             path.resolve(__dirname, '../src/Hmr/Hmr.ts')
@@ -88,9 +108,11 @@ export class SeafoodLoader {
             import { ComponentSymbol } from '@seafood/component'
             import script from ${scriptRequest}
             import template from ${templateRequest}
+            import style from ${styleRequest}
             import Hmr from ${hmrRequest}
 
             script.prototype.__render = template
+            script.prototype.__style = style
             script.prototype[ComponentSymbol] = true
 
             ${this.hmrPlugin.generateCode()}
@@ -101,7 +123,8 @@ export class SeafoodLoader {
 
     private makeCompileRequest(section: SeafoodLoaderCompileSection) {
         const {loaders, resourcePath} = this.loaderContext
-        const query = `?${SeafoodLoaderQueryFlag.Compile}=${section}`
+        const query = `?${SeafoodLoaderQueryFlag.Compile}=${section}&` +
+            `scopeId=${this.scopeId}`
 
         return generateRequest(
             this.loaderContext,
@@ -119,6 +142,19 @@ export class SeafoodLoader {
         return this.makeCompileRequest(SeafoodLoaderCompileSection.Template)
     }
 
+    private makeStyleCompileRequest() {
+        const {resourcePath} = this.loaderContext
+        const query = `?${SeafoodLoaderQueryFlag.Compile}=` +
+            `${SeafoodLoaderCompileSection.Style}&scopeId=${this.scopeId}`
+
+        return generateRequest(
+            this.loaderContext,
+            this.computeStyleLoaders(),
+            resourcePath,
+            query
+        )
+    }
+
     private generateRequestId() {
         const {resourcePath, resourceQuery} = this.loaderContext
         const filePath = path
@@ -127,5 +163,65 @@ export class SeafoodLoader {
             .replace(/\\/g, '/') + resourceQuery
 
         return hash(filePath)
+    }
+
+    private computeScopeId(): string {
+        return this.query && this.query.scopeId
+            || this.options && this.options.scopeId
+            || `_${rs(10)}`
+    }
+
+    private computeStyleLoaders(): LoadersArrayItem[] {
+        let userLoaders: any[] | null
+            = this.getStyleRules()
+
+        if (!userLoaders) {
+            userLoaders = [{
+                loader: 'css-loader'
+            }, {
+                loader: 'stylus-loader'
+            }]
+        }
+
+        const indexOfStylus = userLoaders.findIndex((loader: any) => {
+            return loader.loader === 'stylus-loader'
+        })
+        userLoaders.splice(
+            indexOfStylus,
+            0,
+            {
+                loader: '@seafood/loader',
+                options: {
+                    scopeId: this.scopeId
+                }
+            }
+        )
+        userLoaders.push({
+            loader: '@seafood/loader'
+        })
+
+        return userLoaders.map((loader: any) => {
+            return {
+                path: loader.loader,
+                options: loader.options
+            }
+        })
+    }
+
+    private getStyleRules(): any[] | null {
+        let result = null
+
+        if (this.options
+            && this.options.styleRules
+            && this.options.styleRules.use
+        ) {
+            result = this.options.styleRules.use.map((loader: any) => {
+                return {
+                    loader: loader.loader
+                }
+            })
+        }
+
+        return result
     }
 }

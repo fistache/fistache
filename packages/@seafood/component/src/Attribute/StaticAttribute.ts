@@ -20,8 +20,8 @@ export class StaticAttribute {
         const virtualElement = this.getVirtualElement()
         const node = virtualElement!.getNode()
 
-        if (node && this.value) {
-            (node as Element).setAttribute(this.getName(), this.value)
+        if (node) {
+            (node as Element).setAttribute(this.getName(), this.value || '')
         }
     }
 

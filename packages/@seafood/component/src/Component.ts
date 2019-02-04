@@ -73,6 +73,10 @@ export class Component implements ComponentEventInterface {
     ) => VirtualNode
 
     @unreactive()
+    // tslint:disable-next-line: variable-name
+    private __style: any
+
+    @unreactive()
     private embeddedContent?: VirtualNode[]
 
     @unreactive()
@@ -97,6 +101,7 @@ export class Component implements ComponentEventInterface {
             this.fireEvent(Event.Created)
             this.makeReactive()
             this.initialized = true
+            this.appendStyle()
         }
 
         this.element = element
@@ -122,6 +127,7 @@ export class Component implements ComponentEventInterface {
     }
 
     public rerender() {
+        this.appendStyle()
         this.virtualNode.delete()
         this.render(this.element, this.embeddedContent)
     }
@@ -391,6 +397,20 @@ export class Component implements ComponentEventInterface {
             if (events && events.length) {
                 this.bindEvent(Event.Created, events[0].bind(this))
             }
+        }
+    }
+
+    private appendStyle() {
+        if (this.__style) {
+            const head = document.head
+                || document.getElementsByTagName('head')[0]
+            const style = document.createElement('style')
+            const text = document.createTextNode(this.__style.toString())
+
+            style.type = 'text/css'
+
+            style.appendChild(text)
+            head.appendChild(style)
         }
     }
 }

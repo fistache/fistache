@@ -1,7 +1,6 @@
 import { Event } from '@seafood/shared'
 
 export default class Hmr {
-    public static instance: Hmr
     public static getInstance(): Hmr {
         if (!Hmr.instance) {
             Hmr.instance = new Hmr()
@@ -9,6 +8,7 @@ export default class Hmr {
 
         return Hmr.instance
     }
+    private static instance: Hmr
 
     private readonly data: any
 
@@ -34,6 +34,7 @@ export default class Hmr {
 
             if (data) {
                 data.components.forEach((component: any) => {
+                    component.__style = options.script.prototype.__style
                     component.__render = options.script.prototype.__render
                     component.usedComponents
                         = options.script.prototype.usedComponents

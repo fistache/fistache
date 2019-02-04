@@ -1,6 +1,6 @@
 export interface LoadersArrayItem {
-    request: string
+    request?: string
     path: string
-    query: string
-    options: any
+    query?: string
+    options?: any
 }

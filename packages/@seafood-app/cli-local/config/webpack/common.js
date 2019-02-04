@@ -51,6 +51,16 @@ module.exports = config => {
         .loader('html-loader')
 
   config.module
+    .rule('style')
+      .test(/\.styl$/)
+      .use('css-loader')
+        .loader('css-loader')
+        .end()
+      .use('stylus-loader')
+        .loader('stylus-loader')
+        .end()
+
+  config.module
     .rule('seafood')
       .test(/\.seafood$/)
       .exclude
@@ -72,6 +82,9 @@ module.exports = config => {
         .end()
       .use('@seafood/loader')
         .loader('@seafood/loader')
+        .options({
+          styleRules: config.module.rule('style').toConfig()
+        })
         .end()
 
   config.module
