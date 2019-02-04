@@ -55,13 +55,18 @@ export class Reactivity {
     protected getObjectProperty(
         obj: any,
         propertyKey: PropertyKey
-    ): ReactiveProperty {
+    ): ReactiveProperty | undefined {
         while (obj[PROXY_TARGET_SYMBOL]) {
             obj = obj[PROXY_TARGET_SYMBOL]
         }
 
-        const container = this.log.get(obj) as ObjectPropertyContainer
-        return container.get(propertyKey) as ReactiveProperty
+        const container = this.log.get(obj)
+
+        if (container) {
+            return container.get(propertyKey)
+        }
+
+        return undefined
     }
 
     private bindComponentProperty(
@@ -87,7 +92,8 @@ export class Reactivity {
                 this.merge(
                     obj,
                     reactiveValue,
-                    propertyKey as string, reactiveProperty
+                    propertyKey as string,
+                    reactiveProperty
                 )
                 property.value = reactiveValue[propertyKey as string]
                 reactiveProperty.notifyParentAndChildren()
@@ -165,12 +171,16 @@ export class Reactivity {
                     return target
                 }
 
-                const targetReactiveProperty = this.getObjectProperty(
-                    target, targetPropertyKey
-                )
+                if (target.hasOwnProperty(targetPropertyKey)) {
+                    const targetReactiveProperty = this.getObjectProperty(
+                        target, targetPropertyKey
+                    )
 
-                if (targetReactiveProperty) {
-                    this.watch(targetReactiveProperty)
+                    if (targetReactiveProperty) {
+                        this.watch(targetReactiveProperty)
+                    }
+                } else if (targetPropertyKey === Symbol.toPrimitive) {
+                    return () => JSON.stringify(target)
                 }
 
                 return target[targetPropertyKey]
@@ -215,7 +225,7 @@ export class Reactivity {
                     ignoreNextLengthSetNotify = true
                     target[targetPropertyKey] = value
                     this.bindObjectProperty(
-                        obj, targetPropertyKey, reactiveProperty
+                        obj[propertyKey], targetPropertyKey, reactiveProperty
                     )
                     reactiveProperty.notifyParent()
                 }

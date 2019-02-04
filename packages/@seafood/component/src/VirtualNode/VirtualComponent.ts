@@ -5,17 +5,14 @@ import { VirtualNode } from './VirtualNode'
 
 export class VirtualComponent extends VirtualElement {
     private readonly component: Component
-    private readonly embeddedContent?: VirtualNode[]
 
     constructor(
         component: Component,
-        attributes?: ComponentAttributes,
-        embeddedContent?: VirtualNode[]
+        attributes?: ComponentAttributes
     ) {
         super()
         this.component = component
         this.attributes = attributes
-        this.embeddedContent = embeddedContent
     }
 
     public shouldRenderChildVirtualNodes(): boolean {
@@ -27,15 +24,14 @@ export class VirtualComponent extends VirtualElement {
     public clone(): VirtualNode {
         return super.clone(new VirtualComponent(
             this.component,
-            this.attributes,
-            this.embeddedContent
+            this.attributes
         ))
     }
 
     protected beforeRender() {
         super.beforeRender()
-        if (this.embeddedContent) {
-            this.bindChildrenContext(this.embeddedContent)
+        if (this.childVirtualNodes) {
+            this.bindChildrenContext(this.childVirtualNodes)
         }
     }
 
@@ -45,7 +41,7 @@ export class VirtualComponent extends VirtualElement {
 
             if (node) {
                 return this.component.render(
-                    node as Element, this.embeddedContent
+                    node as Element, this.childVirtualNodes.slice()
                 )
             }
         }

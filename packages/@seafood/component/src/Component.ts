@@ -73,6 +73,8 @@ export class Component implements ComponentEventInterface {
         text: any,
         include: any
     ) => VirtualNode
+
+    @unreactive()
     private embeddedContent?: VirtualNode[]
 
     @unreactive()
@@ -223,15 +225,20 @@ export class Component implements ComponentEventInterface {
         embeddedContent?: VirtualNode[]
     ): VirtualElement => {
         const virtualComponent = new VirtualComponent(
-            component, attributes, embeddedContent
+            component, attributes
         )
         const forExpression = this.extractForExpressionIfExists(attributes)
         let position = 0
 
         if (embeddedContent) {
             for (const child of embeddedContent) {
+                virtualComponent.addChildVirtualNode(child)
+                child.setParentVirtualElement(virtualComponent)
                 child.setPrimaryPosition(position)
+
                 child.getScope().setParentScope(virtualComponent.getScope())
+                child.getScope().setContext(this)
+
                 position++
             }
         }

@@ -190,7 +190,7 @@ export class VirtualElement extends VirtualNode {
         return true
     }
 
-    public clone(virtualElement?: VirtualElement): VirtualNode {
+    public clone(virtualElement?: VirtualElement, children?: VirtualNode[]): VirtualNode {
         const parentScope = this.getScope().getParentScope()
         if (!virtualElement) {
             virtualElement = new (this.constructor as any)(
@@ -206,7 +206,11 @@ export class VirtualElement extends VirtualNode {
             virtualElement.getScope().setParentScope(parentScope)
         }
 
-        for (const childVirtualNode of this.getChildVirtualNodes()) {
+        if (!children) {
+            children = this.getChildVirtualNodes()
+        }
+
+        for (const childVirtualNode of children) {
             const clonedVirtualNode = childVirtualNode.clone()
             virtualElement.addChildVirtualNode(clonedVirtualNode)
             clonedVirtualNode.setParentVirtualElement(virtualElement)
