@@ -84,7 +84,10 @@ export class Component implements ComponentEventInterface {
     @unreactive()
     private initialized = false
 
-    public render(element: Element, embeddedContent?: VirtualNode[]) {
+    public render(
+        element: Element,
+        embeddedContent?: VirtualNode[]
+    ): Node | null {
         if (!this.initialized) {
             // todo: if dev env
             this.enableHmr()
@@ -111,6 +114,8 @@ export class Component implements ComponentEventInterface {
         if (node) {
             element.appendChild(node)
         }
+
+        return node
     }
 
     public rerender() {
@@ -217,6 +222,8 @@ export class Component implements ComponentEventInterface {
         const forExpression = this.extractForExpressionIfExists(attributes)
         let position = 0
 
+        virtualElement.getScope().setContext(this)
+
         if (children) {
             for (const child of children) {
                 virtualElement.addChildVirtualNode(child)
@@ -246,11 +253,13 @@ export class Component implements ComponentEventInterface {
         const forExpression = this.extractForExpressionIfExists(attributes)
         let position = 0
 
+        virtualComponent.getScope().setContext(this)
+
         if (embeddedContent) {
             for (const child of embeddedContent) {
                 virtualComponent.addChildVirtualNode(child)
                 child.setParentVirtualElement(virtualComponent)
-                child.setPrimaryPosition(position)
+                child.setSecondaryPosition(position)
 
                 child.getScope().setParentScope(virtualComponent.getScope())
                 child.getScope().setContext(this)

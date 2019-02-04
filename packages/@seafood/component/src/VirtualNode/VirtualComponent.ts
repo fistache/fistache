@@ -43,14 +43,14 @@ export class VirtualComponent extends VirtualElement {
         }
     }
 
-    protected makeNode(): Element | void {
+    protected makeNode(): Element | null | void {
         if (this.shouldRender() && this.parentVirtualElement) {
             const node = this.parentVirtualElement.getNode()
 
             if (node) {
                 return this.component.render(
                     node as Element, this.childVirtualNodes.slice()
-                )
+                ) as Element | null
             }
         }
     }

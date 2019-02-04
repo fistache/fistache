@@ -310,7 +310,7 @@ export class VirtualElement extends VirtualNode {
         }
     }
 
-    protected makeNode(): Element | void {
+    protected makeNode(): Element | void | null {
         if (this.shouldRender()) {
             return document.createElement(this.tagName as string)
         }
