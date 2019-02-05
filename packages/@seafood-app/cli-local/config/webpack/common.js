@@ -3,29 +3,18 @@ const path = require('path');
 module.exports = config => {
   config
     .cache(true)
-    .entry('app')
-      .add(path.resolve(__dirname,  '../../index.js'))
-      .add(path.resolve('bootstrap/app.ts'))
-      .end()
+    // .entry('app')
+      // .add(path.resolve(__dirname,  '../../index.js'))
+      // .add(path.resolve('bootstrap/app.ts'))
+      // .end()
     .output
+      .filename('[id].[name].js')
       .path(path.resolve('dist'))
-      .filename('[name].js')
       .publicPath('/')
       .end()
     .node
       .set('__dirname', true)
       .set('__filename', true)
-
-  config.node
-    .merge({
-      // prevent webpack from injecting mocks to Node native modules
-      // that does not make sense for the client
-      dgram: 'empty',
-      fs: 'empty',
-      net: 'empty',
-      tls: 'empty',
-      child_process: 'empty'
-    })
 
   config.resolve
     .symlinks(true)
@@ -126,12 +115,12 @@ module.exports = config => {
       })
       .end()
 
-  config
-    .plugin('html')
-    .use(require('html-webpack-plugin'), [{
-      template: path.resolve(__dirname, '../../index.html'),
-      favicon: process.env.NODE_ENV === 'development' ? path.resolve('resources/images/logo/logo@32.png') : undefined,
-    }])
+  // config
+  //   .plugin('html')
+  //   .use(require('html-webpack-plugin'), [{
+  //     template: path.resolve(__dirname, '../../index.html'),
+  //     favicon: path.resolve('resources/images/logo/logo@32.png')
+  //   }])
 
   config
     .plugin('progress')

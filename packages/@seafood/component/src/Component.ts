@@ -98,8 +98,7 @@ export class Component implements ComponentEventInterface {
         embeddedContent?: VirtualNode[]
     ): Node | null {
         if (!this.initialized) {
-            console.log('initialize', this)
-            // todo: if dev env
+            // todo: hmr only if dev env
             this.enableHmr()
             this.fireEvent(Event.Created)
             this.makeReactive()

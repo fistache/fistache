@@ -45,7 +45,6 @@ export default class Hmr {
                     component.element = oldComponent.element
                     component.initialized = oldComponent.initialized
 
-                    console.log(data.components.indexOf(oldComponent))
                     redundantIndecies.push(
                         data.components.indexOf(oldComponent)
                     )

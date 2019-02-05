@@ -1,17 +1,18 @@
-module.exports = (config, mode) => {
-  if (mode !== 'production' && mode !== 'test') {
+module.exports = config => {
+  if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test') {
+    const merge = require('merge');
+
     config
       .mode('development')
       .devtool('cheap-module-eval-source-map')
-      .entry('app')
-        .add('webpack-hot-middleware/client')
-        .end()
 
-    config
-      .plugin('define-target')
-      .use(require('webpack/lib/DefinePlugin'), [{
-        'process.env.NODE_ENV': `'${mode}'`
-      }])
+    config.module
+      .rule('ts-lint')
+        .test(/\.ts$/)
+        .enforce('pre')
+        .use('tslint-loader')
+          .loader('tslint-loader')
+          .end()
 
     // https://github.com/webpack/webpack/issues/6642
     config
@@ -38,11 +39,11 @@ module.exports = (config, mode) => {
     //         cacheCompression: false
     //       }))
 
-    config
-      .plugin('fork-ts-checker')
-        .use(require('fork-ts-checker-webpack-plugin'), [{
-          tslint: true,
-          checkSyntacticErrors: true
-        }])
+    // config
+    //   .plugin('fork-ts-checker')
+    //     .use(require('fork-ts-checker-webpack-plugin'), [{
+    //       tslint: true,
+    //       // checkSyntacticErrors: true
+    //     }])
   }
 }
