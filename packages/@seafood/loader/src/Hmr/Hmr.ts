@@ -33,14 +33,28 @@ export default class Hmr {
             this.bindEvents(id, options.script)
 
             if (data) {
+                const redundantIndecies: number[] = []
+
                 data.components.forEach((component: any) => {
-                    component.__style = options.script.prototype.__style
-                    component.__render = options.script.prototype.__render
-                    component.usedComponents
-                        = options.script.prototype.usedComponents
-                    component.usedStuff
-                        = options.script.prototype.usedStuff
+                    const oldComponent = component
+
+                    component = new options.script()
+                    component.virtualNode = oldComponent.virtualNode
+                    component.embeddedContent
+                        = oldComponent.embeddedContent
+                    component.element = oldComponent.element
+                    component.initialized = oldComponent.initialized
+
+                    console.log(data.components.indexOf(oldComponent))
+                    redundantIndecies.push(
+                        data.components.indexOf(oldComponent)
+                    )
+                    data.components.push(component)
                     component.rerender()
+                })
+
+                redundantIndecies.map((index: number) => {
+                    data.components.splice(index, 1)
                 })
             }
         })

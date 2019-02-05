@@ -1,8 +1,9 @@
 import { Reactivity } from '@seafood/reactivity'
 import { AttributeKeyword, ComponentAttributes, Event, TagAttrib } from '@seafood/shared'
 import { AttributeProperties, DECORATOR_ATTRIBUTE_FLAG } from './Decorators/Attribute'
-import { DECORATOR_UNREACTIVE_FLAG, unreactive } from './Decorators/Unreactive'
+import { unreactive } from './Decorators/Unreactive'
 import { parseArgs } from './Decorators/Use'
+import { Styler } from './Styles/Styler'
 import { VirtualComponent } from './VirtualNode/VirtualComponent'
 import { VirtualElement } from './VirtualNode/VirtualElement'
 import { VirtualEmbeddedContent } from './VirtualNode/VirtualEmbeddedContent'
@@ -11,6 +12,7 @@ import { VirtualPackage } from './VirtualNode/VirtualPackage'
 import { VirtualSlot } from './VirtualNode/VirtualSlot'
 import { VirtualTextNode } from './VirtualNode/VirtualTextNode'
 
+import { DECORATOR_UNREACTIVE_FLAG } from '@seafood/shared'
 export { Event } from '@seafood/shared'
 
 export interface ComponentEventInterface {
@@ -96,6 +98,7 @@ export class Component implements ComponentEventInterface {
         embeddedContent?: VirtualNode[]
     ): Node | null {
         if (!this.initialized) {
+            console.log('initialize', this)
             // todo: if dev env
             this.enableHmr()
             this.fireEvent(Event.Created)
@@ -252,12 +255,12 @@ export class Component implements ComponentEventInterface {
     }
 
     private renderComponent = (
-        component: Component,
+        component: new () => Component,
         attributes?: ComponentAttributes,
         embeddedContent?: VirtualNode[]
     ): VirtualElement => {
         const virtualComponent = new VirtualComponent(
-            component, attributes
+            new component(), attributes
         )
         const forExpression = this.extractForExpressionIfExists(attributes)
         let position = 0
@@ -312,13 +315,13 @@ export class Component implements ComponentEventInterface {
         return new VirtualTextNode(expression)
     }
 
-    private resolveComponent = (name: string): Component => {
+    private resolveComponent = (name: string): new () => Component => {
         if (name === 'parent') {
             try {
                 const parent: any = Reflect.getPrototypeOf(
                     Reflect.getPrototypeOf(this)
                 )
-                return new parent.constructor()
+                return parent.constructor
             } catch (e) {
                 this.throwComponentNotFoundException(name)
             }
@@ -334,7 +337,7 @@ export class Component implements ComponentEventInterface {
             return this.throwComponentNotFoundException(name)
         }
 
-        return new component()
+        return component
     }
 
     private throwComponentNotFoundException(name: string): never {
@@ -402,15 +405,7 @@ export class Component implements ComponentEventInterface {
 
     private appendStyle() {
         if (this.__style) {
-            const head = document.head
-                || document.getElementsByTagName('head')[0]
-            const style = document.createElement('style')
-            const text = document.createTextNode(this.__style.toString())
-
-            style.type = 'text/css'
-
-            style.appendChild(text)
-            head.appendChild(style)
+            Styler.getInstance().use(this.__style)
         }
     }
 }

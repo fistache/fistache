@@ -1,6 +1,5 @@
+import {DECORATOR_UNREACTIVE_FLAG} from '@seafood/shared'
 import 'reflect-metadata'
-
-export const DECORATOR_UNREACTIVE_FLAG = 'unreactive'
 
 export function unreactive() {
     return (target: any, propertyKey: string | symbol) => {
