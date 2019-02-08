@@ -12,19 +12,27 @@ module.exports = (program, projectManager) => {
         .modifyApp((app, state) => {
           projectManager.setMode('development')
 
-          const browserConfig = projectManager.webpackConfigManager.getConfig('broswer')
-          const nodeConfig = projectManager.webpackConfigManager.getConfig('node')
+          const fs = require('fs')
+          const path = require('path')
+          const { createRenderer } = require('@seafood/ssr')
 
-          const browserCompiler = webpack(browserConfig)
-          const nodeCompiler = webpack(nodeConfig)
+          const clientConfig = projectManager.webpack.getConfig('client')
+          const clientCompiler = webpack(clientConfig)
 
-          initializeApp(app, state, browserCompiler, nodeCompiler)
+          const render = createRenderer(
+            fs.readFileSync(path.resolve('dist/server.json'), 'utf-8'),
+            fs.readFileSync(path.resolve(__dirname, '../index.html'), 'utf-8')
+          )
+
+          initializeApp(app, state, clientCompiler)
 
           app.get('*', (request, response) => {
-            // const indexHtml = fs.readFileSync(
-            //   path.resolve('dist/index.html')
-            // )
-            response.end('hello')
+            const html = render(
+              `${request.protocol}://${request.hostname}${request.originalUrl}`
+            )
+
+            response.setHeader("Content-Type", "text/html")
+            response.send(html)
           })
         })
         .run()
@@ -32,28 +40,24 @@ module.exports = (program, projectManager) => {
     });
 }
 
-function initializeApp(app, state, browserCompiler, nodeCompiler) {
-  // const chalk = require('chalk')
+function initializeApp(app, state, clientCompiler) {
+  const chalk = require('chalk')
   const history = require('connect-history-api-fallback')
 
-  // browserCompiler.hooks.done.tap('seafood serve', stats => {
-  //   if (!stats.hasErrors()) {
-  //     console.log(`App serving at: ${chalk.blue.bold(state.getServingLink())}`)
-  //   }
-  // })
+  clientCompiler.hooks.done.tap('seafood dev', stats => {
+    if (!stats.hasErrors()) {
+      console.log(`App serving at: ${chalk.blue.bold(state.getServingLink())}`)
+    }
+  })
 
   app.use(history())
-  addCompilerMiddleware(app, browserCompiler)
-  addCompilerMiddleware(app, nodeCompiler)
-}
-
-function addCompilerMiddleware(app, compiler) {
-  app.use(require('webpack-dev-middleware')(compiler, {
+  app.use(require('webpack-dev-middleware')(clientCompiler, {
     noInfo: true,
     logLevel: 'silent',
     publicPath: '/'
   }));
-  app.use(require('webpack-hot-middleware')(compiler, {
+  app.use(require('webpack-hot-middleware')(clientCompiler, {
     log: false
   }))
 }
+

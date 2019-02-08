@@ -7,7 +7,7 @@ const semver = require('semver')
 
 module.exports = class ProjectManager {
   constructor (rootPath) {
-    this.webpackConfigManager = new WebpackConfigManager(this)
+    this.webpack = new WebpackConfigManager(this)
     this.commandManager = new CommandManager(this)
     this.mode = null
     this.target = null
@@ -77,7 +77,7 @@ module.exports = class ProjectManager {
       folderPath = this.generatePath('config/webpack')
     }
 
-    this.webpackConfigManager.storeFolder(folderPath)
+    this.webpack.storeFolder(folderPath)
 
     return this
   }

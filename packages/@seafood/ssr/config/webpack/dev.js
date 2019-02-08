@@ -1,10 +1,14 @@
-module.exports = config => {
-  if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test') {
-    const merge = require('merge');
-
+module.exports = (config, mode) => {
+  if (mode !== 'production' && mode !== 'test') {
     config
       .mode('development')
       .devtool('cheap-module-eval-source-map')
+
+    config
+      .plugin('define-target')
+      .use(require('webpack/lib/DefinePlugin'), [{
+        'process.env.NODE_ENV': `'${mode}'`
+      }])
 
     config.module
       .rule('ts-lint')

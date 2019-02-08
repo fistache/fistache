@@ -1,31 +1,25 @@
 const WebpackChainConfig = require('webpack-chain')
 
+const glob = require('glob')
 const path = require('path')
 const fs = require('fs')
 
 module.exports = class WebpackConfigManager {
   constructor(projectManager) {
     this.projectManager = projectManager
-    this.branches = {}
+    this.files = {}
     this.order = []
   }
 
-  storeFolder (folderPath, order) {
+  storeFolder (folderPath) {
     if (typeof folderPath !== 'string') {
       throw new Error('A parameter "folderPath" must be a string.')
     }
 
-    if (order && !Array.isArray(order)) {
-      throw new Error('A parameter "order" must be an array of string.')
-    } else {
-      order = ['common', 'browser', 'node', 'dev', 'prod']
-    }
-
-    this.order = order
-    this.order.forEach(branchName => {
-      const filePath = path.join(folderPath, branchName)
-      if (fs.existsSync(`${filePath}.js`)) {
-        this.store(branchName, require(filePath))
+    glob.sync(path.resolve(folderPath, '**/*.js')).forEach(file => {
+      const filePath = path.resolve(file)
+      if (fs.existsSync(filePath)) {
+        this.store(filePath, require(filePath))
       }
     })
   }
@@ -39,11 +33,11 @@ module.exports = class WebpackConfigManager {
       throw new Error('A parameter "chainBuilder" must be a function.')
     }
 
-    if (!this.branches.hasOwnProperty(branchName)) {
-      this.branches[branchName] = []
+    if (!this.files.hasOwnProperty(branchName)) {
+      this.files[branchName] = []
     }
 
-    this.branches[branchName].push(chainBuilder)
+    this.files[branchName].push(chainBuilder)
 
     return this
   }
@@ -77,10 +71,10 @@ module.exports = class WebpackConfigManager {
   getChain (target) {
     let config = new WebpackChainConfig
 
-    for (const name in this.branches) {
-      if (this.branches.hasOwnProperty(name)) {
+    for (const name in this.files) {
+      if (this.files.hasOwnProperty(name)) {
 
-        this.executeBranch(this.branches[name], config, target)
+        this.executeBranch(this.files[name], config, target)
         this.addDefaultConfigProperties(config)
       }
     }

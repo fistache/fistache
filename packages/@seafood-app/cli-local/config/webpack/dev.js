@@ -3,9 +3,6 @@ module.exports = (config, mode) => {
     config
       .mode('development')
       .devtool('cheap-module-eval-source-map')
-      .entry('app')
-        .add('webpack-hot-middleware/client')
-        .end()
 
     config
       .plugin('define-target')

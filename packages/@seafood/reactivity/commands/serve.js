@@ -8,7 +8,7 @@ module.exports = (program, projectManager) => {
     .allowUnknownOption()
     .action(() => {
       const webpack = require('webpack')
-      const config = projectManager.webpackConfigManager.getConfig()
+      const config = projectManager.webpack.getConfig()
 
       const {console} = require('@seafood-app/webpack-kit')
 

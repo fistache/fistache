@@ -93,6 +93,9 @@ export class Component implements ComponentEventInterface {
     @unreactive()
     private initialized = false
 
+    @unreactive()
+    private styler!: Styler
+
     public render(
         element: Element,
         embeddedContent?: VirtualNode[]
@@ -202,6 +205,10 @@ export class Component implements ComponentEventInterface {
         }
     }
 
+    public setStyler(styler: Styler) {
+        this.styler = styler
+    }
+
     public clone() {
         const component = new (this.constructor as any)()
 
@@ -264,6 +271,7 @@ export class Component implements ComponentEventInterface {
         const forExpression = this.extractForExpressionIfExists(attributes)
         let position = 0
 
+        virtualComponent.getComponent().setStyler(this.styler)
         virtualComponent.getScope().setContext(this)
 
         if (embeddedContent) {
@@ -404,7 +412,7 @@ export class Component implements ComponentEventInterface {
 
     private appendStyle() {
         if (this.__style) {
-            Styler.getInstance().use(this.__style)
+            this.styler.use(this.__style)
         }
     }
 }

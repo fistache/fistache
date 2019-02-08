@@ -5,14 +5,19 @@ module.exports = (program, projectManager) => {
     .allowUnknownOption()
     .action(() => {
       const webpack = require('webpack')
+      const path = require('path')
+      const rmfr = require('rmfr')
 
-      projectManager.setMode('production')
+      rmfr(path.resolve('dist'))
 
-      const browserConfig = projectManager.webpackConfigManager.getConfig('browser')
-      const nodeConfig = projectManager.webpackConfigManager.getConfig('node')
+      // projectManager.setMode('production')
+      projectManager.setMode('develop')
 
-      webpack(browserConfig, handleStats)
-      webpack(nodeConfig, handleStats)
+      const clientConfig = projectManager.webpack.getConfig('client')
+      const serverConfig = projectManager.webpack.getConfig('server')
+
+      webpack(clientConfig, handleStats)
+      webpack(serverConfig, handleStats)
     });
 }
 
@@ -23,5 +28,4 @@ function handleStats(err, stats) {
       chunks: false
     }))
   }
-  console.log('done')
 }

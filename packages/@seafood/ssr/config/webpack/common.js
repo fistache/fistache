@@ -13,6 +13,7 @@ module.exports = config => {
       .filename('[name].js')
       .end()
     .node
+      .set('global', true)
       .set('__dirname', false)
       .set('__filename', false)
 

@@ -1,13 +1,12 @@
 module.exports = (config, mode, target) => {
-  if (target === 'node') {
+  if (target === 'server') {
     const path = require('path')
-    const {WebpackSsrNodePlugin} = require('@seafood/ssr')
     const nodeExternals = require('webpack-node-externals')
 
     config
       .target('node')
-      .entry('node-entry')
-        .add(path.resolve(__dirname, '../../entry-node.js'))
+      .entry('server')
+        .add(path.resolve('bootstrap/server.ts'))
         .end()
       .output
         .libraryTarget('commonjs2')
@@ -26,6 +25,12 @@ module.exports = (config, mode, target) => {
 
     config
       .plugin('ssr-node-bundle')
-      .use(WebpackSsrNodePlugin)
+      .use(require('assets-webpack-plugin'), [{
+        useCompilerPath: true,
+        filename: 'server.json',
+        includeAllFileTypes: false,
+        fileTypes: ['js'],
+        entrypoints: true,
+      }])
   }
 }

@@ -8,15 +8,11 @@ module.exports = (program, projectManager) => {
     .allowUnknownOption()
     .action(() => {
       const webpack = require('webpack')
-      const config = projectManager.webpackConfigManager.getConfig()
+      const config = projectManager.webpack.getConfig()
 
       const {console} = require('@seafood-app/webpack-kit')
 
-      webpack(config.map(config => {
-        return Object.assign(config, {
-          mode: 'development',
-        })
-      })).watch({
+      webpack(config).watch({
         hot: false,
         inline: false,
       }, (err, stats) => {

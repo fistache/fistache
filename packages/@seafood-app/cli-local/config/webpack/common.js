@@ -2,13 +2,10 @@ const path = require('path');
 
 module.exports = config => {
   config
-    .cache(true)
-    // .entry('app')
-      // .add(path.resolve(__dirname,  '../../index.js'))
-      // .add(path.resolve('bootstrap/app.ts'))
-      // .end()
+    // .cache(true)
     .output
-      .filename('[id].[name].js')
+      .chunkFilename('[id].[name].js')
+      .filename('[name].js')
       .path(path.resolve('dist'))
       .publicPath('/')
       .end()
