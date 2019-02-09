@@ -20,19 +20,22 @@ module.exports = (program, projectManager) => {
           const clientCompiler = webpack(clientConfig)
 
           const render = createRenderer(
-            fs.readFileSync(path.resolve('dist/server.json'), 'utf-8'),
+            JSON.parse(
+              fs.readFileSync(path.resolve('dist/client.json'), 'utf-8')
+            ).client.js,
+            JSON.parse(
+              fs.readFileSync(path.resolve('dist/server.json'), 'utf-8')
+            ).server.js,
             fs.readFileSync(path.resolve(__dirname, '../index.html'), 'utf-8')
           )
 
           initializeApp(app, state, clientCompiler)
 
-          app.get('*', (request, response) => {
-            const html = render(
-              `${request.protocol}://${request.hostname}${request.originalUrl}`
-            )
-
+          app.get('*', async (request, response) => {
             response.setHeader("Content-Type", "text/html")
-            response.send(html)
+            response.send(
+              await render(request.originalUrl)
+            )
           })
         })
         .run()
