@@ -37,12 +37,12 @@ module.exports = (config, mode) => {
     //         cacheCompression: false
     //       }))
 
-    config
-      .plugin('html')
-      .use(require('html-webpack-plugin'), [{
-        template: path.resolve(__dirname, '../../index.html'),
-        favicon: path.resolve('resources/images/logo/logo@32.png')
-      }])
+    // config
+    //   .plugin('html')
+    //   .use(require('html-webpack-plugin'), [{
+    //     template: path.resolve(__dirname, '../../index.html'),
+    //     favicon: path.resolve('resources/images/logo/logo@32.png')
+    //   }])
 
     config
       .plugin('fork-ts-checker')
