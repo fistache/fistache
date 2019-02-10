@@ -423,14 +423,11 @@ export class Component implements ComponentEventInterface {
         element: Element,
         embeddedContent?: VirtualNode[]
     ): Node | null {
-        if (!this.initialized) {
-            // todo: hmr only if dev env
-            this.enableHmr()
-            this.fireEvent(Event.Created)
-            this.makeReactive()
-            this.initialized = true
-            this.appendStyle()
-        }
+        // todo: hmr only if dev env
+        this.enableHmr()
+        this.fireEvent(Event.Created)
+        this.makeReactive()
+        this.appendStyle()
 
         this.element = element
         this.embeddedContent = embeddedContent

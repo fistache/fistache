@@ -1,5 +1,7 @@
 module.exports = (config, mode) => {
   if (mode !== 'production' && mode !== 'test') {
+    const path = require('path')
+
     config
       .mode('development')
       .devtool('cheap-module-eval-source-map')
@@ -34,6 +36,13 @@ module.exports = (config, mode) => {
     //         cacheDirectory: true,
     //         cacheCompression: false
     //       }))
+
+    config
+      .plugin('html')
+      .use(require('html-webpack-plugin'), [{
+        template: path.resolve(__dirname, '../../index.html'),
+        favicon: path.resolve('resources/images/logo/logo@32.png')
+      }])
 
     config
       .plugin('fork-ts-checker')

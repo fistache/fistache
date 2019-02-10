@@ -21,6 +21,10 @@ export class App {
         this.rootComponent.replace(element)
     }
 
+    public useStyles() {
+        this.shouldUseStyles = true
+    }
+
     private configuteStyles() {
         if (this.shouldUseStyles) {
             this.rootComponent.enableStyles()

@@ -20,31 +20,33 @@ module.exports = (config, mode, target) => {
         'process.env.TARGET': JSON.stringify(target)
       }])
 
-    config
-      .optimization
+    if (mode === 'production') {
+      config
+        .optimization
         .runtimeChunk('single')
         .splitChunks({
-            cacheGroups: {
-              vendors: {
-                test: /[\\/]node_modules[\\/]/,
-                name: 'vendors',
-                chunks: 'all'
-              },
-            }
-          })
+          cacheGroups: {
+            vendors: {
+              test: /[\\/]node_modules[\\/]/,
+              name: 'vendors',
+              chunks: 'all'
+            },
+          }
+        })
 
-    config
-      .plugin('ssr-browser-bundle')
-      .use(require('assets-webpack-plugin'), [{
-        useCompilerPath: true,
-        filename: 'client.json',
-        includeManifest: 'manifest',
-        manifestFirst: true,
-        includeAllFileTypes: false,
-        fileTypes: ['js'],
-        update: mode === 'development',
-        keepInMemory: mode === 'development',
-        entrypoints: true,
-      }])
+      config
+        .plugin('ssr-browser-bundle')
+        .use(require('assets-webpack-plugin'), [{
+          useCompilerPath: true,
+          filename: 'client.json',
+          includeManifest: 'manifest',
+          manifestFirst: true,
+          includeAllFileTypes: false,
+          fileTypes: ['js'],
+          update: mode === 'development',
+          keepInMemory: mode === 'development',
+          entrypoints: true,
+        }])
+    }
   }
 }

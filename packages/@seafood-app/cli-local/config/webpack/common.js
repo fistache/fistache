@@ -2,7 +2,9 @@ const path = require('path');
 
 module.exports = (config, mode, target) => {
   const ifdefOptions = {
-    DEBUG: mode !== 'production',
+    // todo: DEBUG
+    PROD: mode === 'production',
+    DEV: mode !== 'production',
     TARGET: target,
     SERVER: target === 'server',
     CLIENT: target === 'client',
@@ -130,13 +132,6 @@ module.exports = (config, mode, target) => {
       .loader('ifdef-loader')
       .options(ifdefOptions)
       .end()
-
-  // config
-  //   .plugin('html')
-  //   .use(require('html-webpack-plugin'), [{
-  //     template: path.resolve(__dirname, '../../index.html'),
-  //     favicon: path.resolve('resources/images/logo/logo@32.png')
-  //   }])
 
   config
     .plugin('progress')
