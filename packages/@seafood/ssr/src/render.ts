@@ -25,7 +25,7 @@ export function createRenderer(
 
         preloadScripts(clientBundle)
 
-        const filePath = path.join(path.resolve('dist'), serverBundle)
+        const filePath = path.join(path.resolve('.'), serverBundle)
         // @ts-ignore
         const app = await __non_webpack_require__(filePath).default({
             url
@@ -38,6 +38,7 @@ export function createRenderer(
 function render(app: any, clientBundle: any) {
     const container = document.getElementById('app')
 
+    app.shouldUseStyles = true
     app.run(container)
     appendScripts(clientBundle)
 

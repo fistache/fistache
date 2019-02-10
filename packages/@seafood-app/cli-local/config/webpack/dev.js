@@ -7,7 +7,7 @@ module.exports = (config, mode) => {
     config
       .plugin('define-target')
       .use(require('webpack/lib/DefinePlugin'), [{
-        'process.env.NODE_ENV': `'${mode}'`
+        'process.env.NODE_ENV': JSON.stringify(mode)
       }])
 
     // https://github.com/webpack/webpack/issues/6642

@@ -107,6 +107,10 @@
     lodash "^4.17.10"
     to-fast-properties "^2.0.0"
 
+"@types/node@^10.12.24":
+  version "10.12.24"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.12.24.tgz#b13564af612a22a20b5d95ca40f1bffb3af315cf"
+
 "@webassemblyjs/ast@1.7.11":
   version "1.7.11"
   resolved "https://registry.yarnpkg.com/@webassemblyjs/ast/-/ast-1.7.11.tgz#b988582cafbb2b095e8b556526f30c90d057cace"
@@ -1237,6 +1241,12 @@ iconv-lite@^0.4.4:
 ieee754@^1.1.4:
   version "1.1.12"
   resolved "https://registry.yarnpkg.com/ieee754/-/ieee754-1.1.12.tgz#50bf24e5b9c8bb98af4964c941cdb0918da7b60b"
+
+ifdef-loader@^2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/ifdef-loader/-/ifdef-loader-2.1.1.tgz#443cb6c99c68ae085966b9e2ada853001d368ee7"
+  dependencies:
+    loader-utils "^1.1.0"
 
 iferr@^0.1.5:
   version "0.1.5"

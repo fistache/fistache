@@ -11,9 +11,11 @@
   },
   "devDependencies": {
     "@babel/core": "^7.2.2",
+    "@types/node": "^10.12.24",
     "babel-loader": "^8.0.5",
     "cross-env": "^5.2.0",
     "friendly-errors-webpack-plugin": "^1.7.0",
+    "ifdef-loader": "^2.1.1",
     "merge": "^1.2.1",
     "simple-progress-webpack-plugin": "^1.1.2",
     "ts-loader": "^5.3.3",

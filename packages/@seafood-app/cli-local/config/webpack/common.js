@@ -1,13 +1,20 @@
 const path = require('path');
 
-module.exports = config => {
+module.exports = (config, mode, target) => {
+  const ifdefOptions = {
+    DEBUG: mode !== 'production',
+    TARGET: target,
+    SERVER: target === 'server',
+    CLIENT: target === 'client',
+  }
+
   config
     // .cache(true)
     .output
       .chunkFilename('[id].[name].js')
       .filename('[name].js')
       .path(path.resolve('dist'))
-      .publicPath('/')
+      .publicPath('/dist')
       .end()
     .node
       .set('__dirname', true)
@@ -66,6 +73,10 @@ module.exports = config => {
           appendTsSuffixTo: ['\\.seafood$']
         })
         .end()
+      .use('ifdef-loader')
+        .loader('ifdef-loader')
+        .options(ifdefOptions)
+        .end()
       .use('@seafood/loader')
         .loader('@seafood/loader')
         .options({
@@ -96,6 +107,10 @@ module.exports = config => {
         transpileOnly: true
       })
       .end()
+    .use('ifdef-loader')
+      .loader('ifdef-loader')
+      .options(ifdefOptions)
+      .end()
 
 
   config.module
@@ -110,6 +125,10 @@ module.exports = config => {
       .options({
         babelrc: true
       })
+      .end()
+    .use('ifdef-loader')
+      .loader('ifdef-loader')
+      .options(ifdefOptions)
       .end()
 
   // config

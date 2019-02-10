@@ -7,16 +7,17 @@ module.exports = (config, mode, target) => {
         .add(path.resolve('bootstrap/client.ts'))
         .end()
 
-    if (mode === 'develop') {
-      config.entry('client')
-        .add('webpack-hot-middleware/client')
-        .end()
+    if (mode === 'development') {
+      config
+        .entry('client')
+          .add('webpack-hot-middleware/client')
+          .end()
     }
 
     config
       .plugin('define-target')
       .use(require('webpack/lib/DefinePlugin'), [{
-        'process.env.TARGET': `'${target}'`
+        'process.env.TARGET': JSON.stringify(target)
       }])
 
     config
@@ -40,8 +41,9 @@ module.exports = (config, mode, target) => {
         includeManifest: 'manifest',
         manifestFirst: true,
         includeAllFileTypes: false,
-        fileTypes: ['js', 'css'],
-        // keepInMemory: true,
+        fileTypes: ['js'],
+        update: mode === 'development',
+        keepInMemory: mode === 'development',
         entrypoints: true,
       }])
   }

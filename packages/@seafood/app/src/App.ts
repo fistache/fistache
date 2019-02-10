@@ -1,6 +1,8 @@
 import { Component, Styler } from '@seafood/component'
 
 export class App {
+    public shouldUseStyles = false
+
     private styler = new Styler()
 
     private rootComponent: Component
@@ -10,7 +12,20 @@ export class App {
     }
 
     public run(element: Element) {
-        this.rootComponent.setStyler(this.styler)
+        this.configuteStyles()
         this.rootComponent.render(element)
+    }
+
+    public replace(element: Element) {
+        this.configuteStyles()
+        this.rootComponent.replace(element)
+    }
+
+    private configuteStyles() {
+        if (this.shouldUseStyles) {
+            this.rootComponent.enableStyles()
+        }
+
+        this.rootComponent.setStyler(this.styler)
     }
 }
