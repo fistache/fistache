@@ -1,7 +1,5 @@
 module.exports = (config, mode) => {
   if (mode !== 'production' && mode !== 'test') {
-    const path = require('path')
-
     config
       .mode('development')
       .devtool('cheap-module-eval-source-map')
@@ -9,8 +7,16 @@ module.exports = (config, mode) => {
     config
       .plugin('define-target')
       .use(require('webpack/lib/DefinePlugin'), [{
-        'process.env.NODE_ENV': JSON.stringify(mode)
+        'process.env.NODE_ENV': `'${mode}'`
       }])
+
+    config.module
+      .rule('ts-lint')
+        .test(/\.ts$/)
+        .enforce('pre')
+        .use('tslint-loader')
+          .loader('tslint-loader')
+          .end()
 
     // https://github.com/webpack/webpack/issues/6642
     config
@@ -38,17 +44,10 @@ module.exports = (config, mode) => {
     //       }))
 
     // config
-    //   .plugin('html')
-    //   .use(require('html-webpack-plugin'), [{
-    //     template: path.resolve(__dirname, '../../index.html'),
-    //     favicon: path.resolve('resources/images/logo/logo@32.png')
-    //   }])
-
-    config
-      .plugin('fork-ts-checker')
-        .use(require('fork-ts-checker-webpack-plugin'), [{
-          tslint: true,
-          checkSyntacticErrors: true
-        }])
+    //   .plugin('fork-ts-checker')
+    //     .use(require('fork-ts-checker-webpack-plugin'), [{
+    //       tslint: true,
+    //       // checkSyntacticErrors: true
+    //     }])
   }
 }

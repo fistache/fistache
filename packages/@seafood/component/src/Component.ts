@@ -79,6 +79,9 @@ export class Component implements ComponentEventInterface {
     private __style: any
 
     @unreactive()
+    private shouldAppendStyle = false
+
+    @unreactive()
     private embeddedContent?: VirtualNode[]
 
     @unreactive()
@@ -93,37 +96,30 @@ export class Component implements ComponentEventInterface {
     @unreactive()
     private initialized = false
 
+    @unreactive()
+    private styler!: Styler
+
     public render(
         element: Element,
         embeddedContent?: VirtualNode[]
     ): Node | null {
-        if (!this.initialized) {
-            console.log('initialize', this)
-            // todo: if dev env
-            this.enableHmr()
-            this.fireEvent(Event.Created)
-            this.makeReactive()
-            this.initialized = true
-            this.appendStyle()
-        }
-
-        this.element = element
-        this.embeddedContent = embeddedContent
-
-        this.virtualNode = this.__render(
-            this.renderElement,
-            this.renderComponent,
-            this.renderEmbeddedContent,
-            this.renderSlot,
-            this.renderText,
-            this.resolveComponent
-        )
-
-        Component.renderFragment([this.virtualNode])
-        const node = this.virtualNode.getNode()
+        const node = this.initializeAndRender(element, embeddedContent)
 
         if (node) {
             element.appendChild(node)
+        }
+
+        return node
+    }
+
+    public replace(
+        element: Element,
+        embeddedContent?: VirtualNode[]
+    ): Node | null {
+        const node = this.initializeAndRender(element, embeddedContent)
+
+        if (node) {
+            element.replaceChild(node, element.lastChild as Node)
         }
 
         return node
@@ -203,6 +199,14 @@ export class Component implements ComponentEventInterface {
         }
     }
 
+    public setStyler(styler: Styler) {
+        this.styler = styler
+    }
+
+    public enableStyles() {
+        this.shouldAppendStyle = true
+    }
+
     public clone() {
         const component = new (this.constructor as any)()
 
@@ -265,6 +269,11 @@ export class Component implements ComponentEventInterface {
         const forExpression = this.extractForExpressionIfExists(attributes)
         let position = 0
 
+        if (this.shouldAppendStyle) {
+            virtualComponent.getComponent().enableStyles()
+        }
+
+        virtualComponent.getComponent().setStyler(this.styler)
         virtualComponent.getScope().setContext(this)
 
         if (embeddedContent) {
@@ -404,8 +413,40 @@ export class Component implements ComponentEventInterface {
     }
 
     private appendStyle() {
-        if (this.__style) {
-            Styler.getInstance().use(this.__style)
+        // todo: refactor style for server and client
+        if (this.shouldAppendStyle && this.__style) {
+            this.styler.use(this.__style)
         }
+    }
+
+    private initializeAndRender(
+        element: Element,
+        embeddedContent?: VirtualNode[]
+    ): Node | null {
+        this.makeReactive()
+
+        if (!this.initialized) {
+            // todo: hmr only if dev env
+            this.enableHmr()
+            this.fireEvent(Event.Created)
+            this.initialized = true
+            this.appendStyle()
+        }
+
+        this.element = element
+        this.embeddedContent = embeddedContent
+
+        this.virtualNode = this.__render(
+            this.renderElement,
+            this.renderComponent,
+            this.renderEmbeddedContent,
+            this.renderSlot,
+            this.renderText,
+            this.resolveComponent
+        )
+
+        Component.renderFragment([this.virtualNode])
+
+        return this.virtualNode.getNode()
     }
 }

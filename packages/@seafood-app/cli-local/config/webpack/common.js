@@ -1,31 +1,26 @@
 const path = require('path');
 
-module.exports = config => {
+module.exports = (config, mode, target) => {
+  const ifdefOptions = {
+    // todo: DEBUG
+    PROD: mode === 'production',
+    DEV: mode !== 'production',
+    TARGET: target,
+    SERVER: target === 'server',
+    CLIENT: target === 'client',
+  }
+
   config
-    .cache(true)
-    .entry('app')
-      .add(path.resolve(__dirname,  '../../index.js'))
-      .add(path.resolve('bootstrap/app.ts'))
-      .end()
+    // .cache(true)
     .output
-      .path(path.resolve('dist'))
+      .chunkFilename('[id].[name].js')
       .filename('[name].js')
-      .publicPath('/')
+      .path(path.resolve('dist'))
+      .publicPath('/dist')
       .end()
     .node
       .set('__dirname', true)
       .set('__filename', true)
-
-  config.node
-    .merge({
-      // prevent webpack from injecting mocks to Node native modules
-      // that does not make sense for the client
-      dgram: 'empty',
-      fs: 'empty',
-      net: 'empty',
-      tls: 'empty',
-      child_process: 'empty'
-    })
 
   config.resolve
     .symlinks(true)
@@ -80,6 +75,10 @@ module.exports = config => {
           appendTsSuffixTo: ['\\.seafood$']
         })
         .end()
+      .use('ifdef-loader')
+        .loader('ifdef-loader')
+        .options(ifdefOptions)
+        .end()
       .use('@seafood/loader')
         .loader('@seafood/loader')
         .options({
@@ -110,6 +109,10 @@ module.exports = config => {
         transpileOnly: true
       })
       .end()
+    .use('ifdef-loader')
+      .loader('ifdef-loader')
+      .options(ifdefOptions)
+      .end()
 
 
   config.module
@@ -125,13 +128,10 @@ module.exports = config => {
         babelrc: true
       })
       .end()
-
-  config
-    .plugin('html')
-    .use(require('html-webpack-plugin'), [{
-      template: path.resolve(__dirname, '../../index.html'),
-      favicon: process.env.NODE_ENV === 'development' ? path.resolve('resources/images/logo/logo@32.png') : undefined,
-    }])
+    .use('ifdef-loader')
+      .loader('ifdef-loader')
+      .options(ifdefOptions)
+      .end()
 
   config
     .plugin('progress')

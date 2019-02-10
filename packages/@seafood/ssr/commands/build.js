@@ -3,28 +3,25 @@
  */
 module.exports = (program, projectManager) => {
   program
-    .command('serve')
-    .description('run development server')
+    .command('build')
     .allowUnknownOption()
     .action(() => {
+      projectManager.setMode('production')
+
       const webpack = require('webpack')
       const config = projectManager.webpack.getConfig()
 
       const {console} = require('@seafood-app/webpack-kit')
 
-      webpack(config.map(config => {
-        return Object.assign(config, {
-          mode: 'development',
-        })
-      })).watch({
-        hot: false,
-        inline: false,
-      }, (err, stats) => {
+      webpack(Object.assign(config, {
+        mode: 'production',
+      })).run((err, stats) => {
         if (err || stats.hasErrors()) {
           console.log(err || stats.toString({
             chunks: false,
             colors: true
           }))
+          return
         }
       })
     });

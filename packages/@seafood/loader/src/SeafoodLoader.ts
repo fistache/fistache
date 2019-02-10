@@ -1,4 +1,3 @@
-import rs from 'crypto-random-string'
 import hash from 'hash-sum'
 import { OptionObject, stringifyRequest } from 'loader-utils'
 import path from 'path'
@@ -177,7 +176,7 @@ export class SeafoodLoader {
     private computeScopeId(): string {
         return this.query && this.query.scopeId
             || this.options && this.options.scopeId
-            || `_${rs(10)}`
+            || `_${this.requestId}`
     }
 
     private computeStyleLoaders(): LoadersArrayItem[] {

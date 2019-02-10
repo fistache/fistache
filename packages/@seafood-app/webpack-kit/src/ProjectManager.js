@@ -7,14 +7,32 @@ const semver = require('semver')
 
 module.exports = class ProjectManager {
   constructor (rootPath) {
-    this.webpackConfigManager = new WebpackConfigManager(this)
+    this.webpack = new WebpackConfigManager(this)
     this.commandManager = new CommandManager(this)
+    this.mode = null
+    this.target = null
 
     if(!rootPath || typeof rootPath !== 'string') {
       throw new Error('A parameter "rootPath" must be a string.')
     }
 
     this.rootPath = rootPath
+  }
+
+  setMode(mode) {
+    this.mode = mode
+  }
+
+  setTarget(target) {
+    this.target = target
+  }
+
+  getMode() {
+    return this.mode
+  }
+
+  getTarget() {
+    return this.target
   }
 
   manage () {
@@ -54,21 +72,12 @@ module.exports = class ProjectManager {
     return this
   }
 
-  defineConfig (folderPath, packagesPath) {
+  defineConfig (folderPath) {
     if (!folderPath) {
       folderPath = this.generatePath('config/webpack')
     }
 
-    if (!packagesPath) {
-      packagesPath = this.generatePath('config/webpack.packages.js')
-    }
-
-    if (fs.existsSync(packagesPath)) {
-      const packages = require(packagesPath)
-      this.webpackConfigManager.storePackages(packages)
-    }
-
-    this.webpackConfigManager.storeFolder(folderPath)
+    this.webpack.storeFolder(folderPath)
 
     return this
   }

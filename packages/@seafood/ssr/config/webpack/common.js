@@ -1,10 +1,6 @@
 const path = require('path')
 
 module.exports = config => {
-  const ifdefOptions = {
-    DEBUG: process.env.NODE_ENV !== 'production',
-  }
-
   config
     .cache(true)
     .entry('index')
@@ -17,6 +13,7 @@ module.exports = config => {
       .filename('[name].js')
       .end()
     .node
+      .set('global', true)
       .set('__dirname', false)
       .set('__filename', false)
 
@@ -51,10 +48,6 @@ module.exports = config => {
           appendTsSuffixTo: ['\\.seafood$']
         })
         .end()
-      .use('ifdef-loader')
-        .loader('ifdef-loader')
-        .options(ifdefOptions)
-        .end()
       .use('seafood-loader')
         .loader('seafood-loader')
         .end()
@@ -81,10 +74,6 @@ module.exports = config => {
           transpileOnly: true
         })
         .end()
-      .use('ifdef-loader')
-        .loader('ifdef-loader')
-        .options(ifdefOptions)
-        .end()
 
   config.module
     .rule('javascript')
@@ -94,15 +83,11 @@ module.exports = config => {
     //   .add(path.resolve(__dirname, '../../node_modules'))
     //   .end()
     .use('babel-loader')
-      .loader('babel-loader')
-      .options({
-        babelrc: true
-      })
-      .end()
-    .use('ifdef-loader')
-      .loader('ifdef-loader')
-      .options(ifdefOptions)
-      .end()
+    .loader('babel-loader')
+    .options({
+      babelrc: true
+    })
+    .end()
 
   config
     .plugin('progress')

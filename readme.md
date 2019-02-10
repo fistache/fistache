@@ -10,6 +10,7 @@ focusing only on it.
 * **Standarts** for a components writing(one possible programming language, structure, BEM and etc)
 * **Typescript** everywhere.
 * Component **composition and inheritance**.
+* Mandatory **SSR**
 * **Everything we've used to**. Components, HMR, data binding and stuff.
 
 # Installation

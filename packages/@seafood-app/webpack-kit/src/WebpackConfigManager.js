@@ -1,40 +1,25 @@
 const WebpackChainConfig = require('webpack-chain')
 
+const glob = require('glob')
 const path = require('path')
 const fs = require('fs')
 
 module.exports = class WebpackConfigManager {
   constructor(projectManager) {
     this.projectManager = projectManager
-    this.branches = {}
-    this.packages = []
+    this.files = {}
     this.order = []
   }
 
-  storePackages (packages) {
-    if (!Array.isArray(packages)) {
-      throw new Error('A parameter "packages" must be an array of function.')
-    }
-
-    this.packages = packages
-  }
-
-  storeFolder (folderPath, order) {
+  storeFolder (folderPath) {
     if (typeof folderPath !== 'string') {
       throw new Error('A parameter "folderPath" must be a string.')
     }
 
-    if (order && !Array.isArray(order)) {
-      throw new Error('A parameter "order" must be an array of string.')
-    } else {
-      order = ['common', 'dev', 'prod']
-    }
-
-    this.order = order
-    this.order.forEach(branchName => {
-      const filePath = path.join(folderPath, branchName)
-      if (fs.existsSync(`${filePath}.js`)) {
-        this.store(branchName, require(filePath))
+    glob.sync(path.resolve(folderPath, '**/*.js')).forEach(file => {
+      const filePath = path.resolve(file)
+      if (fs.existsSync(filePath)) {
+        this.store(filePath, require(filePath))
       }
     })
   }
@@ -48,11 +33,11 @@ module.exports = class WebpackConfigManager {
       throw new Error('A parameter "chainBuilder" must be a function.')
     }
 
-    if (!this.branches.hasOwnProperty(branchName)) {
-      this.branches[branchName] = []
+    if (!this.files.hasOwnProperty(branchName)) {
+      this.files[branchName] = []
     }
 
-    this.branches[branchName].push(chainBuilder)
+    this.files[branchName].push(chainBuilder)
 
     return this
   }
@@ -65,13 +50,10 @@ module.exports = class WebpackConfigManager {
     this.order = list
   }
 
-  executeBranch (name, config) {
-    if (this.branches.hasOwnProperty(name)) {
-      const branch = this.branches[name]
-      branch.forEach(chainBuilder => {
-        chainBuilder(config)
-      })
-    }
+  executeBranch (branch, config, target) {
+    branch.forEach(chainBuilder => {
+      chainBuilder(config, this.projectManager.getMode(), target || this.projectManager.getTarget())
+    })
   }
 
   addDefaultConfigProperties (config) {
@@ -86,41 +68,21 @@ module.exports = class WebpackConfigManager {
         .end()
   }
 
-  getChain () {
-    if (!this.packages.length) {
-      this.packages = [chain => chain]
+  getChain (target) {
+    let config = new WebpackChainConfig
+
+    for (const name in this.files) {
+      if (this.files.hasOwnProperty(name)) {
+
+        this.executeBranch(this.files[name], config, target)
+        this.addDefaultConfigProperties(config)
+      }
     }
 
-    let configs = []
-
-    this.packages.forEach(chainBuilder => {
-      let config = new WebpackChainConfig
-      this.order.forEach(branchName => {
-        this.executeBranch(branchName, config)
-      })
-
-      for (const name in this.branches) {
-        if (!this.order.includes(name)) {
-          this.executeBranch(name, config)
-        }
-      }
-
-      if (typeof chainBuilder !== 'function') {
-        throw new Error('A parameter "pack" must be a function.')
-      }
-
-      this.addDefaultConfigProperties(config)
-
-      chainBuilder(config)
-      configs.push(config)
-    })
-
-    return configs
+    return config
   }
 
-  getConfig () {
-    return this.getChain().map(config => {
-      return config.toConfig()
-    })
+  getConfig (target) {
+    return this.getChain(target).toConfig()
   }
 }
