@@ -2,10 +2,6 @@ const path = require('path')
 const assetsFolder = path.resolve('.')
 let publicPath
 
-function initializeApp(app) {
-  app.use(require('connect-history-api-fallback')())
-}
-
 function readFile(fs, fileName) {
   if (publicPath) {
     try {
@@ -34,6 +30,7 @@ module.exports = (program, projectManager) => {
           const fs = require('fs')
           const mfs = require('memory-fs')
           const chalk = require('chalk')
+          const favicon = require('serve-favicon')
           const { createRenderer } = require('@seafood/ssr')
 
           const clientConfig = projectManager.webpack.getConfig('client')
@@ -63,6 +60,7 @@ module.exports = (program, projectManager) => {
             logLevel: 'silent',
             publicPath: clientConfig.output.publicPath
           })
+          app.use(require('connect-history-api-fallback')())
           app.use(clientDevMiddleware);
           app.use(require('webpack-hot-middleware')(clientCompiler, {
             log: false
@@ -99,14 +97,14 @@ module.exports = (program, projectManager) => {
             const file = readFile(serverDevFs, 'server.json')
             if (file) {
               try {
-                serverBundle = JSON.parse(file).server.js
+                const bundleName = JSON.parse(file).server.js
+                serverBundle = serverDevFs.readFileSync(path.join(assetsFolder, bundleName), 'utf-8')
                 update()
               } catch (e) {}
             }
           })
 
-          initializeApp(app, state, clientCompiler)
-
+          app.use(favicon(path.resolve('resources/images/logo/logo@32.png')))
           app.use('/dist', express.static(assetsFolder))
 
           app.get('*', async (request, response) => {

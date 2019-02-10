@@ -10,6 +10,7 @@ module.exports = (program, projectManager) => {
 
       const fs = require('fs')
       const path = require('path')
+      const favicon = require('serve-favicon')
       const { createRenderer } = require('@seafood/ssr')
 
       const clientConfig = projectManager.webpack.getConfig('client')
@@ -29,6 +30,7 @@ module.exports = (program, projectManager) => {
 
       // todo: const app =
 
+      app.use(favicon(path.resolve('resources/images/logo/logo@32.png')))
       app.use('/dist', express.static(
         path.resolve('dist')
       ))

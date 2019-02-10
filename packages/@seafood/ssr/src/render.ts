@@ -1,4 +1,4 @@
-import path from 'path'
+import requireFromString from 'require-from-string'
 
 export function createRenderer(
     clientBundle: any,
@@ -25,9 +25,8 @@ export function createRenderer(
 
         preloadScripts(clientBundle)
 
-        const filePath = path.join(path.resolve('.'), serverBundle)
         // @ts-ignore
-        const app = await __non_webpack_require__(filePath).default({
+        const app = await requireFromString(serverBundle).default({
             url
         })
 

@@ -16,6 +16,7 @@
     "@types/jsdom": "^12.2.1",
     "@types/lodash.uniq": "^4.5.4",
     "@types/node": "^10.12.21",
+    "@types/require-from-string": "^1.2.0",
     "babel-loader": "^8.0.5",
     "cross-env": "^5.2.0",
     "friendly-errors-webpack-plugin": "^1.7.0",
@@ -29,6 +30,7 @@
   },
   "dependencies": {
     "jsdom": "^13.2.0",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "require-from-string": "^2.0.2"
   }
 }
