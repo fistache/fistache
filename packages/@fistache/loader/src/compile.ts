@@ -1,5 +1,5 @@
 import LoaderContext = WebpackLoader.LoaderContext
-import { compile } from '@seafood/template-compiler'
+import { compile } from '@fistache/template-compiler'
 import {loader as WebpackLoader} from 'webpack'
 
 const scriptMatchRegex = new RegExp(

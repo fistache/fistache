@@ -1,16 +1,12 @@
-/**
- * The command to run development server.
- */
 module.exports = (program, projectManager) => {
   program
     .command('serve')
-    .description('run development server')
     .allowUnknownOption()
     .action(() => {
+      projectManager.setMode('development')
+
       const webpack = require('webpack')
       const config = projectManager.webpack.getConfig()
-
-      const {console} = require('@fistache-app/webpack-kit')
 
       webpack(config).watch({
         hot: false,
@@ -21,6 +17,7 @@ module.exports = (program, projectManager) => {
             chunks: false,
             colors: true
           }))
+          return
         }
       })
     });

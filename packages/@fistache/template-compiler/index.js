@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
-const {manage} = require('@fistache-app/webpack-kit')
+const path = require('path')
+const {manage} = require('@fistache/webpack-kit')
 
-manage(__dirname)
+manage(__dirname, path.resolve(__dirname, '../../../common'))

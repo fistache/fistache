@@ -57,13 +57,25 @@ module.exports = class WebpackConfigManager {
   }
 
   addDefaultConfigProperties (config) {
+    if (this.projectManager.configDir) {
+      config
+        .entry('index')
+          .add(path.resolve(this.projectManager.rootPath, 'index.ts'))
+          .end()
+        .output
+          .path(path.resolve(this.projectManager.rootPath, 'dist'))
+          .end()
+    }
+
     config.resolve
       .modules
+        .add(path.resolve(this.projectManager.rootPath, 'node_modules'))
         .add(path.resolve(__dirname, '../node_modules'))
         .end()
 
     config.resolveLoader
       .modules
+        .add(path.resolve(this.projectManager.rootPath, 'node_modules'))
         .add(path.resolve(__dirname, '../node_modules'))
         .end()
   }

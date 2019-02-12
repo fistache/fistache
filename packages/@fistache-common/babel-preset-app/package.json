@@ -1,10 +1,12 @@
 {
-  "name": "@fistache-app/typescript-config",
+  "name": "@fistache/babel-preset-app",
   "version": "1.0.0",
   "main": "index.js",
   "author": "Aliaksandr Parfiankou <aliaksandr.parfiankou@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "typescript": "^3.2.2"
+    "@babel/core": "^7.1.6",
+    "@babel/polyfill": "^7.0.0",
+    "@babel/preset-env": "^7.2.0"
   }
 }

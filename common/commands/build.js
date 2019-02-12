@@ -1,19 +1,14 @@
-/**
- * The command to run development server.
- */
 module.exports = (program, projectManager) => {
   program
     .command('build')
     .allowUnknownOption()
     .action(() => {
+      projectManager.setMode('production')
+
       const webpack = require('webpack')
       const config = projectManager.webpack.getConfig()
 
-      const {console} = require('@fistache-app/webpack-kit')
-
-      webpack(Object.assign(config, {
-        mode: 'development',
-      })).run((err, stats) => {
+      webpack(config).run((err, stats) => {
         if (err || stats.hasErrors()) {
           console.log(err || stats.toString({
             chunks: false,

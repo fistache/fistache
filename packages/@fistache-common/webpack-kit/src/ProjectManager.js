@@ -1,12 +1,11 @@
 const WebpackConfigManager = require('./WebpackConfigManager')
 const CommandManager = require('./CommandManager')
 
-const fs = require('fs')
 const path = require('path')
 const semver = require('semver')
 
 module.exports = class ProjectManager {
-  constructor (rootPath) {
+  constructor (rootPath, configDir) {
     this.webpack = new WebpackConfigManager(this)
     this.commandManager = new CommandManager(this)
     this.mode = null
@@ -17,6 +16,7 @@ module.exports = class ProjectManager {
     }
 
     this.rootPath = rootPath
+    this.configDir = configDir
   }
 
   setMode(mode) {
@@ -40,11 +40,15 @@ module.exports = class ProjectManager {
     this.defineCommands()
     this.defineConfig()
 
+    if (this.configDir) {
+      process.chdir(this.configDir)
+    }
+
     this.commandManager.manage()
   }
 
   verifyNodeVersion () {
-    const packageJson = require(this.generatePath('package.json'))
+    const packageJson = require(this.generateRootPath('package.json'))
     const requiredVersion = packageJson.engines && packageJson.engines.node
     if (!requiredVersion) {
       console.error('No engine version requirement in package.json')
@@ -82,7 +86,11 @@ module.exports = class ProjectManager {
     return this
   }
 
-  generatePath (to) {
-    return path.join(this.rootPath, to)
+  generateRootPath (to) {
+    return this.generatePath(to, this.rootPath)
+  }
+
+  generatePath (to, from) {
+    return path.join(from || this.configDir || this.rootPath, to)
   }
 }

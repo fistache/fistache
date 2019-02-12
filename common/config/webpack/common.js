@@ -3,12 +3,8 @@ const path = require('path')
 module.exports = config => {
   config
     .cache(true)
-    .entry('index')
-      .add(path.resolve(__dirname, '../../index.ts'))
-      .end()
     .target('node')
     .output
-      .path(path.resolve(__dirname, '../../dist'))
       .libraryTarget('commonjs2')
       .filename('[name].js')
       .end()
@@ -23,13 +19,13 @@ module.exports = config => {
       .end()
     .modules
       .add('node_modules')
-      .add(path.resolve(__dirname, '../../node_modules'))
+      .add(path.resolve('node_modules'))
       .end()
 
   config.resolveLoader
     .modules
       .add('node_modules')
-      .add(path.resolve(__dirname, '../../node_modules'))
+      .add(path.resolve('node_modules'))
 
   config.module
     .rule('fistache')
@@ -56,7 +52,6 @@ module.exports = config => {
       .test(/\.ts$/)
       .exclude
         .add(path.resolve('node_modules'))
-        .add(path.resolve(__dirname, '../../node_modules'))
         .end()
       // .use('cache-loader')
       //   .loader('cache-loader')

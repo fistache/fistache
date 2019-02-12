@@ -1,3 +1,3 @@
 {
-  "extends": "./node_modules/@fistache-app/typescript-config/tsconfig.json"
+  "extends": "./node_modules/@fistache/typescript-config/tsconfig.json"
 }

@@ -1,0 +1,7 @@
+{
+  "name": "@fistache/typescript-config",
+  "version": "1.0.1",
+  "main": "index.js",
+  "author": "Aliaksandr Parfiankou <aliaksandr.parfiankou@gmail.com>",
+  "license": "MIT"
+}

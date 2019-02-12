@@ -6,8 +6,12 @@
   "author": "Aliaksandr Parfiankou <aliaksandr.parfiankou@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "serve": "cross-env NODE_ENV=development node index.js serve",
-    "build": "cross-env NODE_ENV=production node index.js build"
+    "serve": "node index.js serve",
+    "build": "node index.js build"
+  },
+  "devDependencies": {
+    "@fistache/tslint-config": "^1.0.4",
+    "@fistache/typescript-config": "^1.0.1"
   },
   "dependencies": {
     "@types/hash-sum": "^1.0.0",
@@ -20,19 +24,5 @@
     "postcss-selector-parser": "^5.0.0",
     "query-string": "^6.2.0",
     "reflect-metadata": "^0.1.13"
-  },
-  "devDependencies": {
-    "@babel/core": "^7.2.2",
-    "@types/crypto-random-string": "^1.0.0",
-    "babel-loader": "^8.0.5",
-    "cross-env": "^5.2.0",
-    "friendly-errors-webpack-plugin": "^1.7.0",
-    "merge": "^1.2.1",
-    "simple-progress-webpack-plugin": "^1.1.2",
-    "ts-loader": "^5.3.3",
-    "tslint": "^5.12.1",
-    "tslint-loader": "^3.5.4",
-    "typescript": "^3.2.4",
-    "webpack": "^4.29.0"
   }
 }

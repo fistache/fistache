@@ -21,7 +21,6 @@ module.exports = (program, projectManager) => {
       const webpack = require('webpack')
       const express = require('express')
       const provider = require('express-https-provider')()
-      const {console} = require('@fistache-app/webpack-kit')
 
       provider
         .modifyApp((app, state) => {
