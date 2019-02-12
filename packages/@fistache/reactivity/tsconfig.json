@@ -1,0 +1,3 @@
+{
+  "extends": "./node_modules/@fistache-app/typescript-config/tsconfig.json"
+}

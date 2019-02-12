@@ -1,0 +1,29 @@
+{
+  "name": "@fistache/template-compiler",
+  "version": "1.0.0",
+  "types": "./index.ts",
+  "main": "./dist/index.js",
+  "author": "Aliaksandr Parfiankou <aliaksandr.parfiankou@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "serve": "cross-env NODE_ENV=development node index.js serve",
+    "build": "cross-env NODE_ENV=production node index.js build"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.2.2",
+    "babel-loader": "^8.0.5",
+    "cross-env": "^5.2.0",
+    "friendly-errors-webpack-plugin": "^1.7.0",
+    "merge": "^1.2.1",
+    "simple-progress-webpack-plugin": "^1.1.2",
+    "ts-loader": "^5.3.3",
+    "tslint": "^5.12.1",
+    "tslint-loader": "^3.5.4",
+    "typescript": "^3.2.4",
+    "webpack": "^4.29.0"
+  },
+  "dependencies": {
+    "@types/htmlparser2": "^3.7.31",
+    "htmlparser2": "^3.10.0"
+  }
+}

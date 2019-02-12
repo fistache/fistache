@@ -1,9 +1,6 @@
-<p align="center"><a href="#" target="_blank" rel="nofollow"><img width="64" src="https://gist.github.com/aliaksandrparfiankou/439bf6ea2eefb8f0b9c6deff86010964/raw/06fbf009b5a2cd237bf3ac146a433bbab2e56efb/logo.png" alt="Seafood logo"></a></p>
+<p align="center"><a href="#" target="_blank" rel="nofollow"><img width="64" src="https://gist.github.com/aliaksandrparfiankou/439bf6ea2eefb8f0b9c6deff86010964/raw/06fbf009b5a2cd237bf3ac146a433bbab2e56efb/logo.png" alt="fistache logo"></a></p>
 
-# [Seafood]() ![Version](https://img.shields.io/badge/version-0.0.1%40dev-blue.svg) ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-* **Ready to use solution** to start working out-of-the-box.
-No time wasting to find needed packages, check it out, build
-all this stuff together and other headache.
+# [Fistache]() ![Version](https://img.shields.io/badge/version-0.0.1%40dev-blue.svg) ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 * **Trusted SSL certificate** for local development out-of-the-box.
 * **Workshop area** where you can develop each component separately
 focusing only on it.
@@ -19,9 +16,9 @@ Coming soon.
 # Example component
 ```XML
 <script>
-    import { Component, use, attribute } from '@seafood/component'
+    import { Component, use, attribute } from '@fistache/component'
     import Product from '../../Entity/Product'
-    import ProductPriceComponent from '../Components/ProductPrice.seafood'
+    import ProductPriceComponent from '../Components/ProductPrice.fistache'
 
     @use({
         ProductPriceComponent

@@ -1,7 +1,0 @@
-{
-  "name": "@types/seafood",
-  "version": "1.0.0",
-  "types": "index.d.ts",
-  "author": "Aliaksandr Parfiankou <aliaksandr.parfiankou@gmail.com>",
-  "license": "MIT"
-}

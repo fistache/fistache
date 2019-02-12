@@ -1,0 +1,10 @@
+{
+  "name": "@fistache-app/typescript-config",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Aliaksandr Parfiankou <aliaksandr.parfiankou@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "typescript": "^3.2.2"
+  }
+}

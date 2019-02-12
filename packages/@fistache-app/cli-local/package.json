@@ -1,0 +1,50 @@
+{
+  "name": "@fistache-app/cli-local",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Aliaksandr Parfiankou <aliaksandr.parfiankou@gmail.com>",
+  "license": "MIT",
+  "bin": {
+    "fistache": "bin/fistache.js"
+  },
+  "engines": {
+    "node": ">= 8.0.0"
+  },
+  "dependencies": {
+    "@babel/core": "^7.2.0",
+    "assets-webpack-plugin": "^3.9.7",
+    "babel-loader": "^8.0.4",
+    "cache-loader": "^1.2.5",
+    "chalk": "^2.4.1",
+    "connect-history-api-fallback": "^1.5.0",
+    "core-js": "^2.5.7",
+    "css-loader": "^2.1.0",
+    "express": "^4.16.4",
+    "express-https-provider": "^1.0.11",
+    "favicons-webpack-plugin": "^0.0.9",
+    "fork-ts-checker-webpack-plugin": "^0.5.0",
+    "friendly-errors-webpack-plugin": "^1.7.0",
+    "glob": "^7.1.3",
+    "html-loader": "^0.5.5",
+    "html-webpack-plugin": "^3.2.0",
+    "ifdef-loader": "^2.1.1",
+    "memory-fs": "^0.4.1",
+    "merge": "^1.2.1",
+    "path": "^0.12.7",
+    "rmfr": "^2.0.0",
+    "semver": "^5.6.0",
+    "serve-favicon": "^2.5.0",
+    "simple-progress-webpack-plugin": "^1.1.2",
+    "style-loader": "^0.23.1",
+    "stylus": "^0.54.5",
+    "stylus-loader": "^3.0.2",
+    "ts-loader": "^5.3.1",
+    "tslint": "^5.11.0",
+    "typescript": "^3.2.2",
+    "webpack": "^4.27.1",
+    "webpack-dev-middleware": "^3.4.0",
+    "webpack-hot-middleware": "^2.24.3",
+    "webpack-node-externals": "^1.7.2"
+  },
+  "devDependencies": {}
+}
