@@ -44,6 +44,8 @@ export default class Hmr {
                         = oldComponent.embeddedContent
                     component.element = oldComponent.element
                     component.initialized = oldComponent.initialized
+                    component.styler = oldComponent.styler
+                    component.shouldAppendStyle = oldComponent.shouldAppendStyle
 
                     redundantIndecies.push(
                         data.components.indexOf(oldComponent)

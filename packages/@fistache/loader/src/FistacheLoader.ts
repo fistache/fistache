@@ -119,6 +119,7 @@ export class FistacheLoader {
             import style from ${styleRequest}
             import Hmr from ${hmrRequest}
 
+            script.prototype.__fileId = ${JSON.stringify(this.requestId)}
             script.prototype.__render = template
             script.prototype.__style = style
             script.prototype[ComponentSymbol] = true

@@ -1,8 +1,12 @@
 export class Styler {
-    private styles = new Set<string>()
+    private styles = new Map<string, Element>()
 
-    public use(styles: string) {
-        if (!this.styles.has(styles.toString())) {
+    public use(fileId: string, styles: string, replace = false) {
+        if (!this.styles.has(fileId) || replace) {
+            if (replace) {
+                this.removeIfExists(fileId)
+            }
+
             const head = document.head
                 || document.getElementsByTagName('head')[0]
             const style = document.createElement('style')
@@ -12,11 +16,19 @@ export class Styler {
 
             style.appendChild(text)
             head.appendChild(style)
-            this.styles.add(styles.toString())
+            this.styles.set(fileId, style)
         }
     }
 
     public clear() {
         this.styles.clear()
+    }
+
+    private removeIfExists(fileId: string) {
+        const element = this.styles.get(fileId)
+
+        if (element && element.parentNode) {
+            element.parentNode.removeChild(element)
+        }
     }
 }

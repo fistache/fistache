@@ -61,6 +61,10 @@ export class Component implements ComponentEventInterface {
 
     @unreactive()
     // tslint:disable-next-line: variable-name
+    private __fileId: any
+
+    @unreactive()
+    // tslint:disable-next-line: variable-name
     private __hmr: any
 
     @unreactive()
@@ -126,7 +130,7 @@ export class Component implements ComponentEventInterface {
     }
 
     public rerender() {
-        this.appendStyle()
+        this.appendStyle(true)
         this.virtualNode.delete()
         this.render(this.element, this.embeddedContent)
     }
@@ -412,10 +416,10 @@ export class Component implements ComponentEventInterface {
         }
     }
 
-    private appendStyle() {
+    private appendStyle(replace = false) {
         // todo: refactor style for server and client
         if (this.shouldAppendStyle && this.__style) {
-            this.styler.use(this.__style)
+            this.styler.use(this.__fileId, this.__style, replace)
         }
     }
 

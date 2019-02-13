@@ -69,10 +69,24 @@ export class Compiler {
     }
 
     public getRenderFunction(): string {
-        const firstChild = this.rootTag.children[0]
+        let firstChild = null
+
+        for (const child of this.rootTag.children) {
+            if ((child as TagInfo).renderString
+                || ((child as TextNode).text
+                && (child as TextNode).text.trim())) {
+                firstChild = child
+                break
+            }
+        }
+
         let renderFunction = ''
 
-        if ((firstChild as TagInfo)!.renderString) {
+        if (!firstChild) {
+            renderFunction = `return ${FunctionKeyword.Text}(${
+                JSON.stringify(JSON.stringify(' '))
+            })`
+        } else if ((firstChild as TagInfo).renderString) {
             renderFunction = `${
                 [...this.dependencies.values()].map(
                     (dependency: ComponentDependency) => {
