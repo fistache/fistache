@@ -113,11 +113,18 @@ export class FistacheLoader {
         this.hmrPlugin.setTemplateRequest(templateRequest)
 
         this.loaderContext.callback(null, `
-            import { ComponentSymbol } from '@fistache/component'
+            import { Component, ComponentSymbol } from '@fistache/component'
             import script from ${scriptRequest}
             import template from ${templateRequest}
             import style from ${styleRequest}
             import Hmr from ${hmrRequest}
+
+            if (!script.prototype) {
+                script = class extends Component {}
+                console.warn('Fistache component cannot be empty '
+                + 'and must return DEFAULT class extended of '
+                + '@fistache/component Component class or its child.')
+            }
 
             script.prototype.__fileId = ${JSON.stringify(this.requestId)}
             script.prototype.__render = template

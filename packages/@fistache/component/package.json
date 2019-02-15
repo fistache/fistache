@@ -10,10 +10,11 @@
     "build": "node index.js build"
   },
   "dependencies": {
+    "axios": "^0.18.0",
     "reflect-metadata": "^0.1.13"
   },
   "devDependencies": {
-    "@fistache/tslint-config": "^1.0.4",
+    "@fistache/tslint-config": "^1.0.5",
     "@fistache/typescript-config": "^1.0.1"
   }
 }

@@ -1,4 +1,4 @@
-import { Component, ComponentSymbol } from '../Component'
+import { Component, COMPONENT_SYMBOL } from '../Component'
 
 export interface ParsedArgs {
     usedComponents: Map<string, new () => Component>
@@ -31,7 +31,7 @@ export function parseArgs(args: any): ParsedArgs {
 
             if (argValue
                 && argValue.prototype
-                && argValue.prototype[ComponentSymbol]
+                && argValue.prototype[COMPONENT_SYMBOL]
             ) {
                 usedComponents.set(computeComponentName(argName), argValue)
             } else {

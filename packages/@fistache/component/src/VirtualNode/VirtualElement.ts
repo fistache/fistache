@@ -10,10 +10,10 @@ export enum VirtualElementPresentState {
     Missing
 }
 
-export const ElementSymbol = Symbol('VirtualElement')
+export const VIRTUAL_ELEMENT_SYMBOL = Symbol('VirtualElement')
 
 export class VirtualElement extends VirtualNode {
-    public [ElementSymbol] = true
+    public [VIRTUAL_ELEMENT_SYMBOL] = true
 
     protected attributes?: ComponentAttributes
     protected attributesContainer: AttributeContainer
@@ -102,7 +102,7 @@ export class VirtualElement extends VirtualNode {
                 child = this.childVirtualNodes[++index] as VirtualElement
                 child.update()
             } while (index < maxIndex
-                && child[ElementSymbol]
+                && child[VIRTUAL_ELEMENT_SYMBOL]
                 && child.getShouldListenToElse()
             )
         }
@@ -395,7 +395,7 @@ export class VirtualElement extends VirtualNode {
                     return true
                 }
             } while (index >= 0
-                && child[ElementSymbol]
+                && child[VIRTUAL_ELEMENT_SYMBOL]
                 && child.getShouldListenToElse()
             )
         }

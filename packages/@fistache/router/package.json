@@ -10,7 +10,7 @@
     "build": "node index.js build"
   },
   "devDependencies": {
-    "@fistache/tslint-config": "^1.0.4",
+    "@fistache/tslint-config": "^1.0.5",
     "@fistache/typescript-config": "^1.0.1"
   }
 }

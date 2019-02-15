@@ -2,9 +2,10 @@
 # yarn lockfile v1
 
 
-"@fistache/tslint-config@^1.0.4":
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/@fistache/tslint-config/-/tslint-config-1.0.4.tgz#5b8368a3a66c6bbe0dc33d2d399fc4af5e96f908"
+"@fistache/tslint-config@^1.0.5":
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/@fistache/tslint-config/-/tslint-config-1.0.5.tgz#909608ff81d954b40f7d3281b42c7a3c54e3a3d3"
+  integrity sha512-kUo+Bqs68J1Q208Z8LUwcL100ASqykrUY1yMLGImTsgK75vXFCx01790MwIAImzYieaDdkc6XtccFMHU3vOVqQ==
 
 "@fistache/typescript-config@^1.0.1":
   version "1.0.1"

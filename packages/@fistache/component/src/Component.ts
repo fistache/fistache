@@ -1,8 +1,8 @@
 import { Reactivity } from '@fistache/reactivity'
 import { AttributeKeyword, ComponentAttributes, Event, TagAttrib } from '@fistache/shared'
-import { AttributeProperties, DECORATOR_ATTRIBUTE_FLAG } from './Decorators/Attribute'
-import { unreactive } from './Decorators/Unreactive'
-import { parseArgs } from './Decorators/Use'
+import { AttributeProperties, DECORATOR_ATTRIBUTE_FLAG } from './Decorators/attribute'
+import { unreactive } from './Decorators/unreactive'
+import { parseArgs } from './Decorators/use'
 import { Styler } from './Styles/Styler'
 import { VirtualComponent } from './VirtualNode/VirtualComponent'
 import { VirtualElement } from './VirtualNode/VirtualElement'
@@ -21,10 +21,10 @@ export interface ComponentEventInterface {
     fireEvent(eventName: Event): void
 }
 
-export const ComponentSymbol = Symbol('ComponentSymbol')
+export const COMPONENT_SYMBOL = Symbol('COMPONENT_SYMBOL')
 
-// todo: make a seperate class implemented render functionality
-export class Component implements ComponentEventInterface {
+// todo: make a seperate class to implement render functionality
+export abstract class Component implements ComponentEventInterface {
     public static renderFragment(
         stack: VirtualNode[],
         attachBefore?: Node | null

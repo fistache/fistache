@@ -1,12 +1,12 @@
 import { ComponentAttributes } from '@fistache/shared'
 import { Component } from '../Component'
-import { ElementSymbol, VirtualElement } from './VirtualElement'
+import { VIRTUAL_ELEMENT_SYMBOL, VirtualElement } from './VirtualElement'
 import { VirtualNode } from './VirtualNode'
 
-export const VirtualComponentSymbol = Symbol('VirtualComponentSymbol')
+export const VIRTUAL_COMPONENT_SYMBOL = Symbol('VIRTUAL_COMPONENT_SYMBOL')
 
 export class VirtualComponent extends VirtualElement {
-    public [VirtualComponentSymbol] = true
+    public [VIRTUAL_COMPONENT_SYMBOL] = true
 
     private readonly component: Component
 
@@ -60,7 +60,7 @@ export class VirtualComponent extends VirtualElement {
         for (const child of children) {
             child.getScope().setContext(this.getScope().getContext())
 
-            if ((child as VirtualElement)[ElementSymbol]) {
+            if ((child as VirtualElement)[VIRTUAL_ELEMENT_SYMBOL]) {
                 this.bindChildrenContext(
                     (child as VirtualElement).getChildVirtualNodes()
                 )
