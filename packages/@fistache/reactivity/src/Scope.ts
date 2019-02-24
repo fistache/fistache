@@ -90,6 +90,15 @@ export class Scope {
             scope = scope.getParentScope()
         }
 
+        const usedStuff: Map<string, any> | undefined
+            = this.getContext().usedStuff
+
+        if (usedStuff) {
+            for (const stuff of usedStuff) {
+                extendedVariables[stuff[0]] = () => stuff[1]
+            }
+        }
+
         return extendedVariables
     }
 

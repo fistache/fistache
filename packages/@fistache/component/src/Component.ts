@@ -54,7 +54,7 @@ export abstract class Component implements ComponentEventInterface {
     protected eventHandlers: Event[][] = []
 
     @unreactive()
-    protected usedStuff?: Set<any>
+    protected usedStuff?: Map<string, any>
 
     @unreactive()
     protected usedComponents?: Map<string, new () => Component>
@@ -196,7 +196,7 @@ export abstract class Component implements ComponentEventInterface {
 
         if (this.usedStuff) {
             for (const item of parsedArgs.usedStuff) {
-                this.usedStuff.add(item)
+                this.usedStuff.set(item[0], item[1])
             }
         } else {
             this.usedStuff = parsedArgs.usedStuff

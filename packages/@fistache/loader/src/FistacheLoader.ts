@@ -113,7 +113,7 @@ export class FistacheLoader {
         this.hmrPlugin.setTemplateRequest(templateRequest)
 
         this.loaderContext.callback(null, `
-            import { Component, ComponentSymbol } from '@fistache/component'
+            import { Component, COMPONENT_SYMBOL } from '@fistache/component'
             import script from ${scriptRequest}
             import template from ${templateRequest}
             import style from ${styleRequest}
@@ -129,7 +129,7 @@ export class FistacheLoader {
             script.prototype.__fileId = ${JSON.stringify(this.requestId)}
             script.prototype.__render = template
             script.prototype.__style = style
-            script.prototype[ComponentSymbol] = true
+            script.prototype[COMPONENT_SYMBOL] = true
 
             ${this.hmrPlugin.generateCode()}
 

@@ -2,7 +2,7 @@ import { Component, COMPONENT_SYMBOL } from '../Component'
 
 export interface ParsedArgs {
     usedComponents: Map<string, new () => Component>
-    usedStuff: Set<any>
+    usedStuff: Map<string, any>
 }
 
 export function use(args: any) {
@@ -23,7 +23,7 @@ export function use(args: any) {
 
 export function parseArgs(args: any): ParsedArgs {
     const usedComponents = new Map<string, new () => Component>()
-    const usedStuff = new Set()
+    const usedStuff = new Map<string, any>()
 
     for (const argName in args) {
         if (args.hasOwnProperty(argName)) {
@@ -35,7 +35,7 @@ export function parseArgs(args: any): ParsedArgs {
             ) {
                 usedComponents.set(computeComponentName(argName), argValue)
             } else {
-                usedStuff.add(argValue)
+                usedStuff.set(argName, argValue)
             }
         }
     }

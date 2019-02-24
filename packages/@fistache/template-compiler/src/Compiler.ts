@@ -1,6 +1,6 @@
 import { AttributeKeyword, FunctionKeyword, TagAttrib } from '@fistache/shared'
 import { Parser } from 'htmlparser2'
-import { HtmlTags } from './HtmlTags'
+import { HTML_TAGS } from './HtmlTags'
 
 enum InjectionType {
     None = 'none',
@@ -531,7 +531,9 @@ export class Compiler {
     }
 
     private isItComponentName(name: string): boolean {
-        return !HtmlTags.includes(name) && name !== 'content' && name !== 'slot'
+        return !HTML_TAGS.includes(name)
+            && name !== 'content'
+            && name !== 'slot'
     }
 }
 

@@ -1,4 +1,4 @@
-export const HtmlTags: string[] = [
+export const HTML_TAGS: string[] = [
     'dir', 'div', 'dl', 'dt', 'em', 'embed', 'fieldset', 'font', 'form',
     'frame', 'frameset', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'head', 'hr',
     /* 'html',*/ 'hype', 'i', 'iframe', 'img', 'video', 'track', 'time',
