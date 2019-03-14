@@ -13,11 +13,20 @@ export abstract class Page extends Component {
     }
 
     private fetchFlaggedField() {
-        for (const field in this) {
-            if (Reflect.hasMetadata(DECORATOR_FETCH_FLAG, this, field)) {
-                // @ts-ignore
-                this[field] = JSON.parse(window.FISTACHE_FETCH)
-                break
+        // @ts-ignore
+        if (window.FISTACHE_FETCH) {
+            // @ts-ignore
+            let result = window.FISTACHE_FETCH
+
+            if (typeof result === 'string' && result.length) {
+                result = JSON.parse(result)
+            }
+
+            for (const field in this) {
+                if (Reflect.hasMetadata(DECORATOR_FETCH_FLAG, this, field)) {
+                    this[field] = result
+                    break
+                }
             }
         }
     }

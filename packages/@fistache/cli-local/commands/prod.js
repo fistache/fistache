@@ -13,22 +13,19 @@ module.exports = (program, projectManager) => {
       const favicon = require('serve-favicon')
       const { createRenderer } = require('@fistache/ssr')
 
-      const clientConfig = projectManager.webpack.getConfig('client')
-      const clientCompiler = webpack(clientConfig)
+      const app = express()
 
       const render = createRenderer(
         JSON.parse(
           fs.readFileSync(path.resolve('dist/client.json'), 'utf-8')
         ).client.js,
-        JSON.parse(
+        fs.readFileSync(path.join('.', JSON.parse(
           fs.readFileSync(path.resolve('dist/server.json'), 'utf-8')
-        ).server.js,
+        ).server.js), 'utf-8'),
         fs.readFileSync(path.resolve(__dirname, '../index.html'), 'utf-8')
       )
 
-      initializeApp(app, state, clientCompiler)
-
-      // todo: const app =
+      app.use(require('connect-history-api-fallback')())
 
       app.use(favicon(path.resolve('resources/images/logo/logo@32.png')))
       app.use('/dist', express.static(
@@ -38,13 +35,10 @@ module.exports = (program, projectManager) => {
       app.get('*', async (request, response) => {
         response.setHeader("Content-Type", "text/html")
         response.send(
-          await render(request.originalUrl)
+          await render(`http://localhost:8080${request.originalUrl}`)
         )
       })
+
+      app.listen(8080)
     });
 }
-
-function initializeApp(app) {
-  app.use(require('connect-history-api-fallback')())
-}
-

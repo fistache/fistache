@@ -73,20 +73,28 @@ export class Router {
     }
 
     public async fetchCurrentPage() {
+        // @ts-ignore
+        window.FISTACHE_FETCH = null
+
         if (this.currentPage) {
+            let result
+
+            if (!('fetch' in this.currentPage)) {
+                throw new Error(`Page doesn't have fetch method. ` +
+                    `Please make sure your component extends of Page class.`
+                )
+            }
+
             try {
-                let result
-                try {
-                    // @ts-ignore
-                    result = await this.currentPage.fetch(this.routeVars)
-                } catch (e) {
-                    result = null
-                    console.warn(`Please make sure your component ` +
-                        `extends of Page class.`)
-                }
                 // @ts-ignore
-                window.FISTACHE_FETCH = JSON.stringify(result)
-            } catch (e) {}
+                result = await this.currentPage.fetch(this.routeVars)
+            } catch (e) {
+                console.error(`Error during fetching.`)
+                throw e
+            }
+
+            // @ts-ignore
+            window.FISTACHE_FETCH = JSON.stringify(result)
         }
     }
 

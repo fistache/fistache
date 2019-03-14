@@ -1,3 +1,4 @@
+// @ts-ignore
 import requireFromString from 'require-from-string'
 
 export function createRenderer(
@@ -13,7 +14,9 @@ export function createRenderer(
 
     return async (url: string) => {
         // @ts-ignore
-        const { JSDOM } = __non_webpack_require__('jsdom')
+        const { JSDOM } = __non_webpack_require__('jsdom', {
+            url
+        })
         const dom = new JSDOM(template)
 
         // @ts-ignore
@@ -24,10 +27,11 @@ export function createRenderer(
         global.navigator = window.navigator
 
         preloadScripts(clientBundle)
+        appendFetchIfExists()
 
         // @ts-ignore
         const app = await requireFromString(serverBundle).default({
-            url
+            // context params
         })
 
         return render(app, clientBundle)
@@ -52,6 +56,16 @@ function preloadScripts(clientBundle: any) {
         link.setAttribute('as', 'script')
 
         document.head.appendChild(link)
+    }
+}
+
+function appendFetchIfExists() {
+    if (window.FISTACHE_FETCH) {
+        const script = document.createElement('script')
+
+        script.innerHTML = `window.FISTACHE_FETCH = ${window.FISTACHE_FETCH}`
+
+        document.head.appendChild(script)
     }
 }
 
